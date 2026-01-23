@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abonnements - Ma Boutique Élégante</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="oda.jpg">
+    <link rel="stylesheet" href="abonnement-v2.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<style>
+    :root {
+    --primary-color: #007AFF;
+    --primary-hover: #0056b3;
+    --secondary-color: #E8F4FF;
+    --accent-color: #34C759;
+    --bg-general: #F5F5F7;
+    --bg-card: #FFFFFF;
+    --text-primary: #1D1D1F;
+    --text-secondary: #86868B;
+    --border-color: #D2D2D7;
+    --success: #34C759;
+    --warning: #FF9500;
+    --error: #FF3B30;
+    --gradient-primary: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+    --gradient-gold: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    --gradient-purple: linear-gradient(135deg, #9D50BB 0%, #6E48AA 100%);
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --shadow-heavy: 0 8px 24px rgba(0, 0, 0, 0.16);
+    --shadow-glow: 0 8px 32px rgba(0, 122, 255, 0.2);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --transition-fast: 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #F5F7FA 0%, #E8EFF5 100%);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* ==================== HEADER ==================== */
+.main-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-light);
+    z-index: 1000;
+    animation: slideDown var(--transition-fast);
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    max-width: 1920px;
+    margin: 0 auto;
+}
+
+.back-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+    background: white;
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateX(-3px);
+}
+
+.brand-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-image {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.brand-name {
+    font-size: 1.4rem;
+    font-weight: 600;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.icon-btn {
+    position: relative;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 8px;
+}
+
+.notification-btn .badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #FF3B30;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: var(--secondary-color);
+    cursor: pointer;
+}
+
+.avatar-image {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    border: 2px solid var(--primary-color);
+}
+
+.user-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* ==================== CONTENEUR PRINCIPAL ==================== */
+.subscription-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 100px 24px 60px;
+}
+
+/* ==================== EN-TÊTE DE PAGE ==================== */
+.page-header {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeIn 0.6s ease;
+}
+
+.header-icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    animation: pulse 2s infinite;
+}
+
+.page-title {
+    font-size: 3rem;
+    font-weight: 800;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+}
+
+.page-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ==================== STATUT ACTUEL ==================== */
+.current-status {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    margin-bottom: 48px;
+    box-shadow: var(--shadow-medium);
+    animation: fadeIn 0.8s ease;
+}
+
+.status-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.status-icon {
+    font-size: 3rem;
+    width: 70px;
+    height: 70px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.status-info {
+    flex: 1;
+}
+
+.status-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.status-text {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+/* ==================== GRILLE DES PLANS ==================== */
+.plans-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 32px;
+    margin-bottom: 60px;
+}
+
+.plan-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: 32px 24px;
+    box-shadow: var(--shadow-light);
+    transition: var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 1s ease;
+    animation-fill-mode: both;
+    border: 2px solid transparent;
+}
+
+.plan-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transition: transform var(--transition-fast);
+}
+
+.plan-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.plan-card:hover::before {
+    transform: scaleX(1);
+}
+
+/* Plans spécifiques */
+.plan-free {
+    animation-delay: 0.1s;
+}
+
+.plan-starter {
+    animation-delay: 0.2s;
+    border-color: var(--primary-color);
+}
+
+.plan-business {
+    animation-delay: 0.3s;
+    border-color: var(--warning);
+    box-shadow: var(--shadow-glow);
+}
+
+.plan-premium {
+    animation-delay: 0.4s;
+    border-color: #9D50BB;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f3ff 100%);
+}
+
+/* Badge du plan */
+.plan-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.plan-free .plan-badge {
+    background: linear-gradient(135deg, #34C759 0%, #30B350 100%);
+    color: white;
+}
+
+.plan-starter .plan-badge {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.plan-business .plan-badge {
+    background: var(--gradient-gold);
+    color: white;
+}
+
+.plan-premium .plan-badge {
+    background: var(--gradient-purple);
+    color: white;
+}
+
+/* En-tête du plan */
+.plan-header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding-top: 24px;
+}
+
+.plan-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+}
+
+.plan-price {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.price-amount {
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.plan-premium .price-amount {
+    background: var(--gradient-purple);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.price-currency {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.plan-period {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* Fonctionnalités */
+.plan-features {
+    margin-bottom: 32px;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.feature-item:last-child {
+    border-bottom: none;
+}
+
+.feature-icon {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--success);
+}
+
+.feature-disabled .feature-icon {
+    color: var(--text-secondary);
+}
+
+.feature-text {
+    flex: 1;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.feature-disabled .feature-text {
+    color: var(--text-secondary);
+}
+
+/* Boutons des plans */
+.plan-btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    margin-bottom: 16px;
+}
+
+.btn-free {
+    background: var(--secondary-color);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+}
+
+.btn-starter {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.btn-business {
+    background: var(--gradient-gold);
+    color: white;
+}
+
+.btn-premium {
+    background: var(--gradient-purple);
+    color: white;
+}
+
+.plan-btn:not(.btn-free):hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+/* Notes et highlights */
+.plan-note, .plan-highlight {
+    text-align: center;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+}
+
+.plan-note {
+    background: #FFF3E0;
+    color: #E65100;
+}
+
+.plan-highlight {
+    background: var(--secondary-color);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* ==================== FAQ ==================== */
+.faq-section {
+    margin-top: 80px;
+    animation: fadeIn 1.2s ease;
+}
+
+.faq-title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 48px;
+}
+
+.faq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.faq-item {
+    background: white;
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-light);
+    transition: var(--transition-fast);
+}
+
+.faq-item:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-medium);
+}
+
+.faq-question {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.faq-answer {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* ==================== MODAL PAIEMENT ==================== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--radius-xl);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-header {
+    padding: 24px;
+    border-bottom: 2px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 59, 48, 0.1);
+    color: var(--error);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.modal-close:hover {
+    background: var(--error);
+    color: white;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+/* Résumé paiement */
+.payment-summary {
+    background: var(--secondary-color);
+    padding: 20px;
+    border-radius: var(--radius-md);
+    margin-bottom: 24px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+}
+
+.summary-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.summary-value {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.summary-divider {
+    height: 2px;
+    background: var(--border-color);
+    margin: 12px 0;
+}
+
+.summary-total {
+    padding-top: 12px;
+}
+
+.summary-total .summary-label {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.summary-total .summary-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+/* Info paiement */
+.payment-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.info-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: #F5F7FA;
+    border-radius: var(--radius-md);
+}
+
+.info-icon {
+    font-size: 1.5rem;
+}
+
+.info-box p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Bouton procéder */
+.btn-proceed {
+    width: 100%;
+    padding: 18px;
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.btn-proceed:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.btn-proceed:disabled {
+    background: var(--text-secondary);
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ==================== LOADING OVERLAY ==================== */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid var(--secondary-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-text {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .header-container {
+        padding: 12px 16px;
+    }
+
+    .brand-name {
+        font-size: 1.1rem;
+    }
+
+    .user-name {
+        display: none;
+    }
+
+    .subscription-container {
+        padding: 80px 16px 40px;
+    }
+
+    .page-title {
+        font-size: 2rem;
+    }
+
+    .page-subtitle {
+        font-size: 1rem;
+    }
+
+    .plans-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .price-amount {
+        font-size: 2.5rem;
+    }
+
+    .payment-info {
+        grid-template-columns: 1fr;
+    }
+
+    .faq-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 1.8rem;
+    }
+
+    .plan-name {
+        font-size: 1.5rem;
+    }
+
+    .price-amount {
+        font-size: 2rem;
+    }
+}
+</style>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <button class="back-btn" onclick="window.location.href='produit.html'">
+                <span>←</span>
+            </button>
+            
+            <div class="brand-section">
+                <div class="logo-image">🛍️</div>
+                <h1 class="brand-name"> Oda</h1>
+            </div>
+
+            <div class="header-actions">
+                <button class="icon-btn notification-btn">
+                    <span>🔔</span>
+                    <span class="badge">3</span>
+                </button>
+                <div class="user-profile">
+                    <div class="avatar-image"></div>
+                    <span class="user-name" id="userName">Admin</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteneur Principal -->
+    <div class="subscription-container">
+        <!-- En-tête de page -->
+        <div class="page-header">
+            <div class="header-icon">👑</div>
+            <h1 class="page-title">Choisissez votre Plan</h1>
+            <p class="page-subtitle">Développez votre boutique avec le plan qui correspond à vos besoins</p>
+        </div>
+
+        <!-- Statut Actuel -->
+        <div class="current-status" id="currentStatus">
+            <div class="status-content">
+                <div class="status-icon">📊</div>
+                <div class="status-info">
+                    <h3 class="status-title">Statut actuel</h3>
+                    <p class="status-text" id="statusText">Chargement...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grille des Plans -->
+        <div class="plans-grid">
+            <!-- Plan Gratuit -->
+            <div class="plan-card plan-free">
+                <div class="plan-badge">🎁 GRATUIT</div>
+                <div class="plan-header">
+                    <h2 class="plan-name">Débutant</h2>
+                    <div class="plan-price">
+                        <span class="price-amount">0</span>
+                        <span class="price-currency">FCFA</span>
+                    </div>
+                    <p class="plan-period">Toujours gratuit</p>
+                </div>
+
+                <div class="plan-features">
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text"><strong>10 produits</strong> maximum</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text">Gestion basique</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text">Support communautaire</span>
+                    </div>
+                    <div class="feature-item feature-disabled">
+                        <span class="feature-icon">✗</span>
+                        <span class="feature-text">Statistiques limitées</span>
+                    </div>
+                </div>
+
+                <button class="plan-btn btn-free" onclick="activerPlanGratuit()" id="btnGratuit">
+                    Plan Actuel
+                </button>
+
+                <div class="plan-note">
+                    <p>⚠️ Les produits au-delà de 10 seront automatiquement en brouillon</p>
+                </div>
+            </div>
+
+            <!-- Plan Starter -->
+            <div class="plan-card plan-starter">
+                <div class="plan-badge">🚀 POPULAIRE</div>
+                <div class="plan-header">
+                    <h2 class="plan-name">Starter</h2>
+                    <div class="plan-price">
+                        <span class="price-amount">1,000</span>
+                        <span class="price-currency">FCFA</span>
+                    </div>
+                    <p class="plan-period">Par mois</p>
+                </div>
+
+                <div class="plan-features">
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text"><strong>80 produits</strong> maximum</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text">Gestion avancée</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text">Statistiques détaillées</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text">Support prioritaire</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text">Export de données</span>
+                    </div>
+                </div>
+
+                <button class="plan-btn btn-starter" onclick="ouvrirModalPaiement('starter', 1000)" id="btnStarter">
+                    Choisir ce plan
+                </button>
+
+                <div class="plan-highlight">
+                    <p>💡 Idéal pour les petites boutiques</p>
+                </div>
+            </div>
+
+            <!-- Plan Business -->
+            <div class="plan-card plan-business">
+                <div class="plan-badge">⭐ RECOMMANDÉ</div>
+                <div class="plan-header">
+                    <h2 class="plan-name">Business</h2>
+                    <div class="plan-price">
+                        <span class="price-amount">1,500</span>
+                        <span class="price-currency">FCFA</span>
+                    </div>
+                    <p class="plan-period">Par mois</p>
+                </div>
+
+                <div class="plan-features">
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text"><strong>150 produits</strong> maximum</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text">Toutes les fonctionnalités Starter</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text">Analyses avancées</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text">Support premium 24/7</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text">Personnalisation boutique</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text">Promotions & codes promo</span>
+                    </div>
+                </div>
+
+                <button class="plan-btn btn-business" onclick="ouvrirModalPaiement('business', 1500)" id="btnBusiness">
+                    Choisir ce plan
+                </button>
+
+                <div class="plan-highlight">
+                    <p>🏆 Meilleur rapport qualité/prix</p>
+                </div>
+            </div>
+
+            <!-- Plan Premium -->
+            <div class="plan-card plan-premium">
+                <div class="plan-badge">💎 PREMIUM</div>
+                <div class="plan-header">
+                    <h2 class="plan-name">Premium</h2>
+                    <div class="plan-price">
+                        <span class="price-amount">2,500</span>
+                        <span class="price-currency">FCFA</span>
+                    </div>
+                    <p class="plan-period">Par mois</p>
+                </div>
+
+                <div class="plan-features">
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text"><strong>250 produits</strong> maximum</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text">Toutes les fonctionnalités Business</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text">Gestion multi-boutiques</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text">API & intégrations</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text">Compte manager dédié</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text">Formation personnalisée</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span class="feature-text">Priorité sur nouvelles fonctionnalités</span>
+                    </div>
+                </div>
+
+                <button class="plan-btn btn-premium" onclick="ouvrirModalPaiement('premium', 2500)" id="btnPremium">
+                    Choisir ce plan
+                </button>
+
+                <div class="plan-highlight">
+                    <p>👑 Pour les entrepreneurs ambitieux</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section FAQ -->
+        <div class="faq-section">
+            <h2 class="faq-title">Questions Fréquentes</h2>
+            
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h3 class="faq-question">💳 Comment effectuer le paiement ?</h3>
+                    <p class="faq-answer">Le paiement s'effectue via Lygos. Après avoir choisi votre plan, vous serez redirigé vers une page de paiement sécurisée où vous pourrez choisir Orange Money ou MTN MoMo.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">🔄 Puis-je changer de plan ?</h3>
+                    <p class="faq-answer">Oui, vous pouvez upgrader ou downgrader votre plan à tout moment. Les changements sont effectifs immédiatement.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">📦 Que se passe-t-il si je dépasse la limite ?</h3>
+                    <p class="faq-answer">Les produits excédentaires sont automatiquement mis en brouillon. Ils redeviendront actifs une fois que vous aurez upgradé votre plan.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3 class="faq-question">⏰ Quelle est la durée de l'abonnement ?</h3>
+                    <p class="faq-answer">Tous les abonnements sont mensuels et se renouvellent automatiquement. Vous pouvez annuler à tout moment.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Paiement -->
+    <div class="modal-overlay" id="modalPaiement">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Finaliser votre abonnement</h2>
+                <button class="modal-close" onclick="fermerModalPaiement()">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="payment-summary">
+                    <div class="summary-item">
+                        <span class="summary-label">Plan sélectionné</span>
+                        <span class="summary-value" id="selectedPlan">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Nombre de produits</span>
+                        <span class="summary-value" id="productLimit">-</span>
+                    </div>
+                    <div class="summary-divider"></div>
+                    <div class="summary-item summary-total">
+                        <span class="summary-label">Total à payer</span>
+                        <span class="summary-value" id="totalAmount">-</span>
+                    </div>
+                </div>
+
+                <div class="payment-info">
+                    <div class="info-box">
+                        <span class="info-icon">🔒</span>
+                        <p>Paiement 100% sécurisé via Lygos</p>
+                    </div>
+                    <div class="info-box">
+                        <span class="info-icon">⚡</span>
+                        <p>Activation immédiate après paiement</p>
+                    </div>
+                </div>
+
+                <button class="btn-proceed" onclick="procederPaiement()" id="btnProceed">
+                    Procéder au paiement 💳
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zone de Notification -->
+    <div id="notification-container"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Redirection vers Lygos...</p>
+    </div>
+<script type="module">
+    // ==================== CONFIGURATION ====================
+const SUPABASE_URL = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2ticWJxeGN3emNybG11dnpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MTk1MzMsImV4cCI6MjA3NjA5NTUzM30.AMzAUwtjFt7Rvof5r2enMyYIYToc1wNWWEjvZqK_YXM';
+
+const BACKEND_CONFIG = {
+    getBackendUrl: () => {
+        const hostname = window.location.hostname;
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            return 'http://localhost:3000';
+        }
+        return 'https://back-kwelly-3.onrender.com';
+    },
+    timeout: 30000,
+    retryAttempts: 3,
+    retryDelay: 1000
+};
+
+const BACKEND_URL = BACKEND_CONFIG.getBackendUrl();
+
+let currentUser = null;
+let abonnementActuel = null;
+let produits = [];
+let planSelectionne = null;
+let montantSelectionne = 0;
+let backendHealthy = false;
+
+const PLANS = {
+    gratuit: { nom: 'Débutant', limite: 10, prix: 0 },
+    starter: { nom: 'Starter', limite: 80, prix: 1000 },
+    business: { nom: 'Business', limite: 150, prix: 1500 },
+    premium: { nom: 'Premium', limite: 250, prix: 2500 }
+};
+
+// ==================== UTILITAIRES ====================
+async function fetchWithTimeout(url, options = {}, timeout = BACKEND_CONFIG.timeout) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    
+    try {
+        const response = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(timeoutId);
+        return response;
+    } catch (error) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') throw new Error('Timeout: Le serveur ne répond pas');
+        throw error;
+    }
+}
+
+async function callBackendWithRetry(endpoint, options = {}, attempts = BACKEND_CONFIG.retryAttempts) {
+    let lastError;
+    
+    for (let i = 0; i < attempts; i++) {
+        try {
+            console.log(`🔄 Tentative ${i + 1}/${attempts} - ${endpoint}`);
+            
+            const response = await fetchWithTimeout(
+                `${BACKEND_URL}${endpoint}`,
+                {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        ...options.headers
+                    }
+                }
+            );
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: 'Erreur serveur' }));
+                throw new Error(errorData.error || `Erreur ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('✅ Réponse:', data);
+            return data;
+            
+        } catch (error) {
+            lastError = error;
+            console.error(`❌ Tentative ${i + 1} échouée:`, error.message);
+            
+            if (i < attempts - 1 && isRetryableError(error)) {
+                await sleep(BACKEND_CONFIG.retryDelay * (i + 1));
+                continue;
+            }
+            break;
+        }
+    }
+    
+    throw lastError;
+}
+
+function isRetryableError(error) {
+    const retryableMessages = ['fetch failed', 'network', 'timeout', 'ECONNREFUSED', 'ETIMEDOUT'];
+    return retryableMessages.some(msg => error.message.toLowerCase().includes(msg.toLowerCase()));
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function checkBackendHealth() {
+    try {
+        console.log('🔍 Vérification backend:', BACKEND_URL);
+        
+        const response = await fetchWithTimeout(`${BACKEND_URL}/health`, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        }, 10000);
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        console.log('✅ Backend connecté:', data);
+        
+        backendHealthy = true;
+        afficherNotification('✅ Système de paiement connecté', 'success');
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Backend inaccessible:', error.message);
+        backendHealthy = false;
+        afficherNotification('⚠️ Système de paiement hors ligne - Mode dégradé', 'warning');
+        return false;
+    }
+}
+
+// ==================== AUTHENTIFICATION ====================
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function verifierAuthentification() {
+    try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) throw error;
+        if (!session) {
+            console.warn('⚠️ Aucune session active');
+            window.location.href = 'index.html';
+            return;
+        }
+        
+        currentUser = session.user;
+        console.log('✅ Utilisateur connecté:', currentUser.email);
+        
+        const userNameElement = document.getElementById('userName');
+        if (userNameElement) {
+            userNameElement.textContent = currentUser.email.split('@')[0];
+        }
+        
+    } catch (error) {
+        console.error('❌ Erreur authentification:', error);
+        window.location.href = 'index.html';
+    }
+}
+
+// ==================== CHARGEMENT DONNÉES ====================
+async function chargerDonnees() {
+    try {
+        await chargerAbonnement();
+        await chargerProduits();
+        mettreAJourStatut();
+        mettreAJourBoutons();
+    } catch (error) {
+        console.error('❌ Erreur chargement données:', error);
+    }
+}
+
+async function chargerAbonnement() {
+    try {
+        const { data, error } = await supabase
+            .from('abonnements')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .single();
+
+        if (error && error.code !== 'PGRST116') throw error;
+        abonnementActuel = data;
+        console.log('📋 Abonnement actuel:', abonnementActuel);
+    } catch (error) {
+        console.error('❌ Erreur chargement abonnement:', error);
+    }
+}
+
+async function chargerProduits() {
+    try {
+        const { data, error } = await supabase
+            .from('produits')
+            .select('id, statut, date_draft')
+            .eq('user_id', currentUser.id);
+
+        if (error) throw error;
+        produits = data || [];
+        console.log(`📦 ${produits.length} produit(s) chargé(s)`);
+    } catch (error) {
+        console.error('❌ Erreur chargement produits:', error);
+    }
+}
+
+// ==================== AFFICHAGE ====================
+function mettreAJourStatut() {
+    const statusText = document.getElementById('statusText');
+    if (!statusText) return;
+
+    const nombrePublies = produits.filter(p => p.statut === 'published').length;
+    
+    if (!abonnementActuel) {
+        statusText.innerHTML = `
+            <strong>Plan Gratuit</strong> • 
+            ${nombrePublies}/10 produits publiés
+            ${nombrePublies >= 10 ? '<br><span style="color: var(--error);">⚠️ Limite atteinte</span>' : ''}
+        `;
+        return;
+    }
+
+    const expiration = new Date(abonnementActuel.date_expiration);
+    const maintenant = new Date();
+    const joursRestants = Math.ceil((expiration - maintenant) / (1000 * 60 * 60 * 24));
+    
+    if (joursRestants <= 0) {
+        statusText.innerHTML = `<strong style="color: var(--error);">Abonnement expiré</strong> • Tous vos produits sont en brouillon`;
+    } else {
+        statusText.innerHTML = `
+            <strong>Plan ${abonnementActuel.plan.toUpperCase()}</strong> • 
+            ${nombrePublies}/${abonnementActuel.limite_produits} produits publiés • 
+            Expire dans ${joursRestants} jour${joursRestants > 1 ? 's' : ''}
+        `;
+    }
+}
+
+function mettreAJourBoutons() {
+    const boutons = {
+        btnGratuit: document.getElementById('btnGratuit'),
+        btnStarter: document.getElementById('btnStarter'),
+        btnBusiness: document.getElementById('btnBusiness'),
+        btnPremium: document.getElementById('btnPremium')
+    };
+
+    Object.values(boutons).forEach(btn => {
+        if (btn) {
+            btn.textContent = 'Choisir ce plan';
+            btn.disabled = false;
+            btn.style.cursor = 'pointer';
+        }
+    });
+
+    if (!abonnementActuel) {
+        if (boutons.btnGratuit) {
+            boutons.btnGratuit.textContent = '✓ Plan Actuel';
+            boutons.btnGratuit.disabled = true;
+            boutons.btnGratuit.style.cursor = 'not-allowed';
+        }
+        return;
+    }
+
+    const expiration = new Date(abonnementActuel.date_expiration);
+    if (expiration <= new Date()) return;
+
+    const mapping = {
+        'starter': 'btnStarter',
+        'business': 'btnBusiness',
+        'premium': 'btnPremium'
+    };
+
+    const btnKey = mapping[abonnementActuel.plan];
+    if (btnKey && boutons[btnKey]) {
+        boutons[btnKey].textContent = '✓ Plan Actuel';
+        boutons[btnKey].disabled = true;
+        boutons[btnKey].style.cursor = 'not-allowed';
+    }
+}
+
+// ==================== GESTION PRODUITS ====================
+async function gererProduitsSelonLimite(limite) {
+    try {
+        console.log(`📦 Gestion des produits selon limite: ${limite}`);
+        
+        const { data: tousProduits, error } = await supabase
+            .from('produits')
+            .select('id, nom, statut, created_at')
+            .eq('user_id', currentUser.id)
+            .order('created_at', { ascending: true });
+
+        if (error) throw error;
+        if (!tousProduits || tousProduits.length === 0) {
+            console.log('ℹ️ Aucun produit à gérer');
+            return;
+        }
+
+        const produitsAPublier = tousProduits.slice(0, limite);
+        const produitsAMettreDraft = tousProduits.slice(limite);
+
+        const idsAPublier = produitsAPublier.filter(p => p.statut !== 'published').map(p => p.id);
+        const idsAMettreDraft = produitsAMettreDraft.filter(p => p.statut === 'published').map(p => p.id);
+
+        if (idsAPublier.length > 0) {
+            await supabase.from('produits').update({ 
+                statut: 'published', 
+                date_draft: null 
+            }).in('id', idsAPublier);
+            console.log(`✅ ${idsAPublier.length} produit(s) publié(s)`);
+        }
+
+        if (idsAMettreDraft.length > 0) {
+            await supabase.from('produits').update({ 
+                statut: 'draft', 
+                date_draft: new Date().toISOString() 
+            }).in('id', idsAMettreDraft);
+            console.log(`⚠️ ${idsAMettreDraft.length} produit(s) mis en brouillon`);
+        }
+
+        if (idsAPublier.length > 0 || idsAMettreDraft.length > 0) {
+            afficherNotification(
+                idsAPublier.length > 0 && idsAMettreDraft.length > 0
+                    ? `✅ ${idsAPublier.length} publiés, ${idsAMettreDraft.length} en brouillon`
+                    : idsAPublier.length > 0
+                        ? `✅ ${idsAPublier.length} produit(s) publié(s)`
+                        : `⚠️ ${idsAMettreDraft.length} produit(s) en brouillon`,
+                idsAMettreDraft.length > 0 ? 'warning' : 'success'
+            );
+        }
+        
+    } catch (error) {
+        console.error('❌ Erreur gestion produits:', error);
+        afficherNotification('⚠️ Erreur lors de la gestion des produits', 'warning');
+    }
+}
+
+// ==================== MODAL & PAIEMENT (CORRIGÉ) ====================
+window.activerPlanGratuit = () => {
+    afficherNotification('ℹ️ Vous êtes déjà sur le plan gratuit', 'info');
+};
+
+// ✅ CORRECTION: Ouverture du modal sans bloquer si backend offline
+window.ouvrirModalPaiement = (plan, montant) => {
+    console.log('🔔 Ouverture modal pour:', plan, montant);
+    
+    planSelectionne = plan;
+    montantSelectionne = montant;
+    
+    document.getElementById('selectedPlan').textContent = PLANS[plan].nom;
+    document.getElementById('productLimit').textContent = `${PLANS[plan].limite} produits`;
+    document.getElementById('totalAmount').textContent = `${montant.toLocaleString('fr-FR')} FCFA`;
+    
+    // Afficher un avertissement si backend offline, mais permettre quand même l'ouverture
+    if (!backendHealthy) {
+        const paymentInfo = document.querySelector('.payment-info');
+        if (paymentInfo) {
+            paymentInfo.innerHTML = `
+                <div style="grid-column: 1 / -1; background: #fff3cd; border: 2px solid #ffc107; padding: 16px; border-radius: 12px; text-align: center;">
+                    <strong style="color: #856404;">⚠️ Système de paiement temporairement indisponible</strong><br>
+                    <small style="color: #856404;">Le paiement sera activé automatiquement dès que le système sera en ligne</small>
+                </div>
+            `;
+        }
+    }
+    
+    document.getElementById('modalPaiement').classList.add('active');
+    document.body.style.overflow = 'hidden';
+};
+
+window.fermerModalPaiement = () => {
+    document.getElementById('modalPaiement').classList.remove('active');
+    document.body.style.overflow = 'auto';
+    planSelectionne = null;
+    montantSelectionne = 0;
+};
+
+window.procederPaiement = async () => {
+    const btnProceed = document.getElementById('btnProceed');
+    
+    if (!planSelectionne) {
+        afficherNotification('❌ Aucun plan sélectionné', 'error');
+        return;
+    }
+
+    // ✅ Vérifier backend au moment du paiement
+    if (!backendHealthy) {
+        afficherNotification('❌ Système de paiement indisponible - Réessayez dans quelques instants', 'error');
+        // Tenter une nouvelle vérification
+        await checkBackendHealth();
+        if (!backendHealthy) {
+            return;
+        }
+    }
+    
+    btnProceed.disabled = true;
+    btnProceed.textContent = '⏳ Préparation...';
+    
+    try {
+        console.log('🚀 Initialisation paiement abonnement');
+        
+        const dateDebut = new Date();
+        const dateExpiration = new Date();
+        dateExpiration.setMonth(dateExpiration.getMonth() + 1);
+        
+        const { data: abonnement, error: aboError } = await supabase
+            .from('abonnements')
+            .upsert({
+                user_id: currentUser.id,
+                plan: planSelectionne,
+                limite_produits: PLANS[planSelectionne].limite,
+                date_debut: dateDebut.toISOString(),
+                date_expiration: dateExpiration.toISOString(),
+                statut: 'pending',
+                montant: montantSelectionne
+            }, { onConflict: 'user_id' })
+            .select()
+            .single();
+
+        if (aboError) throw aboError;
+        
+        console.log('✅ Abonnement créé (pending):', abonnement.id);
+        
+        const successUrl = `${window.location.origin}/abonnement.html?payment=success&subscription_id=${abonnement.id}`;
+        const failureUrl = `${window.location.origin}/abonnement.html?payment=failed&subscription_id=${abonnement.id}`;
+        
+        const paymentData = {
+            order_id: abonnement.id,
+            order_number: `SUB-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+            amount: montantSelectionne,
+            shop_name: 'Ma Boutique Élégante',
+            message: `Abonnement ${PLANS[planSelectionne].nom}`,
+            customer_name: currentUser.email.split('@')[0],
+            customer_email: currentUser.email,
+            customer_phone: '+237600000000',
+            success_url: successUrl,
+            failure_url: failureUrl
+        };
+        
+        console.log('📤 Envoi au backend:', paymentData);
+        
+        const response = await callBackendWithRetry('/api/payment/initialize', {
+            method: 'POST',
+            body: JSON.stringify(paymentData)
+        });
+        
+        if (response.success && response.payment_url) {
+            console.log('✅ Paiement initialisé:', response.payment_url);
+            
+            localStorage.setItem('paiement_en_attente', JSON.stringify({
+                subscription_id: abonnement.id,
+                plan: planSelectionne,
+                prix: montantSelectionne,
+                limite: PLANS[planSelectionne].limite,
+                date: new Date().toISOString(),
+                user_id: currentUser.id,
+                payment_url: response.payment_url
+            }));
+            
+            fermerModalPaiement();
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            afficherNotification('🔄 Redirection vers Lygos...', 'info');
+            
+            setTimeout(() => {
+                window.location.href = response.payment_url;
+            }, 1500);
+            
+        } else {
+            throw new Error('URL de paiement manquante');
+        }
+        
+    } catch (error) {
+        console.error('❌ Erreur:', error);
+        afficherNotification(`❌ ${error.message}`, 'error');
+        btnProceed.disabled = false;
+        btnProceed.textContent = 'Procéder au paiement 💳';
+        document.getElementById('loadingOverlay').style.display = 'none';
+    }
+};
+
+// ==================== RETOUR PAIEMENT ====================
+async function verifierRetourPaiement() {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('payment');
+    const subscriptionId = params.get('subscription_id');
+    
+    if (status === 'failed' || status === 'cancelled') {
+        afficherNotification('⚠️ Paiement annulé', 'warning');
+        
+        if (subscriptionId) {
+            await supabase.from('abonnements').delete().eq('id', subscriptionId);
+        }
+        
+        localStorage.removeItem('paiement_en_attente');
+        window.history.replaceState({}, '', window.location.pathname);
+        return;
+    }
+    
+    if (status === 'success' && subscriptionId) {
+        try {
+            afficherNotification('⏳ Activation de votre abonnement...', 'info');
+            
+            const { error: updateError } = await supabase
+                .from('abonnements')
+                .update({ 
+                    statut: 'actif',
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', subscriptionId);
+
+            if (updateError) throw updateError;
+            
+            const { data: abo } = await supabase
+                .from('abonnements')
+                .select('*')
+                .eq('id', subscriptionId)
+                .single();
+            
+            if (abo) {
+                await chargerDonnees();
+                await gererProduitsSelonLimite(abo.limite_produits);
+                
+                afficherNotification('✅ Abonnement activé avec succès !', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'produit.html';
+                }, 3000);
+            }
+            
+            localStorage.removeItem('paiement_en_attente');
+            
+        } catch (error) {
+            console.error('❌ Erreur activation:', error);
+            afficherNotification(`❌ ${error.message}`, 'error');
+        }
+        
+        window.history.replaceState({}, '', window.location.pathname);
+    }
+}
+
+// ==================== SYSTÈME ABONNEMENT ====================
+async function gererProduitsExpires() {
+    try {
+        const { data: abo } = await supabase
+            .from('abonnements')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .single();
+
+        if (!abo || new Date(abo.date_expiration) <= new Date()) {
+            await supabase.from('produits')
+                .update({ 
+                    statut: 'draft', 
+                    date_draft: new Date().toISOString() 
+                })
+                .eq('user_id', currentUser.id)
+                .eq('statut', 'published');
+        }
+    } catch (error) {
+        console.error('❌ Erreur gestion expirés:', error);
+    }
+}
+
+async function supprimerProduitsAnciens() {
+    try {
+        const dateLimite = new Date();
+        dateLimite.setDate(dateLimite.getDate() - 14);
+
+        const { data } = await supabase.from('produits')
+            .select('id')
+            .eq('user_id', currentUser.id)
+            .eq('statut', 'draft')
+            .not('date_draft', 'is', null)
+            .lt('date_draft', dateLimite.toISOString());
+
+        if (data && data.length > 0) {
+            await supabase.from('produits').delete().in('id', data.map(p => p.id));
+            afficherNotification(`🗑️ ${data.length} produit(s) supprimé(s) (>14j)`, 'info');
+        }
+    } catch (error) {
+        console.error('❌ Erreur suppression:', error);
+    }
+}
+
+async function initialiserSystemeAbonnement() {
+    try {
+        await gererProduitsExpires();
+        await supprimerProduitsAnciens();
+    } catch (error) {
+        console.error('❌ Erreur système:', error);
+    }
+}
+
+// ==================== EVENT LISTENERS ====================
+function initialiserEventListeners() {
+    document.getElementById('modalPaiement')?.addEventListener('click', (e) => {
+        if (e.target.id === 'modalPaiement') fermerModalPaiement();
+    });
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') fermerModalPaiement();
+    });
+}
+
+// ==================== NOTIFICATIONS ====================
+function afficherNotification(message, type = 'info') {
+    let conteneur = document.getElementById('notification-container');
+
+    if (!conteneur) {
+        conteneur = document.createElement('div');
+        conteneur.id = 'notification-container';
+        conteneur.style.cssText = 'position:fixed;top:100px;right:20px;z-index:10000;display:flex;flex-direction:column;gap:12px';
+        document.body.appendChild(conteneur);
+    }
+
+    const couleurs = { 
+        success: '#4CAF50', 
+        error: '#f44336', 
+        info: '#007AFF', 
+        warning: '#FF9800' 
+    };
+
+    const notif = document.createElement('div');
+    notif.style.cssText = `
+        background:white;
+        padding:16px 24px;
+        border-radius:12px;
+        box-shadow:0 8px 25px rgba(0,0,0,0.15);
+        border-left:4px solid ${couleurs[type]};
+        animation:slideIn 0.5s ease;
+        max-width:350px;
+        font-family:'Poppins',sans-serif;
+        font-weight:500;
+        color:#333
+    `;
+    notif.textContent = message;
+
+    conteneur.appendChild(notif);
+
+    setTimeout(() => {
+        notif.style.animation = 'fadeOut 0.5s ease';
+        setTimeout(() => notif.remove(), 500);
+    }, 4000);
+}
+
+// ==================== INITIALISATION ====================
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🌸 Page Abonnements initialisée !');
+    console.log('🔧 Backend URL:', BACKEND_URL);
+    
+    try {
+        await verifierAuthentification();
+        await checkBackendHealth(); // Continue même si ça échoue
+        await chargerDonnees();
+        initialiserEventListeners();
+        verifierRetourPaiement();
+        await initialiserSystemeAbonnement();
+        
+        console.log('✅ Page abonnements prête');
+        console.log('💳 Système Lygos:', backendHealthy ? 'ACTIF' : 'INACTIF');
+        
+    } catch (error) {
+        console.error('❌ Erreur initialisation:', error);
+        afficherNotification('❌ Erreur lors du chargement', 'error');
+    }
+});
+
+console.log('✅ Module Abonnements Lygos chargé - Backend:', BACKEND_URL);
+</script>
+</body>
+</html>

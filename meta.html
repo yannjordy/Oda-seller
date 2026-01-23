@@ -1,0 +1,641 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <link href="/css/fonts.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/mit_app_inventor.css?foo=3841">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dongle&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dongle&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Bitter' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500&family=Roboto+Flex:opsz,wght@8..144,100;8..144,200;8..144,300;8..144,400;8..144,500;8..144,600;8..144,700;8..144,800;8..144,900;8..144,1000&display=swap" rel="stylesheet">
+
+    <title>MIT App Inventor</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-X8JVR7MNWD"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-X8JVR7MNWD');
+    </script>
+    <style>
+
+      /* For width 400px and smaller: */
+      @media screen and (max-width: 400px) {
+          .column {
+              width: 100%;
+          }
+          .mobile-spacer {
+              padding-top: 20px;
+          }
+          .app-inventor-carousel-small-screen {
+              display: contents;
+          }
+          .app-inventor-carousel {
+              display: none;
+          }
+          .app-inventor-carousel-large {
+              display: none;
+          }
+          .left-align-text-small-view {
+              text-align: left;
+          }
+          .img {
+              width: 100%;
+              height: auto;
+          }
+      }
+
+      /* For width 500px and smaller: */
+      @media screen and (max-width: 500px) {
+          .column {
+              width: 100%;
+          }
+          .mobile-spacer {
+              padding-top: 20px;
+          }
+          .app-inventor-carousel-small-screen {
+              display: contents;
+          }
+          .app-inventor-carousel {
+              display: none;
+          }
+          .app-inventor-carousel-large {
+              display: none;
+          }
+          .left-align-text-small-view {
+              text-align: left;
+          }
+          .img {
+              width: 100%;
+              height: auto;
+          }
+      }
+
+      /* For width 500px to 768px: */
+      @media screen and (min-width: 501px)  {
+          .app-inventor-carousel-small-screen {
+              display: contents;
+          }
+          .mobile-spacer {
+              padding-top: 20px;
+          }
+          .app-inventor-carousel {
+              display: none;
+          }
+          .app-inventor-carousel-large {
+              display: none;
+          }
+      }
+
+      /* For width 768px and larger: */
+      @media screen and (min-width: 768px)  {
+
+          navbar-expand-xl .navbar-collapse {
+              display: flex!important;
+              flex-basis: auto;
+          }
+          .app-inventor-carousel-small-screen {
+              display: none;
+          }
+          .app-inventor-carousel {
+              display: contents;
+          }
+      }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script type="text/javascript">
+
+      var gotoappinventor = function() {
+        var referrer = document.location.pathname;
+        var patt = /.*hour-of-code.*/;
+        if (referrer.match(patt)) {
+          window.open("http://code.appinventor.mit.edu/", "new");
+        } else {
+          window.open("http://ai2.appinventor.mit.edu/", "new");
+        }
+      }
+    </script>
+  </head>
+
+  <body class="mit_app_inventor"><div style="padding: 4px;"></div>
+<nav class="navbar navbar-expand-xl navbar-light">
+	<div style="padding-left: 10px;"></div>
+	<a class="navbar-brand" href="/">
+		<div style="height:1%">
+	<img src="/images/logo.png" style="height: 70px;" alt="App Inventor Logo"></div></a>
+
+	<button type="button" class="btn create-btn" style="width: 150px; height: 45px; font-weight: 700;" onclick="gotoappinventor();">Create Apps!</button>
+	
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent"
+			aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle Navigation" style="background-color: #F88D34; color: #FFFFFF; border-radius: .75rem;">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+
+	<div class="collapse navbar-collapse" id="navbarContent" style="min-width: 300px">
+
+		<ul class="navbar-nav" style="margin-left: auto; margin-right: auto;">
+
+		<li class="nav-item dropdown">
+			<div class="mobile-spacer"></div>
+		<a class="nav-link" href="http://example.com" data-toggle="dropdown" style="border-radius: .75rem;" aria-haspopup="true" aria-expanded="false">
+			 About	</a>
+			
+		<div class="dropdown-menu" style="background-color: #f4dcc9; border-radius: .75rem; font-weight: 400; font-family: 'Poppins', sans-serif; font-size: 15px;">
+			<a class="dropdown-item" href="/about-us">About App Inventor</a>
+			<a class="dropdown-item" href="/ios_tips">iOS</a>
+			<a class="dropdown-item" href="/FAQ">FAQ</a>
+			<a class="dropdown-item" href="/explore/our-team">Our Team</a>
+			<a class="dropdown-item" href="/about/termsofservice" target="_blank">Terms of Service</a>
+			<a class="dropdown-item" href="/ai2/ReleaseNotes">Release Notes</a>
+		</div>
+		</li>
+		
+		<li class="nav-item dropdown">
+			<div class="mobile-spacer"></div>
+		<a class="nav-link" href="http://example.com" data-toggle="dropdown" style="border-radius: .75rem;" aria-haspopup="true" aria-expanded="false">
+			Learning	</a>
+			
+		<div class="dropdown-menu" style="background-color: #f4dcc9; border-radius: .75rem; font-weight: 400; font-family: 'Poppins', sans-serif; font-size: 15px;">
+			<a class="dropdown-item" href="/explore/teach">Teach</a>
+			<a class="dropdown-item" href="/explore/ai2/tutorials">Tutorials</a>
+			<a class="dropdown-item" href="/explore/hour-of-code">Hour of Code</a>
+			<a class="dropdown-item" href="/explore/ai-with-mit-app-inventor">AI with App Inventor</a>
+			<a class="dropdown-item" href="/explore/ai2/data_science_unit">Data Science</a>
+			<a class="dropdown-item" href="/explore/books">Books</a>
+	</div>
+		</li>
+
+		<li class="nav-item dropdown">	<div class="mobile-spacer"></div>
+		<a class="nav-link" href="/news" data-toggle="dropdown" style="border-radius: .75rem;" aria-haspopup="true" aria-expanded="false">
+			News & Events	</a>
+		
+		<div class="dropdown-menu" style="background-color: #f4dcc9; border-radius: .75rem; font-weight: 400; font-family: 'Poppins', sans-serif; font-size: 15px;">
+			<a class="dropdown-item" href="https://www.appinventorfoundation.org/overview" target="_blank">Appathon</a>
+			<a class="dropdown-item" href="/explore/news">In the News</a>
+			<a class="dropdown-item" href="/explore/blog">Team Blog</a>
+			<a class="dropdown-item" href="/explore/events">Events</a>
+			<a class="dropdown-item" href="/explore/stories">Stories from the Field</a>
+	</div>
+		</li>
+
+		<li class="nav-item dropdown"><div class="mobile-spacer"></div>
+			<a class="nav-link" href="/involved" data-toggle="dropdown" style="border-radius: .75rem;" aria-haspopup="true" aria-expanded="false">
+				Get Involved</a>
+				
+			<div class="dropdown-menu" style="background-color: #f4dcc9; border-radius: .75rem; font-weight: 400; font-family: 'Poppins', sans-serif; font-size: 15px;">
+				<a class="dropdown-item" href="https://docs.google.com/document/d/e/2PACX-1vTPfdHjhGAqRGZ0dwNrL0AEwQI7nlPHx9dBaw8MbuFHIGlJvkC8apRoiPJKQJvkkQOITPuoyb8lRUtt/pub" target="_blank">10 Ways to Get Involved!</a>
+				<a class="dropdown-item" href="https://community.appinventor.mit.edu" target="_blank">Support and Community</a>
+				<a class="dropdown-item" href="/giving_to_App_Inventor.html">Contribute to App Inventor</a>
+				<a class="dropdown-item" href="https://github.com/mit-cml/appinventor-sources" target="_blank">Open Source Information</a>
+		</div>
+			</li>
+
+		<li class="nav-item dropdown"><div class="mobile-spacer"></div>
+		<a class="nav-link" href="/explore/resources" data-toggle="dropdown" style="border-radius: .75rem;" aria-haspopup="true" aria-expanded="false">
+			Resources</a> 
+		<div class="dropdown-menu" style="background-color: #f4dcc9; border-radius: .75rem; font-weight: 400; font-family: 'Poppins', sans-serif; font-size: 15px;">
+			<a class="dropdown-item" href="/explore/foundation">App Inventor Foundation</a>
+			<a class="dropdown-item" href="/explore/get-started">Get Started</a>
+			<a class="dropdown-item" href="/explore/content/system-requirements">System Requirements</a>
+			<a class="dropdown-item" href="/explore/library">Documentation</a>
+			<a class="dropdown-item" href="https://community.appinventor.mit.edu" target="_blank">Support and Community</a>
+			<a class="dropdown-item" href="/explore/research">Research</a>
+	
+	</div>
+	<div class="mobile-spacer"></div>
+		</li></ul>
+
+		<a href="/giving_to_App_Inventor.html">
+				<button type="button" class="btn donate-btn" style="margin-right: 20px; width: 110px; height: 45px; font-weight: 700;">Donate</button></a>
+			
+				<a href="/search.html">
+				  <button type="button" class="btn create-btn" style="width: 60px; height: 45px;" >
+					<img src="/images/landing_page_assets/magnifier.png" style="width: 30px; background-color: #F88D34; border-radius: .75rem" alt="Search Engine for the App Inventor Site" />
+				  </button></a>
+				  <div style="padding-right: 4px;"></div>
+		</div>
+	</div>
+</nav>
+<div style="padding: 4px;"></div><div class="container-fluid-home">
+
+      <!-- Image panels for phone-size screens -->
+
+      <div class="app-inventor-carousel-small-screen">
+        <div style="padding: 10px;"></div>
+        <div style="position:relative; text-decoration:none; text-align: center; margin-left: auto; margin-right: auto; align-items: center;"> <a href="https://www.appinventorfoundation.org/responsible-ai" target="_blank"> <img src="/images/landing_page_assets/carousel_banners_small/Responsible AI Curriculum Announcement_small.png" style="width: 90%; border-radius: 1rem;">
+            <div style="position: absolute;
+                        left: 18%;
+                        bottom: 26%;
+                        text-align: center;
+                        width: 65%;
+                        ">.
+              <div style="font-family: 'Poppins'; font-weight:1000; letter-spacing: 3.5px; background-color: #a5cf47; margin:auto; border-radius: .2rem; color:#3c3c3c; font-size: .55em;">EDUCATOR COLLABORATIVE</div>
+              <div style="padding: 1vw;"></div>
+              <div style="font-family: 'Montserrat'; font-weight:1000; line-height:100%; color:#3c3c3c; margin:auto; font-size: 1.3em;">Responsible AI </div>
+              <div style="padding: .5vw;"></div>
+              <div style="font-family: 'Montserrat'; font-weight:600; line-height:100%; color:#3c3c3c; margin:auto; font-size: 1.3em;">in Every Classroom</div>
+              <div style="padding: 2.3vw;"></div>
+              <div style="font-family: 'Poppins'; font-weight:300; line-height:110%; color:#3c3c3c; margin:auto; font-size: 1em;">Free human-centered AI and data-science curriculum for grades 6 and above</div>
+        </div></a> </div>
+
+        <div style="padding: 15px;"></div>
+
+        <div style="position:relative; text-align: center; margin-left: auto; margin-right: auto; align-items: center;"><a href="https://giving.appinventor.mit.edu"><img src="/images/landing_page_assets/carousel_banners_small/donate_small.png" style="width: 90%; border-radius: 1rem;">
+            <div style="position: absolute;
+                        top: 28.5%;
+                        text-align: center;
+                        width: 100%;">
+            </div>
+        </a></div>
+      </div>
+
+      <!-- Carousel for computer screens -->
+
+      <div class="app-inventor-carousel">
+
+
+        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+
+          <!-- The slideshow/carousel -->
+
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <a href="https://giving.appinventor.mit.edu" target="_blank"><img src="images/landing_page_assets/carousel_banners_full/donate.png"  class="d-block w-100" alt="Slide 1" loading="lazy">
+
+                <div class="carousel-caption d-none d-md-block" style="position: absolute;
+                                                                       bottom: 25.5%;
+                                                                       left: 42.5%;
+                                                                       ">
+                  <div style="padding: .6vw;">  </div>
+                  <div style="padding: .5vw;"></div> </div>
+              </a>
+            </div>
+            <div class="carousel-item">
+              <a href="https://www.appinventorfoundation.org/responsible-ai" target="_blank"><img src="images/landing_page_assets/carousel_banners_full/Responsible AI Curriculum Announcement.png" alt="Slide 2" class="d-block w-100" loading="lazy">
+                <div class="carousel-caption d-none d-md-block" style="
+                                                                       bottom: 13%;
+                                                                       text-align: center;">
+                  <div style=" font-family: 'Poppins'; font-weight:700; letter-spacing: 2px; background-color: #a5cf47; width: calc(12rem + 120 * ((100vw - 320px) / (1280 - 320))); margin:auto; border-radius: .2rem; line-height:140%; color: #3c3c3c; font-size: calc(.3rem + 12 * ((100vw - 320px) / (1280 - 320)));">EDUCATOR COLLABORATIVE</div>
+                  <div style="padding: .4vw;"></div>
+                  <div style="font-family: 'Montserrat'; letter-spacing: 4px; font-weight:700; line-height:100%; color: #3c3c3c; margin:auto; font-size: calc(.45rem + 12 * ((100vw - 320px) / 680));"><span style="font-family: 'Montserrat'; font-weight:900; line-height:100%; color: #3c3c3c; margin:auto; font-size: calc(.6rem + 12 * ((100vw - 320px) / 680));">Responsible AI</span>
+                    in Every Classroom</div>
+                  <div style="padding: 1vw;"></div>
+                  <div style="font-family: 'Poppins'; font-weight:350; color: #3c3c3c;  margin:auto; font-size: calc(.7rem + 6 * ((100vw - 320px) / 680));">Free human-centered AI and data-science curriculum for grades 6 and above</div>
+              </div></a>
+            </div>
+          </div>
+
+          <!-- Left and right controls/icons -->
+
+          <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev" aria-label="Previous slide">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next" aria-label="Next slide">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          </button>
+        </div>
+     </div>
+
+    		<!DOCTYPE html>
+		<html lang="en">
+		<head>
+		  <meta charset="utf-8">
+		  <meta name="viewport" content="width=device-width, initial-scale=1">
+		  <link rel="preconnect" href="https://fonts.googleapis.com">
+		  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,900;1,100;1,200;1,300;1,500;1,600;1,700;1,900&display=swap" rel="stylesheet">
+		  <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100;8..144,200;8..144,300;8..144,400;8..144,500;8..144,600;8..144,700;8..144,800;8..144,900;8..144,1000&display=swap" rel="stylesheet">
+		<script type="text/javascript">
+			function ajax_get_json(){
+				var results = document.getElementById("results")
+				var hr = new XMLHttpRequest();
+				hr.open("GET", "/stats", true);
+				hr.setRequestHeader("Content-type", "application/json", true);
+				hr.onreadystatechange = function() {
+				if(hr.readyState == 4 && hr.status == 200) {
+						var data = JSON.parse(hr.responseText);
+						var header =
+									
+									 '<div style="display: inline-flex; flex-wrap: wrap;">\n' +
+									   '<div class="statContainer purple shadow-sm">\n' +
+										   '<div class="title text-center">USERS TODAY:</div>\n' +
+										   '<div class="d-flex">\n' +
+											   '<div class="p-1 flex-fill text-center status">\n' +
+												   '<h5 class="font-weight-bold">' + data.daily + '</h5>\n' +
+												   '</div>\n' +
+												   '</div>\n' +
+												   '</div>\n' +
+												   '</div>\n' +
+   
+									'<div style="padding-left: 90px; display: inline-flex; flex-wrap: wrap;">\n' +
+									   '<div class="statContainer teal shadow-sm">\n' +
+										   '<div class="title text-center">USERS THIS MONTH:</div>\n' +
+										   '<div class="d-flex">\n' +
+											   '<div class="p-1 flex-fill text-center status">\n' +
+												   '<h5 class="font-weight-bold" style="margin-top: 5px">' + data.monthly + '</h5>\n' +
+												   '</div>\n' +
+												   '</div>\n' +
+												   '</div>\n' +
+												   '</div>\n' +
+   
+												   '<div style="padding-left: 90px; display: inline-flex; flex-wrap: wrap;">\n' +		
+									   '<div class="statContainer lime shadow-sm">\n' +
+										   '<div class="title text-center">ALL-TIME USERS:</div>\n' +
+										   '<div class="d-flex">\n' +
+											   '<div class="p-1 flex-fill text-center status">\n' +
+												   '<h5 class="font-weight-bold" style="margin-top: 5px">' + data.users + '</h5>\n' +
+												   '</div>\n' +
+												   '</div>\n' +
+												   '</div>\n' +
+												   '</div>\n' +
+   
+												   '<div style="padding-left: 90px; display: inline-flex; flex-wrap: wrap;">\n' +	
+									   '<div class="statContainer orange shadow-sm">\n' +
+										   '<div class="title text-center">APPS BUILT:</div>\n' +
+										   '<div class="d-flex">\n' +
+											   '<div class="p-1 flex-fill text-center status">\n' +
+												   '<h5 class="font-weight-bold" style="margin-top: 5px">' + data.projects + '</h5>\n' +
+												   '</div>\n' +
+												   '</div>\n' +
+												   '</div>\n' +
+												   '</div>\n';
+					results.innerHTML = header;
+				}
+				}
+				hr.send(null);
+			}
+		   </script>
+			</head>
+		<body>
+			
+			<div style="padding: 25px;"></div>
+			<div style="background-color: #f5ecd3;">
+				<div style="padding: 35px;"></div>
+			
+		<div id="results" class="d-none d-lg-block" style="text-align:center;">
+			
+			<script type="text/javascript">ajax_get_json();</script>
+		</div>
+		<div style="padding: 10px;"></div>
+
+		<div class="upperrow">
+		<div class="four_boxes">
+			<a href="explore/get-started"><img src="images/landing_page_assets/resource_cards/get_started_card_no_text.png" style="width:100%; border-radius: 1rem;">
+			<div style="position: absolute;
+			bottom: 25px;
+			left: 45px;"><div style="font-weight:500; font-size: 24px; color:black;">Get Started</div></div></a>
+		</div>
+
+		<div class="four_boxes">
+			<a href="explore/ai2/tutorials"><img src="images/landing_page_assets/resource_cards/tutorials_card_no_text.png" style="width:100%; border-radius: 1rem;">
+			<div style="position: absolute;
+			bottom: 25px;
+			left: 33px;"><div style="font-weight:500; font-size: 24px; color:black;">Try a Tutorial</div></div></a>
+		</div>
+
+		<div class="four_boxes">
+			<a href="explore/teach"><img src="images/landing_page_assets/resource_cards/educators_card_no_text.png" style="width:100%; border-radius: 1rem;">
+			<div style="position: absolute;
+			bottom: 25px;
+			left: 26px;
+			font-weight:500; font-size: 24px;color:black;">Teach Coding</div></a>
+		</div>
+
+		<div class="four_boxes">
+			<a href="https://community.appinventor.mit.edu" target="_blank"><img src="images/landing_page_assets/resource_cards/community_card_no_text.png" style="width:100%; border-radius: 1rem;">
+			<div style="position: absolute;
+			bottom: 25px;
+			left: 26px;
+			font-weight:500; font-size: 24px;color:black;">Ask Questions</div></a>
+		</div>
+		
+		<div class="four_boxes">
+			<a href="https://docs.google.com/document/d/e/2PACX-1vTPfdHjhGAqRGZ0dwNrL0AEwQI7nlPHx9dBaw8MbuFHIGlJvkC8apRoiPJKQJvkkQOITPuoyb8lRUtt/pub" target="_blank"><img src="images/landing_page_assets/resource_cards/contribute_card_no_text.png" style="width:100%; border-radius: 1rem;">
+			<div style="position: absolute;
+			bottom: 25px;
+			left: 42px;
+			font-weight:500; font-size: 24px;color:black;">Get Involved</div></a>
+		</div>
+		<div style="padding: 25px;"></div>
+	  </div></div>
+
+	  <div style="background-color: #f8bd8b;">
+	  <table>
+		<div style="padding: 25px;"></div>
+		  <tr>
+			<div class="orangerow_top">  
+	<div class="two_boxes">
+		<a href="explore/app-building-guides"><img src="images/landing_page_assets/promotion_panels/yr_media_panel.jpg" style="width:90%; border-radius: 1rem;">
+		<div style="position: absolute;
+		bottom: 170px;
+		left: 58px;
+		color:azure;
+		padding-right: 200px;
+		font-weight:700; font-size: 12px;">Try our App Building Guides for the Youth Mobile Power Series</div>
+	</div></a>
+
+	<div class="two_boxes">
+		<a href="explore/ai-with-mit-app-inventor"><img src="images/landing_page_assets/promotion_panels/ai_with_app_inventor_panel.png" style="width:90%; border-radius: 1rem;">
+	<div style="position: absolute;
+		bottom: 49px;
+		left: 61px; 
+		padding-right: 46px; 
+		color:rgb(8, 108, 108); font-weight:700; font-size: 20px; line-height: .98; letter-spacing:1pt">Artificial Intelligence<br>with App Inventor<br>
+		<div style="padding: 5px;"></div>
+		<div style="font-weight:700; font-size: 14px; color:rgb(8, 108, 108); letter-spacing:normal">New curriculum and Teacher Resources</div>
+	</div></a></div>	</div>
+</tr>
+<tr>
+	<div class="orangerow_bottom"> 
+	<div class="two_boxes">
+		<a href="https://forms.gle/U22SPD5mRZ5viWFi7"><img src="images/landing_page_assets/promotion_panels/coolthink_panel.jpg" style="width:90%; border-radius: 1rem;">
+		<div style="position: absolute;
+		bottom: 125px;
+		left: 95px;
+		padding-right: 95px; 
+		color:black;
+		line-height: 1.1;
+		font-weight:700; font-size: 14px;">Coolthink is a three-year computational thinking curriculum in English for students age 9 - 12.</div></a>
+	</div>
+
+	<div class="two_boxes">
+		<a href="https://www.youtube.com/channel/UCGJVKvMbiNP5ou2yz0FdVWw" target="_blank"><img src="images/landing_page_assets/promotion_panels/youtube_panel.jpg" style="width: 90%; border-radius: 1rem;">
+		<div style="position: absolute;
+		bottom: 185px;
+		left: 75px;
+		color:rgb(94, 41, 15); font-weight:900; font-size: 26px;line-height: 1.1;">Follow the <br>MIT App Inventor <br>YouTube Channel</div></a>
+	</div>
+	</div>
+
+</tr>
+<div style="padding: 25px;"></div>
+</table>
+</div>
+  <div style="padding: 15px;"></div>
+ 
+<div class="row news-header">
+	<div class="col-xl-12">
+		<h1 class="font-weight-bold text-center">News & Events</h1>
+		</div>
+</div>
+<div class="row news-cards">
+
+    <div class="col-xl-12" style="padding-left: 10%; padding-right: 10%;">
+		<div class="card-columns accented-cards card-adjust">
+	            
+	            
+		    <div class="card" style="height: 600px;" >
+			<div class="card-body">
+			    <h4 class="card-title">Open Education Award to Hal Abelson</h4> 
+			    <p class="card-text">
+	                        
+	                        <p>Hal Abelson has been selected as recipient of a special 2025 Lifetime Achievement Award for Excellence for his work in open education.  The award is presented by Open Education Global (OEGlobal.org) , a worldwide community that seeks to transform education systems everywhere by fostering a movement foregrounding openness in all aspects of education.</p> <img src="/images/HalOEAward2025.png" style="display: block; margin: auto; width: 85%; border-radius: 20px;">
+     
+
+	                        
+	                    </p>
+	                    
+	                    
+	                    <p class="card-text"><a href="https://awards.oeglobal.org/awards/2025/board/hal-abelson/" target="_blank">More</a></p>
+			</div>
+	            </div>
+	            
+		    <div class="card" style="height: 600px;" >
+			<div class="card-body">
+			    <h4 class="card-title">MIT FutureMakers Workshop Empowers High School Students in Rural Kentucky with Hands-On AI and a Glimpse toward Agricultural Innovation</h4> 
+			    <p class="card-text">
+	                        
+	                        <img src="/images/blogs/jeffFreilich/Kentucky2025/Kentucky2025.jpg" style="display: block; margin: auto; width: 90%; border-radius: 25px;" alt="Kentucky students holding certificates"> <p>This past August, high school students from the Floyd County School of Innovation (FCSI) participated in a groundbreaking five-day workshop at the University of Pikeville in eastern Kentucky.  </p>
+
+	                        
+	                    </p>
+	                    
+	                    
+	                    <p class="card-text"><a href="/explore/blogs/jeffFreilich/2025/09/10/Kentucky2025" target="_blank">More</a></p>
+			</div>
+	            </div>
+	            
+		    <div class="card" style="height: 600px;" >
+			<div class="card-body">
+			    <h4 class="card-title">My Coding Journey at the Navajo Nation @ Chinle, AZ</h4> 
+			    <p class="card-text">
+	                        
+	                        <img src="/images/blogs/selim/ChinleAZ2025/Students2.jpg" style="display: block; margin: auto; width: 90%; border-radius: 25px;" alt="Chinle AZ summer school"> <p>Thanks to a Google grant I had the fortune to travel to Chinle, Arizona in May 2025 and help start a new CS course called "<em>Introduction to Mobile Computing & Artificial Intelligence</em>" at the Chinle High School. </p>
+
+	                        
+	                    </p>
+	                    
+	                    
+	                    <p class="card-text"><a href="/blogs/selim/2025/09/05/ChinleAZ2025" target="_blank">More</a></p>
+			</div>
+	            </div>
+	            
+		    <div class="card" style="height: 600px;" >
+			<div class="card-body">
+			    <h4 class="card-title">2025 Global AI Hackathon Winners announced</h4> 
+			    <p class="card-text">
+	                        
+	                        <p>Over 1,300 participants from 86 countries and regions used AI tools to develop mobile apps addressing the UN’s Sustainable Development Goals in a six-week virtual event hosted by MIT RAISE and the App Inventor Foundation.</p> <img src="/images/2025GlobalAIHackathonWinners.png" style="display: block; margin: auto; width: 80%; border-radius: 1rem;">
+
+	                        
+	                    </p>
+	                    
+	                    
+	                    <p class="card-text"><a href="https://www.appinventorfoundation.org/news/gah-2025-winners" target="_blank">More</a></p>
+			</div>
+	            </div>
+	            
+		</div>
+		<div style="padding: 10px;"></div>
+
+<div class="text-center">
+<button type="button" style="
+  width: 155px;
+  color: #FFFFFF;
+  background-color: #A7247A;
+  border-radius: .75rem;
+  font-size: 18px;
+  height: 45px;
+  font-weight: 700;
+  border: none; /* remove browser default */"
+onclick="window.open('/explore/news');">View More</button>
+</div>
+		<div style="padding: 30px;"></div>
+<!--</div>-->
+    </div>
+	
+<div class="col-xl-12" style="padding-left: 35%; padding-right: 35%;">
+	
+		<blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/mitappinventorofficial/?utm_source=ig_embed&amp;utm_campaign=loading" data-instgrm-version="14" style="border-radius:20px; box-shadow:0 0 20px 0 rgba(0,0,0,0.5),0 20px 30px 0 rgba(0,0,0,0.15); margin: 1px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"><div style="padding:16px;"> <a href="https://www.instagram.com/mitappinventorofficial/?utm_source=ig_embed&amp;utm_campaign=loading" style=" background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%;" target="_blank"> <div style=" display: flex; flex-direction: row; align-items: center;"> <div style="background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 40px; margin-right: 14px; width: 40px;"></div> <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center;"> <div style=" background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 100px;"></div> <div style=" background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 60px;"></div></div></div><div style="padding: 19% 0;"></div> <div style="display:block; height:50px; margin:0 auto 12px; width:50px;"><svg width="50px" height="50px" viewBox="0 0 60 60" version="1.1" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g transform="translate(-511.000000, -20.000000)" fill="#000000"><g><path d="M556.869,30.41 C554.814,30.41 553.148,32.076 553.148,34.131 C553.148,36.186 554.814,37.852 556.869,37.852 C558.924,37.852 560.59,36.186 560.59,34.131 C560.59,32.076 558.924,30.41 556.869,30.41 M541,60.657 C535.114,60.657 530.342,55.887 530.342,50 C530.342,44.114 535.114,39.342 541,39.342 C546.887,39.342 551.658,44.114 551.658,50 C551.658,55.887 546.887,60.657 541,60.657 M541,33.886 C532.1,33.886 524.886,41.1 524.886,50 C524.886,58.899 532.1,66.113 541,66.113 C549.9,66.113 557.115,58.899 557.115,50 C557.115,41.1 549.9,33.886 541,33.886 M565.378,62.101 C565.244,65.022 564.756,66.606 564.346,67.663 C563.803,69.06 563.154,70.057 562.106,71.106 C561.058,72.155 560.06,72.803 558.662,73.347 C557.607,73.757 556.021,74.244 553.102,74.378 C549.944,74.521 548.997,74.552 541,74.552 C533.003,74.552 532.056,74.521 528.898,74.378 C525.979,74.244 524.393,73.757 523.338,73.347 C521.94,72.803 520.942,72.155 519.894,71.106 C518.846,70.057 518.197,69.06 517.654,67.663 C517.244,66.606 516.755,65.022 516.623,62.101 C516.479,58.943 516.448,57.996 516.448,50 C516.448,42.003 516.479,41.056 516.623,37.899 C516.755,34.978 517.244,33.391 517.654,32.338 C518.197,30.938 518.846,29.942 519.894,28.894 C520.942,27.846 521.94,27.196 523.338,26.654 C524.393,26.244 525.979,25.756 528.898,25.623 C532.057,25.479 533.004,25.448 541,25.448 C548.997,25.448 549.943,25.479 553.102,25.623 C556.021,25.756 557.607,26.244 558.662,26.654 C560.06,27.196 561.058,27.846 562.106,28.894 C563.154,29.942 563.803,30.938 564.346,32.338 C564.756,33.391 565.244,34.978 565.378,37.899 C565.522,41.056 565.552,42.003 565.552,50 C565.552,57.996 565.522,58.943 565.378,62.101 M570.82,37.631 C570.674,34.438 570.167,32.258 569.425,30.349 C568.659,28.377 567.633,26.702 565.965,25.035 C564.297,23.368 562.623,22.342 560.652,21.575 C558.743,20.834 556.562,20.326 553.369,20.18 C550.169,20.033 549.148,20 541,20 C532.853,20 531.831,20.033 528.631,20.18 C525.438,20.326 523.257,20.834 521.349,21.575 C519.376,22.342 517.703,23.368 516.035,25.035 C514.368,26.702 513.342,28.377 512.574,30.349 C511.834,32.258 511.326,34.438 511.181,37.631 C511.035,40.831 511,41.851 511,50 C511,58.147 511.035,59.17 511.181,62.369 C511.326,65.562 511.834,67.743 512.574,69.651 C513.342,71.625 514.368,73.296 516.035,74.965 C517.703,76.634 519.376,77.658 521.349,78.425 C523.257,79.167 525.438,79.673 528.631,79.82 C531.831,79.965 532.853,80.001 541,80.001 C549.148,80.001 550.169,79.965 553.369,79.82 C556.562,79.673 558.743,79.167 560.652,78.425 C562.623,77.658 564.297,76.634 565.965,74.965 C567.633,73.296 568.659,71.625 569.425,69.651 C570.167,67.743 570.674,65.562 570.82,62.369 C570.966,59.17 571,58.147 571,50 C571,41.851 570.966,40.831 570.82,37.631"></path></g></g></g></svg></div><div style="padding-top: 8px;"> <div style=" color:#3897f0; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:550; line-height:18px;">View this profile on Instagram</div></div><div style="padding: 12.5% 0;"></div> <div style="display: flex; flex-direction: row; margin-bottom: 14px; align-items: center;"><div> <div style="background-color: #F4F4F4; border-radius: 50%; height: 12.5px; width: 12.5px; transform: translateX(0px) translateY(7px);"></div> <div style="background-color: #F4F4F4; height: 12.5px; transform: rotate(-45deg) translateX(3px) translateY(1px); width: 12.5px; flex-grow: 0; margin-right: 14px; margin-left: 2px;"></div> <div style="background-color: #F4F4F4; border-radius: 50%; height: 12.5px; width: 12.5px; transform: translateX(9px) translateY(-18px);"></div></div><div style="margin-left: 8px;"> <div style=" background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 20px; width: 20px;"></div> <div style=" width: 0; height: 0; border-top: 2px solid transparent; border-left: 6px solid #f4f4f4; border-bottom: 2px solid transparent; transform: translateX(16px) translateY(-4px) rotate(30deg)"></div></div><div style="margin-left: auto;"> <div style=" width: 0px; border-top: 8px solid #F4F4F4; border-right: 8px solid transparent; transform: translateY(16px);"></div> <div style=" background-color: #F4F4F4; flex-grow: 0; height: 12px; width: 16px; transform: translateY(-4px);"></div> <div style=" width: 0; height: 0; border-top: 8px solid #F4F4F4; border-left: 8px solid transparent; transform: translateY(-4px) translateX(8px);"></div></div></div> <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center; margin-bottom: 24px;"> <div style=" background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 224px;"></div> <div style=" background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 144px;"></div></div></a><p style=" color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; line-height:17px; margin-bottom:0; margin-top:8px; overflow:hidden; padding:8px 0 7px; text-align:center; text-overflow:ellipsis; white-space:nowrap;"><a href="https://www.instagram.com/mitappinventorofficial/?utm_source=ig_embed&amp;utm_campaign=loading" style=" color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:normal; line-height:17px;" target="_blank">MIT App Inventor</a> (@<a href="https://www.instagram.com/mitappinventorofficial/?utm_source=ig_embed&amp;utm_campaign=loading" style=" color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:normal; line-height:17px;" target="_blank">mitappinventorofficial</a>) • Instagram photos and videos</p></div></blockquote>
+		<script async src="//www.instagram.com/embed.js"></script>
+
+	
+</div>
+<div style="padding: 30px;"></div>
+
+</body></html>
+
+
+    <div class="footer background-color">
+	<div style="padding-left: 35%;"></div>
+	<div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
+	<div style="text-align: center;">
+		<div style="padding-top: 10%; "></div>
+	<h3>MIT App Inventor</h3>
+	<div style="padding: 5px;"></div>
+	<a href="https://raise.mit.edu" target="_blank"><img src="/images/RAISE_sub-brand_lockup_two-level_rgb_black-and-silver-gray.svg" style="width: 250px;"></a>
+	<div style="padding: 20px;"></div>
+</div>
+	
+	<div style="width: 450px; text-align: center;">
+		<div style="padding-top: 5%;"></div>
+	<a href="https://web.mit.edu" target="_blank"><img src="/images/landing_page_assets/logos/MIT-logo-gray-ltgray-72x38.svg" style="width: 200px; padding-left: 5px;"></a><div style="padding: 5px;"></div>
+	© 2012-2025 Massachusetts Institute of Technology
+	<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank"><img alt="Creative Commons License" style="border-width:0" src="/images/cc80x15.png" /></a><br/>This work is licensed under a 
+	<a rel="license" class="footer_links" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+	<br/><a class="footer_links" href="/about/termsofservice" target="_blank">Terms of Service and Privacy Policy</a>
+	<div style="padding: 15px;"></div>
+</div>
+
+	<div>
+		<div style="padding-top: 10%;"></div>
+	App Inventor Support: <a class="footer_links" href="https://community.appinventor.mit.edu" target="_blank">Community</a><br>
+	Other inquiries: <a class="footer_links" href="mailto:appinventor@mit.edu" target="_blank">Email</a><br>
+	GitHub: <a class="footer_links" href="https://github.com/mit-cml"  target="_blank">mit-cml</a><br>
+	Accessibility: <a class="footer_links" href="http://accessibility.mit.edu" target="_blank">accessibility.mit.edu</a><br>
+	<div style="padding: 5px;"></div>
+	<div style="padding-left: 30px;">
+	<a href="https://www.youtube.com/@MITAppInventor" target="_blank"><img src="/images/social_media/youtube.png" style="width: 40px; padding: 5px;"></a>
+	<a href="https://www.instagram.com/mitappinventorofficial/" target="_blank"><img src="/images/social_media/instagram.png" style="width: 40px; padding: 5px;"></a>
+	<a href="https://twitter.com/MITAppInventor" target="_blank"><img src="/images/social_media/twitter.png" style="width: 40px; padding: 5px;"></a>
+	<a href="https://www.facebook.com/MITAppInventor" target="_blank"><img src="/images/social_media/facebook.png" style="width: 27px"></a>
+	<a href="https://www.linkedin.com/company/appinventorfoundation" target="_blank"><img src="/images/social_media/linkedin.png" style="width: 37px; padding: 5px; margin-bottom: 3px;"></a>
+</div>
+</div>
+	</div>
+	<div style="padding-right: 35%;"></div>
+	<script src="/js/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script src="/js/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<script src="/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	<script async src="/js/widgets.js" charset="utf-8"></script>
+	
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  </body>
+</html>
