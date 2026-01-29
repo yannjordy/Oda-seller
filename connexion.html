@@ -135,15 +135,30 @@ form{
     display: flex;
     justify-content: center;
 }
-.social-icons a{
+
+.social-icons .google-btn{
     display: inline-flex;
-    padding: 10px;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
     border: 2px solid #ccc;
     border-radius: 8px;
-    font-size: 24px;
+    font-size: 16px;
     color: #333;
     text-decoration: none;
-    margin: 0 8px;
+    background: #fff;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.social-icons .google-btn:hover{
+    border-color: #7494ec;
+    background: #f8f9ff;
+}
+
+.social-icons .google-btn i{
+    font-size: 24px;
+    margin-right: 8px;
 }
 
 .toggle-box{
@@ -294,12 +309,12 @@ form{
                     <a href="">Forgot password?</a>
                 </div>
                 <button type="submit" class="btn">Login</button>
-                <p>or login with social platform</p>
+                <p>or login with</p>
                 <div class="social-icons">
-                    <a href=""><i class="bx bxl-google"></i></a>
-                    <a href=""><i class="bx bxl-facebook"></i></a>
-                    <a href=""><i class="bx bxl-github"></i></a>
-                    <a href=""><i class="bx bxl-linkedin"></i></a>
+                    <a href="#" class="google-btn">
+                        <i class="bx bxl-google"></i>
+                        <span>Continue with Google</span>
+                    </a>
                 </div>
             </form>
         </div>
@@ -313,19 +328,19 @@ form{
                 </div>
                 <div class="input-box">
                     <input type="email" name="" id="registerEmail" placeholder="Email" required>
-                    <i class="bx bxs-enveloppe"></i>
+                    <i class="bx bxs-envelope"></i>
                 </div>
                 <div class="input-box">
                     <input type="password" name="" id="registerPassword" placeholder="Password" required>
                     <i class="bx bxs-lock-alt"></i>
                 </div>
                 <button type="submit" class="btn">Register</button>
-                <p>or register with social platform</p>
+                <p>or register with</p>
                 <div class="social-icons">
-                    <a href=""><i class="bx bxl-google"></i></a>
-                    <a href=""><i class="bx bxl-facebook"></i></a>
-                    <a href=""><i class="bx bxl-github"></i></a>
-                    <a href=""><i class="bx bxl-linkedin"></i></a>
+                    <a href="#" class="google-btn">
+                        <i class="bx bxl-google"></i>
+                        <span>Continue with Google</span>
+                    </a>
                 </div>
             </form>
             
@@ -349,201 +364,181 @@ form{
     const SUPABASE_URL = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2ticWJxeGN3emNybG11dnpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MTk1MzMsImV4cCI6MjA3NjA5NTUzM30.AMzAUwtjFt7Rvof5r2enMyYIYToc1wNWWEjvZqK_YXM';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const container = document.querySelector('.container');
-const registerBtn = document.querySelector('.register-btn');
-const loginBtn = document.querySelector('.login-btn');
+    const container = document.querySelector('.container');
+    const registerBtn = document.querySelector('.register-btn');
+    const loginBtn = document.querySelector('.login-btn');
 
-registerBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    container.classList.add('active');
-});
+    registerBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        container.classList.add('active');
+    });
 
-loginBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    container.classList.remove('active');
-});
+    loginBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        container.classList.remove('active');
+    });
 
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (error) {
+                console.error('Erreur de vérification session:', error);
+                return;
+            }
+            
+            if (session && session.user) {
+                console.log('✅ Utilisateur déjà connecté, redirection...');
+                window.location.href = 'tableau.html';
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+        }
+    });
+
+    // CONNEXION
+    const loginForm = document.querySelector('.form-box.login form');
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
         
-        if (error) {
-            console.error('Erreur de vérification session:', error);
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const submitBtn = loginForm.querySelector('button[type="submit"]');
+        
+        if (!username || !password) {
+            alert('Veuillez remplir tous les champs');
             return;
         }
         
-        if (session && session.user) {
-            console.log('✅ Utilisateur déjà connecté, redirection...');
+        try {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bx bx-loader bx-spin"></i> Connexion...';
+            
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: username,
+                password: password
+            });
+            
+            if (error) throw error;
+            
+            console.log('✅ Connexion réussie:', data);
             window.location.href = 'tableau.html';
+            
+        } catch (error) {
+            console.error('Erreur de connexion:', error);
+            
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Login';
+            
+            let errorMessage = 'Nom d\'utilisateur ou mot de passe incorrect';
+            alert(errorMessage);
         }
-    } catch (error) {
-        console.error('Erreur:', error);
-    }
-});
+    });
 
-// CONNEXION
-const loginForm = document.querySelector('.form-box.login form');
-loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const username = document.getElementById('loginUsername').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    const submitBtn = loginForm.querySelector('button[type="submit"]');
-    
-    if (!username || !password) {
-        alert('Veuillez remplir tous les champs');
-        return;
-    }
-    
-    try {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="bx bx-loader bx-spin"></i> Connexion...';
+    // INSCRIPTION
+    const registerForm = document.querySelector('.form-box.register form');
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
         
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: username,
-            password: password
-        });
+        const username = document.getElementById('registerUsername').value.trim();
+        const email = document.getElementById('registerEmail').value.trim();
+        const password = document.getElementById('registerPassword').value;
+        const submitBtn = registerForm.querySelector('button[type="submit"]');
         
-        if (error) throw error;
+        if (!username || !email || !password) {
+            alert('Veuillez remplir tous les champs');
+            return;
+        }
         
-        console.log('✅ Connexion réussie:', data);
-        window.location.href = 'tableau.html';
-        
-    } catch (error) {
-        console.error('Erreur de connexion:', error);
-        
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Login';
-        
-        let errorMessage = 'Nom d\'utilisateur ou mot de passe incorrect';
-        alert(errorMessage);
-    }
-});
-
-// INSCRIPTION
-const registerForm = document.querySelector('.form-box.register form');
-registerForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const username = document.getElementById('registerUsername').value.trim();
-    const email = document.getElementById('registerEmail').value.trim();
-    const password = document.getElementById('registerPassword').value;
-    const submitBtn = registerForm.querySelector('button[type="submit"]');
-    
-    if (!username || !email || !password) {
-        alert('Veuillez remplir tous les champs');
-        return;
-    }
-    
-    try {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="bx bx-loader bx-spin"></i> Inscription...';
-        
-        // Tentative d'inscription
-        const { data, error } = await supabase.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-                // Ces données sont envoyées au TRIGGER SQL (NEW.raw_user_meta_data)
-                data: {
-                    name: username,
-                    display_name: username
+        try {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bx bx-loader bx-spin"></i> Inscription...';
+            
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: {
+                        name: username,
+                        display_name: username
+                    }
                 }
+            });
+            
+            if (error) throw error;
+            
+            alert('Inscription réussie ! Redirection...');
+            window.location.href = 'tableau.html';
+            
+        } catch (error) {
+            console.error('Détails erreur inscription:', error);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Register';
+            
+            let errorMessage = error.message;
+            if (error.message.includes('already registered')) {
+                errorMessage = 'Cet email est déjà utilisé.';
             }
-        });
-        
-        if (error) throw error;
-
-        // Note: Avec votre SQL et la confirmation email désactivée, 
-        // l'utilisateur est soit auto-connecté, soit prêt à l'être.
-        
-        alert('Inscription réussie ! Redirection...');
-        window.location.href = 'tableau.html';
-        
-    } catch (error) {
-        console.error('Détails erreur inscription:', error);
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Register';
-        
-        // Affichage de l'erreur réelle pour le débogage
-        let errorMessage = error.message;
-        if (error.message.includes('already registered')) {
-            errorMessage = 'Cet email est déjà utilisé.';
-        }
-        alert("Erreur : " + errorMessage);
-    }
-});
-
-// CONNEXION SOCIALE
-async function handleSocialLogin(provider) {
-    try {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-            provider: provider,
-            options: {
-                redirectTo: window.location.origin + '/tableau.html'
-            }
-        });
-        
-        if (error) throw error;
-        
-    } catch (error) {
-        console.error(`Erreur de connexion ${provider}:`, error);
-        alert(`Erreur lors de la connexion avec ${provider}`);
-    }
-}
-
-document.querySelectorAll('.social-icons a').forEach(link => {
-    link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const icon = link.querySelector('i');
-        let provider = '';
-        
-        if (icon.classList.contains('bxl-google')) {
-            provider = 'google';
-        } else if (icon.classList.contains('bxl-facebook')) {
-            provider = 'facebook';
-        } else if (icon.classList.contains('bxl-github')) {
-            provider = 'github';
-        } else if (icon.classList.contains('bxl-linkedin')) {
-            provider = 'linkedin';
-        }
-        
-        if (provider) {
-            handleSocialLogin(provider);
+            alert("Erreur : " + errorMessage);
         }
     });
-});
 
-// MOT DE PASSE OUBLIÉ
-const forgotLink = document.querySelector('.forgot-link a');
-if (forgotLink) {
-    forgotLink.addEventListener('click', async (e) => {
-        e.preventDefault();
-        
-        const email = prompt('Entrez votre adresse email pour réinitialiser votre mot de passe :');
-        
-        if (email && email.includes('@')) {
-            try {
-                const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-                    redirectTo: window.location.origin + '/reset-password.html'
-                });
-                
-                if (error) throw error;
-                
-                alert('Un email de réinitialisation a été envoyé à ' + email);
-            } catch (error) {
-                console.error('Erreur:', error);
-                alert('Erreur lors de l\'envoi de l\'email de réinitialisation');
-            }
-        } else if (email) {
-            alert('Veuillez entrer une adresse email valide');
+    // CONNEXION GOOGLE UNIQUEMENT
+    async function handleGoogleLogin() {
+        try {
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin + '/tableau.html'
+                }
+            });
+            
+            if (error) throw error;
+            
+        } catch (error) {
+            console.error('Erreur de connexion Google:', error);
+            alert('Erreur lors de la connexion avec Google');
         }
-    });
-}
+    }
 
-console.log('🔐 Page de connexion initialisée');
+    // Attacher l'événement aux boutons Google
+    document.querySelectorAll('.google-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleGoogleLogin();
+        });
+    });
+
+    // MOT DE PASSE OUBLIÉ
+    const forgotLink = document.querySelector('.forgot-link a');
+    if (forgotLink) {
+        forgotLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            const email = prompt('Entrez votre adresse email pour réinitialiser votre mot de passe :');
+            
+            if (email && email.includes('@')) {
+                try {
+                    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+                        redirectTo: window.location.origin + '/reset-password.html'
+                    });
+                    
+                    if (error) throw error;
+                    
+                    alert('Un email de réinitialisation a été envoyé à ' + email);
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors de l\'envoi de l\'email de réinitialisation');
+                }
+            } else if (email) {
+                alert('Veuillez entrer une adresse email valide');
+            }
+        });
+    }
+
+    console.log('🔐 Page de connexion initialisée avec Google Auth uniquement');
   </script>
 </body>
 </html>
