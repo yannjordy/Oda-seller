@@ -228,6 +228,280 @@ section {
         font-size: 14px;
     }
 }
+/* Styles pour le bouton de langue */
+#languageToggle {
+    position: relative;
+    overflow: visible;
+}
+
+#languageToggle:active {
+    transform: scale(0.95);
+}
+
+.flag {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    transition: transform 0.3s ease;
+}
+
+#languageToggle:hover .flag {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* Animation du texte */
+#currentLang {
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+/* Menu déroulant de langue (optionnel) */
+.language-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    padding: 8px;
+    min-width: 140px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 100;
+}
+
+.language-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.language-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 600;
+    color: #334155;
+}
+
+.language-option:hover {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(245, 158, 11, 0.1));
+    color: #dc2626;
+}
+
+.language-option.active {
+    background: linear-gradient(135deg, #dc2626, #f59e0b);
+    color: white;
+}
+
+.language-option .flag {
+    font-size: 1.5rem;
+}
+
+/* Animation de pulsation pour attirer l'attention */
+@keyframes pulse-lang {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+    }
+}
+
+#languageToggle.pulse {
+    animation: pulse-lang 2s infinite;
+}
+
+/* ===========================================
+   GUIDE D'INSTALLATION iOS - STYLES
+   =========================================== */
+
+.ios-install-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    padding: 20px;
+}
+
+.ios-install-modal.active {
+    display: flex;
+}
+
+.ios-phone {
+    background: #1f2937;
+    border-radius: 40px;
+    padding: 12px;
+    max-width: 340px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.ios-screen {
+    background: white;
+    border-radius: 32px;
+    overflow: hidden;
+    height: 680px;
+    position: relative;
+}
+
+.ios-notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 30px;
+    background: #1f2937;
+    border-radius: 0 0 20px 20px;
+    z-index: 10;
+}
+
+.ios-step {
+    display: none;
+    height: 100%;
+    flex-direction: column;
+}
+
+.ios-step.active {
+    display: flex;
+}
+
+.ios-safari-bar {
+    background: #f5f5f7;
+    padding: 12px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.ios-tap {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(220, 38, 38, 0.3);
+    border: 3px solid #dc2626;
+    animation: iosTap 2s infinite;
+    pointer-events: none;
+}
+
+@keyframes iosTap {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.5); opacity: 0.7; }
+}
+
+.ios-nav {
+    position: absolute;
+    bottom: -70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border-radius: 50px;
+    padding: 12px 24px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.ios-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d1d5db;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.ios-dot.active {
+    background: #dc2626;
+    transform: scale(1.5);
+}
+
+.ios-close {
+    position: absolute;
+    top: -50px;
+    right: 0;
+    background: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.ios-close:hover {
+    background: #dc2626;
+    color: white;
+    transform: scale(1.1);
+}
+
+.ios-help-btn {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #dc2626, #f59e0b);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
+    z-index: 100;
+    animation: iosHelpPulse 3s infinite;
+}
+
+@keyframes iosHelpPulse {
+    0%, 100% { 
+        transform: scale(1); 
+        box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4); 
+    }
+    50% { 
+        transform: scale(1.1); 
+        box-shadow: 0 12px 30px rgba(220, 38, 38, 0.6); 
+    }
+}
+
+.ios-help-btn:hover {
+    transform: scale(1.05);
+}
+
+@media (max-width: 640px) {
+    .ios-phone {
+        max-width: 300px;
+    }
+    
+    .ios-screen {
+        height: 600px;
+    }
+    
+    .ios-help-btn {
+        bottom: 80px;
+        right: 15px;
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+    }
+}
 </style>
 <body>
 
@@ -248,6 +522,35 @@ section {
     <header class="fixed top-0 left-0 w-full p-6 z-50 flex justify-between items-center pointer-events-none">
         <div class="font-extrabold text-2xl text-red-600 pointer-events-auto">ODA<span class="text-amber-500">MARKET</span></div>
         <div class="hidden md:block text-xs font-bold text-gray-400 uppercase tracking-widest pointer-events-auto">Glissez pour explorer &rarr;</div>
+        <!-- Header avec menu déroulant -->
+<header class="fixed top-0 left-0 w-full p-6 z-50 flex justify-between items-center pointer-events-none">
+    <div class="font-extrabold text-2xl text-red-600 pointer-events-auto">ODA<span class="text-amber-500">MARKET</span></div>
+    
+    <!-- Bouton de langue avec menu déroulant -->
+    <div class="pointer-events-auto relative">
+        <button id="languageToggle" class="bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg hover:shadow-xl px-4 py-2 rounded-full font-bold text-sm transition-all duration-300 flex items-center gap-2 border-2 border-slate-200 hover:border-red-600 group">
+            <span class="flag text-xl" id="currentFlag">🇫🇷</span>
+            <span id="currentLang" class="text-slate-700 group-hover:text-red-600">FR</span>
+            <svg class="w-4 h-4 text-slate-400 group-hover:text-red-600 transition-transform" id="dropdownIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        
+        <!-- Menu déroulant -->
+        <div id="languageMenu" class="language-menu">
+            <div class="language-option" data-lang="fr">
+                <span class="flag">🇫🇷</span>
+                <span>Français</span>
+            </div>
+            <div class="language-option" data-lang="en">
+                <span class="flag">🇬🇧</span>
+                <span>English</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="hidden md:block text-xs font-bold text-gray-400 uppercase tracking-widest pointer-events-auto">Glissez pour explorer &rarr;</div>
+</header>
     </header>
 
     <!-- Points de navigation -->
@@ -367,8 +670,9 @@ section {
         </section>
 
     </div>
-
+<script src="translate.js"></script>
     <script>
+        
 // Variables globales
 let deferredPrompt;
 const installPrompt = document.getElementById('installPrompt');
@@ -551,6 +855,111 @@ function handleDragEnd(e) {
         goToPage(currentPage);
     }
 }
+// Menu déroulant de langue
+const languageToggle = document.getElementById('languageToggle');
+const languageMenu = document.getElementById('languageMenu');
+const languageOptions = document.querySelectorAll('.language-option');
+const currentFlag = document.getElementById('currentFlag');
+const currentLang = document.getElementById('currentLang');
+const dropdownIcon = document.getElementById('dropdownIcon');
+
+let menuOpen = false;
+
+// Toggle du menu
+languageToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuOpen = !menuOpen;
+    languageMenu.classList.toggle('show', menuOpen);
+    dropdownIcon.style.transform = menuOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+});
+
+// Fermer le menu en cliquant ailleurs
+document.addEventListener('click', () => {
+    if (menuOpen) {
+        menuOpen = false;
+        languageMenu.classList.remove('show');
+        dropdownIcon.style.transform = 'rotate(0deg)';
+    }
+});
+
+// Sélection de langue
+languageOptions.forEach(option => {
+    option.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const lang = option.dataset.lang;
+        
+        // Changer la langue
+        if (window.universalTranslationManager) {
+            window.universalTranslationManager.setLanguage(lang);
+            updateLanguageDisplay(lang);
+        }
+        
+        // Fermer le menu
+        menuOpen = false;
+        languageMenu.classList.remove('show');
+        dropdownIcon.style.transform = 'rotate(0deg)';
+        
+        // Notification
+        showLanguageNotification(lang);
+    });
+});
+
+// Mettre à jour l'affichage
+function updateLanguageDisplay(lang) {
+    const languages = {
+        fr: { flag: '🇫🇷', code: 'FR' },
+        en: { flag: '🇬🇧', code: 'EN' }
+    };
+    
+    currentFlag.textContent = languages[lang].flag;
+    currentLang.textContent = languages[lang].code;
+    
+    // Mettre à jour les options actives
+    languageOptions.forEach(opt => {
+        opt.classList.toggle('active', opt.dataset.lang === lang);
+    });
+}
+
+// Notification
+function showLanguageNotification(lang) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: linear-gradient(135deg, #dc2626, #f59e0b);
+        color: white;
+        padding: 16px 24px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 14px;
+        box-shadow: 0 10px 40px rgba(220, 38, 38, 0.3);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    `;
+    
+    const messages = {
+        fr: '🇫🇷 Langue changée en Français',
+        en: '🇬🇧 Language changed to English'
+    };
+    
+    notification.textContent = messages[lang];
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.4s ease';
+        setTimeout(() => notification.remove(), 400);
+    }, 2500);
+}
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', () => {
+    const currentLanguage = window.universalTranslationManager?.getCurrentLanguage() || 'fr';
+    updateLanguageDisplay(currentLanguage);
+});
 
 // Fonction pour aller à une page spécifique
 function goToPage(pageIndex) {
@@ -612,6 +1021,331 @@ const initChart = () => {
 
 // Initialisation au chargement
 window.onload = initChart;
+
+    </script>
+
+    <!-- ===========================================
+         GUIDE D'INSTALLATION iOS - MODAL
+         =========================================== -->
+    <div id="iosInstallModal" class="ios-install-modal">
+        <div style="position: relative;">
+            <div class="ios-close" onclick="closeIOSGuide()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </div>
+
+            <div class="ios-phone">
+                <div class="ios-screen">
+                    <div class="ios-notch"></div>
+                    
+                    <!-- Étape 1: Safari -->
+                    <div id="iosStep1" class="ios-step active">
+                        <div class="bg-white px-4 py-3 border-b" style="padding-top: 40px;">
+                            <div class="bg-gray-100 rounded-full px-4 py-2 text-sm text-gray-600">
+                                🔒 odamarket.com
+                            </div>
+                        </div>
+                        <div class="flex-1 bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-white">
+                            <div class="text-center">
+                                <div class="text-6xl mb-4">🛍️</div>
+                                <h1 class="text-3xl font-black">OdaMarket</h1>
+                                <p class="text-sm opacity-90 mt-2">Votre app de vente</p>
+                            </div>
+                        </div>
+                        <div class="ios-safari-bar">
+                            <div class="ios-tap" style="left: 50%; bottom: 8px; transform: translateX(-50%);"></div>
+                            <div class="text-blue-500 text-2xl">⬆️</div>
+                        </div>
+                    </div>
+
+                    <!-- Étape 2: Menu Partage -->
+                    <div id="iosStep2" class="ios-step">
+                        <div class="flex-1 bg-black bg-opacity-50 flex items-end">
+                            <div class="bg-white rounded-t-3xl w-full p-6">
+                                <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
+                                <div class="grid grid-cols-4 gap-3 mb-4">
+                                    <div class="text-center">
+                                        <div class="bg-blue-500 w-12 h-12 rounded-2xl mx-auto mb-1 flex items-center justify-center text-white">📧</div>
+                                        <span class="text-xs text-gray-600">Mail</span>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="bg-green-500 w-12 h-12 rounded-2xl mx-auto mb-1 flex items-center justify-center text-white">💬</div>
+                                        <span class="text-xs text-gray-600">Messages</span>
+                                    </div>
+                                </div>
+                                <div class="border-t pt-3">
+                                    <button onclick="nextIOSStep()" class="w-full text-left py-3 flex items-center gap-3 hover:bg-gray-50 rounded-lg px-2">
+                                        <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-xl">➕</div>
+                                        <div>
+                                            <div class="font-semibold">Ajouter à l'écran d'accueil</div>
+                                            <div class="text-xs text-gray-500">Installer l'application</div>
+                                        </div>
+                                    </button>
+                                    <div class="ios-tap" style="left: 20px; top: 64%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Étape 3: Confirmation -->
+                    <div id="iosStep3" class="ios-step">
+                        <div class="flex-1 bg-black bg-opacity-50 flex items-end">
+                            <div class="bg-white rounded-t-3xl w-full p-6">
+                                <div class="text-center mb-6">
+                                    <div class="w-20 h-20 bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-4xl shadow-lg">🛍️</div>
+                                    <div class="text-xl font-semibold mb-1">OdaMarket</div>
+                                    <div class="text-sm text-gray-500">odamarket.com</div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button class="flex-1 bg-gray-100 py-3 rounded-full font-semibold text-gray-700">Annuler</button>
+                                    <button onclick="nextIOSStep()" class="flex-1 bg-blue-500 text-white py-3 rounded-full font-semibold">Ajouter</button>
+                                    <div class="ios-tap" style="right: 70px; bottom: 35px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Étape 4: Succès -->
+                    <div id="iosStep4" class="ios-step">
+                        <div class="h-full bg-gradient-to-br from-purple-500 to-indigo-600 p-6 pt-16">
+                            <div class="grid grid-cols-4 gap-4 mb-8">
+                                <div class="text-center">
+                                    <div class="w-14 h-14 bg-blue-500 rounded-2xl mx-auto mb-2 flex items-center justify-center text-2xl shadow-lg">📱</div>
+                                    <div class="text-white text-xs">Téléphone</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-14 h-14 bg-blue-600 rounded-2xl mx-auto mb-2 flex items-center justify-center text-2xl shadow-lg">🧭</div>
+                                    <div class="text-white text-xs">Safari</div>
+                                </div>
+                                <div class="text-center pulse-icon">
+                                    <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl mx-auto mb-2 flex items-center justify-center text-2xl shadow-lg">🛍️</div>
+                                    <div class="text-white text-xs font-bold">OdaMarket</div>
+                                    <div class="ios-tap" style="left: 50%; top: 15px; transform: translateX(-50%);"></div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-12">
+                                <div class="bg-white bg-opacity-20 backdrop-blur rounded-2xl p-6 inline-block">
+                                    <div class="text-5xl mb-3">🎉</div>
+                                    <p class="text-white font-bold text-lg">Installation réussie !</p>
+                                    <p class="text-white text-sm mt-2 opacity-90">L'app est maintenant accessible<br>depuis votre écran d'accueil</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="ios-nav">
+                <button onclick="prevIOSStep()" id="iosPrevBtn" style="cursor: pointer;">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <div class="ios-dot active" data-step="1"></div>
+                <div class="ios-dot" data-step="2"></div>
+                <div class="ios-dot" data-step="3"></div>
+                <div class="ios-dot" data-step="4"></div>
+                <button onclick="nextIOSStep()" id="iosNextBtn" style="cursor: pointer;">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bouton flottant d'aide -->
+    <div class="ios-help-btn" onclick="openIOSGuide()" title="Comment installer sur iPhone ?">
+        ℹ️
+    </div>
+
+    <script>
+    // ===========================================
+    // GUIDE D'INSTALLATION iOS - JAVASCRIPT
+    // ===========================================
+    let currentIOSStep = 1;
+    const totalIOSSteps = 4;
+
+    function openIOSGuide() {
+        document.getElementById('iosInstallModal').classList.add('active');
+        showIOSStep(1);
+        
+        // Auto-play
+        setTimeout(() => {
+            if (document.getElementById('iosInstallModal').classList.contains('active')) {
+                startIOSAutoPlay();
+            }
+        }, 2000);
+    }
+
+    function closeIOSGuide() {
+        document.getElementById('iosInstallModal').classList.remove('active');
+        if (typeof iosAutoPlayInterval !== 'undefined') {
+            clearInterval(iosAutoPlayInterval);
+        }
+    }
+
+    function showIOSStep(stepNum) {
+        // Cache toutes les étapes
+        for (let i = 1; i <= totalIOSSteps; i++) {
+            const step = document.getElementById('iosStep' + i);
+            const dot = document.querySelector(`.ios-dot[data-step="${i}"]`);
+            
+            if (step) step.classList.remove('active');
+            if (dot) dot.classList.remove('active');
+        }
+        
+        // Affiche l'étape demandée
+        const activeStep = document.getElementById('iosStep' + stepNum);
+        const activeDot = document.querySelector(`.ios-dot[data-step="${stepNum}"]`);
+        
+        if (activeStep) activeStep.classList.add('active');
+        if (activeDot) activeDot.classList.add('active');
+        
+        currentIOSStep = stepNum;
+        updateIOSNavButtons();
+    }
+
+    function nextIOSStep() {
+        if (currentIOSStep < totalIOSSteps) {
+            showIOSStep(currentIOSStep + 1);
+        } else {
+            showIOSStep(1); // Retour au début
+        }
+    }
+
+    function prevIOSStep() {
+        if (currentIOSStep > 1) {
+            showIOSStep(currentIOSStep - 1);
+        }
+    }
+
+    function updateIOSNavButtons() {
+        const prevBtn = document.getElementById('iosPrevBtn');
+        const nextBtn = document.getElementById('iosNextBtn');
+        
+        if (prevBtn) prevBtn.style.opacity = currentIOSStep === 1 ? '0.3' : '1';
+        if (nextBtn) nextBtn.style.opacity = currentIOSStep === totalIOSSteps ? '0.3' : '1';
+    }
+
+    // Auto-play
+    let iosAutoPlayInterval;
+    function startIOSAutoPlay() {
+        iosAutoPlayInterval = setInterval(() => {
+            nextIOSStep();
+        }, 4000);
+    }
+
+    // Clic sur les dots
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.ios-dot').forEach((dot, index) => {
+            dot.addEventListener('click', () => showIOSStep(index + 1));
+        });
+    });
+
+    // Support clavier
+    document.addEventListener('keydown', (e) => {
+        if (!document.getElementById('iosInstallModal').classList.contains('active')) return;
+        
+        if (e.key === 'ArrowLeft') prevIOSStep();
+        if (e.key === 'ArrowRight') nextIOSStep();
+        if (e.key === 'Escape') closeIOSGuide();
+    });
+
+    // Détecter si l'utilisateur est sur iOS
+    function isIOS() {
+        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    }
+
+    // Afficher automatiquement le guide sur iOS si pas encore installé
+    window.addEventListener('load', () => {
+        if (isIOS() && !window.matchMedia('(display-mode: standalone)').matches) {
+            // Afficher après 5 secondes si c'est la première visite
+            const hasSeenGuide = localStorage.getItem('iosGuideShown');
+            if (!hasSeenGuide) {
+                setTimeout(() => {
+                    openIOSGuide();
+                    localStorage.setItem('iosGuideShown', 'true');
+                }, 5000);
+            }
+        }
+    });
+    // Gestion du modal d'installation PWA
+function showPWAModal() {
+    const modal = document.getElementById('pwaModal');
+    modal.classList.add('active');
+    localStorage.setItem('pwaModalShown', 'true');
+}
+
+function closePWAModal() {
+    const modal = document.getElementById('pwaModal');
+    modal.classList.remove('active');
+}
+
+// Fermer en cliquant sur l'overlay
+document.getElementById('pwaModal')?.addEventListener('click', (e) => {
+    if (e.target.classList.contains('pwa-modal-overlay')) {
+        closePWAModal();
+    }
+});
+
+// Vérifier si l'utilisateur est sur iOS et si le modal n'a pas déjà été montré
+function checkPWAInstall() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
+    const modalShown = localStorage.getItem('pwaModalShown');
+    
+    // Afficher le modal si :
+    // - L'utilisateur est sur iOS
+    // - L'app n'est pas déjà installée
+    // - Le modal n'a jamais été montré
+    if (isIOS && !isInStandaloneMode && !modalShown) {
+        // Attendre 3 secondes après le chargement de la page
+        setTimeout(() => {
+            showPWAModal();
+        }, 3000);
+    }
+}
+
+// Lancer la vérification au chargement de la page
+window.addEventListener('load', checkPWAInstall);
+
+// BONUS: Bouton pour rouvrir le modal manuellement
+// Vous pouvez l'ajouter n'importe où dans votre page
+function createPWAButton() {
+    const button = document.createElement('button');
+    button.innerHTML = '📱 Installer l\'app';
+    button.style.cssText = `
+        position: fixed;
+        bottom: 100px;
+        right: 20px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        z-index: 1000;
+        font-size: 0.9rem;
+    `;
+    button.onclick = showPWAModal;
+    
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
+    
+    // Afficher le bouton seulement si sur iOS et pas installé
+    if (isIOS && !isInStandaloneMode) {
+        document.body.appendChild(button);
+    }
+}
+
+// Créer le bouton après le chargement
+window.addEventListener('load', createPWAButton);
     </script>
 </body>
 </html>
