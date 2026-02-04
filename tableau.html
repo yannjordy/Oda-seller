@@ -244,6 +244,13 @@
                             <option value="Animaux">Animaux</option>
                             <option value="Luxe">Luxe</option>
                             <option value="Bureau">Bureau</option>
+                            <option value="peruque">peruque</option>
+                            <option value="chaussures">chaussure</option>
+                            <option value="telephone">telephone</option>
+                            <option value="outils">outils</option>
+                            <option value="enfants">enfants</option>
+                            <option value="bijoux">bijoux</option>
+                            <option value="autre">autre</option>
                         </select>
                     </div>
                 </section>
@@ -1257,28 +1264,7 @@ function mettreAJourApercu() {
     }
 }
 
-// ==================== 🆕 UPLOAD CLOUDINARY SÉCURISÉ ====================
 
-/**
- * 🔐 Upload d'une image vers Cloudinary avec signature sécurisée
- * @param {File} file - Fichier image à uploader
- * @param {string} nomFichier - Nom identifiant pour le fichier
- * @returns {Promise<string>} URL publique de l'image sur Cloudinary
- */
-// ==================== 🆕 UPLOAD CLOUDINARY SÉCURISÉ (VERSION CORRIGÉE) ====================
-
-/**
- * 🔐 Upload d'une image vers Cloudinary avec signature sécurisée
- * @param {File} file - Fichier image à uploader
- * @param {string} nomFichier - Nom identifiant pour le fichier
- * @returns {Promise<string>} URL publique de l'image sur Cloudinary
- */
-/**
- * 📤 Upload d'une image vers Cloudinary (Unsigned Upload)
- * @param {File} file - Fichier image à uploader
- * @param {string} nomFichier - Nom identifiant pour le fichier
- * @returns {Promise<string>} URL publique de l'image sur Cloudinary
- */
  async function uploaderImageVersCloudinary(file, nomFichier) {
     try {
         console.log(`📤 Upload de ${nomFichier} vers Cloudinary...`);
@@ -1851,5 +1837,4 @@ console.log('%c💾 Vérification du quota avant chaque publication', 'color: #2
 console.log('%c☁️ Upload sécurisé via Cloudinary avec compression automatique', 'color: #FF6B35; font-weight: bold;');
 
 </script>
-    <script src="/notifications.js"></script>
 </html>
