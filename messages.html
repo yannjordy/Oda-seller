@@ -8,9 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="oda.jpg">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="messages-styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="message-notifications.js"></script> 
 </head>
 <style>
     /* ==================== VARIABLES ==================== */
@@ -45,7 +42,8 @@ body {
     color: var(--text-primary);
     line-height: 1.6;
     overflow: hidden;
-    height: 100vh;
+    height: 100%;
+    height: 100dvh; /* dvh = dynamic viewport height, tient compte du clavier */
     width: 100vw;
 }
 
@@ -434,6 +432,7 @@ body.menu-open {
     margin: 0;
     padding: 0;
     height: calc(100vh - var(--header-height));
+    height: calc(100dvh - var(--header-height)); /* fallback + dvh */
     overflow: hidden;
 }
 
@@ -918,6 +917,25 @@ body.menu-open {
         min-height: 80px;
     }
 }
+@media (max-width: 768px) {
+    .conversation-panel.mobile-show {
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: calc(100dvh - var(--header-height));
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-input-container {
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        background: white;
+    }
+}
 </style>
 <body>
     <!-- Arrière-plan avec motifs de produits ODA -->
@@ -1047,21 +1065,20 @@ body.menu-open {
         </main>
     </div>
 <script src="message-notifications.js"></script>
- <script type="module">
- 
+<script type="module">
 // ==================== CONFIGURATION SUPABASE ====================
-const SUPABASE_URL     = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
+const SUPABASE_URL      = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2ticWJxeGN3emNybG11dnpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MTk1MzMsImV4cCI6MjA3NjA5NTUzM30.AMzAUwtjFt7Rvof5r2enMyYIYToc1wNWWEjvZqK_YXM';
 
-// ✅ FIX : window.supabase (pas de type="module", pas de createClient destructuré)
+// ✅ FIX : window.supabase depuis le CDN (pas de type="module" → scope global)
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ==================== VARIABLES GLOBALES ====================
-let conversations      = new Map();
-let conversationActive = null;
-let pollingInterval    = null;
-let currentUser        = null;
-let notificationChecker = null; // ✅ FIX : déclaration unique (plus de doublon)
+let conversations       = new Map();
+let conversationActive  = null;
+let pollingInterval     = null;
+let currentUser         = null;
+let notificationChecker = null;
 
 // ==================== EMOJI POOL ====================
 const EMOJI_POOL = {
@@ -1073,7 +1090,7 @@ const EMOJI_POOL = {
     sports:     ['⚽','🏀','🏈','⚾','🎾','🏐','🏓','🏸','🥊','🎱','🏊','🚴','⛷️','🏄','🤸']
 };
 
-// ✅ OPT : tableau aplati calculé une seule fois en cache
+// Tableau aplati calculé une seule fois
 const TOUS_LES_EMOJIS = Object.values(EMOJI_POOL).flat();
 
 const COULEURS_AVATAR = [
@@ -1100,7 +1117,6 @@ const COULEURS_AVATAR = [
 ];
 
 // ==================== UTILITAIRES AVATAR EMOJI ====================
-
 function stringToHash(str) {
     if (!str) return 0;
     let hash = 0;
@@ -1111,23 +1127,13 @@ function stringToHash(str) {
     return Math.abs(hash);
 }
 
-function getEmojiPourClient(clientName) {
-    return TOUS_LES_EMOJIS[stringToHash(clientName) % TOUS_LES_EMOJIS.length];
-}
-
-function getCouleurPourClient(clientName) {
-    return COULEURS_AVATAR[stringToHash(clientName) % COULEURS_AVATAR.length];
-}
-
+function getEmojiPourClient(clientName)  { return TOUS_LES_EMOJIS[stringToHash(clientName) % TOUS_LES_EMOJIS.length]; }
+function getCouleurPourClient(clientName){ return COULEURS_AVATAR[stringToHash(clientName)  % COULEURS_AVATAR.length]; }
 function genererAvatarClient(clientName) {
-    return {
-        emoji:   getEmojiPourClient(clientName),
-        couleur: getCouleurPourClient(clientName)
-    };
+    return { emoji: getEmojiPourClient(clientName), couleur: getCouleurPourClient(clientName) };
 }
 
 // ==================== STYLES CSS INJECTÉS ====================
-
 function ajouterStylesProduitsMessages() {
     if (document.getElementById('products-messages-styles')) return;
     const style = document.createElement('style');
@@ -1135,16 +1141,16 @@ function ajouterStylesProduitsMessages() {
     style.textContent = `
         /* ---- Carte produit ---- */
         .message-product-card {
-            max-width: 280px; background: white; border-radius: 16px;
-            overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,.1);
-            margin-bottom: 8px; animation: fadeIn .4s ease;
-            border: 2px solid rgba(0,122,255,.1);
-            transition: transform .2s ease, box-shadow .2s ease;
+            max-width:280px; background:white; border-radius:16px;
+            overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,.1);
+            margin-bottom:8px; animation:fadeIn .4s ease;
+            border:2px solid rgba(0,122,255,.1);
+            transition:transform .2s ease, box-shadow .2s ease;
         }
-        .message-product-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.15); }
-        .message-product-card.sent  { border-color: rgba(0,122,255,.3); }
+        .message-product-card:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,.15); }
+        .message-product-card.sent  { border-color:rgba(0,122,255,.3); }
         .product-card-image { width:100%; height:180px; object-fit:cover; display:block; }
-        .product-card-info  { padding: 12px; }
+        .product-card-info  { padding:12px; }
         .product-card-name  { font-weight:600; font-size:.95rem; color:var(--text-primary); margin-bottom:8px; line-height:1.3; }
         .product-card-price { font-weight:700; font-size:1.1rem; color:var(--primary-color); margin-bottom:6px; }
         .product-card-stock { font-size:.8rem; color:var(--text-secondary); display:flex; align-items:center; gap:4px; }
@@ -1163,10 +1169,10 @@ function ajouterStylesProduitsMessages() {
         /* ---- Bulles ---- */
         .message-bubble {
             max-width:70%; padding:12px 16px; border-radius:16px;
-            word-wrap:break-word; animation: messageSlideIn .3s ease;
+            word-wrap:break-word; animation:messageSlideIn .3s ease;
         }
         .message-bubble.sent {
-            background: linear-gradient(135deg,#007AFF,#5AC8FA);
+            background:linear-gradient(135deg,#007AFF,#5AC8FA);
             color:white; border-bottom-right-radius:4px;
         }
         .message-bubble.received {
@@ -1246,6 +1252,9 @@ function ajouterStylesProduitsMessages() {
             cursor:pointer; font-size:.9rem; color:var(--primary-color);
             font-family:'Poppins',sans-serif; font-weight:500;
         }
+        @media (max-width:768px) {
+            .mobile-back-btn { display:flex; align-items:center; gap:6px; }
+        }
 
         /* ---- Animations ---- */
         @keyframes fadeIn         { from{opacity:0;transform:translateY(10px)}  to{opacity:1;transform:translateY(0)} }
@@ -1254,7 +1263,7 @@ function ajouterStylesProduitsMessages() {
         @keyframes slideLeft      { from{transform:translateX(400px);opacity:0} to{transform:translateX(0);opacity:1} }
         @keyframes fadeOut        { to{opacity:0;transform:translateY(-10px)} }
 
-        .message-item { animation: fadeInConv .35s ease; }
+        .message-item { animation:fadeInConv .35s ease; }
         .message-item.active {
             background:linear-gradient(135deg,rgba(0,122,255,.08),rgba(90,200,250,.08));
             border-left:4px solid #007AFF;
@@ -1265,23 +1274,20 @@ function ajouterStylesProduitsMessages() {
             font-size:.72rem; font-weight:600; padding:3px 8px; border-radius:12px;
             min-width:20px; text-align:center; box-shadow:0 2px 6px rgba(255,59,48,.3); margin-left:6px;
         }
-
-        /* ---- Notification toast ---- */
         @keyframes slideInRight { from{transform:translateX(400px);opacity:0} to{transform:translateX(0);opacity:1} }
     `;
     document.head.appendChild(style);
 }
 
 // ==================== INITIALISATION ====================
-// ✅ FIX PRINCIPAL : robuste contre le DOMContentLoaded déjà passé
-//    (problème causé par type="module" qui diffère l'exécution)
+// ✅ FIX : robuste contre le DOMContentLoaded déjà passé
 async function init() {
     console.log('💬 Page Messages initialisée !');
 
     ajouterStylesProduitsMessages();
     await verifierAuthentification();
 
-    if (!currentUser) return; // Stopper si non connecté
+    if (!currentUser) return;
 
     initialiserMenuHamburger();
     await verifierConnexion();
@@ -1290,9 +1296,16 @@ async function init() {
     initialiserRecherche();
     initialiserFiltres();
     initialiserTextareaAutoResize();
+    initialiserGestionClavierMobile(); // ✅ FIX CLAVIER MOBILE
 
-    notificationChecker = await initMessageNotifications(supabase, currentUser);
-    if (notificationChecker) console.log('🔔 Système de notifications activé');
+    // ✅ FIX : initMessageNotifications vient de message-notifications.js (script global)
+    //         On vérifie qu'elle est disponible avant de l'appeler
+    if (typeof initMessageNotifications === 'function') {
+        notificationChecker = await initMessageNotifications(supabase, currentUser);
+        if (notificationChecker) console.log('🔔 Système de notifications activé');
+    } else {
+        console.warn('⚠️ initMessageNotifications non disponible');
+    }
 
     demarrerPolling();
     console.log('✅ Page messages prête !');
@@ -1315,7 +1328,7 @@ async function verifierAuthentification() {
             console.warn('⚠️ Aucune session active');
             afficherNotification('⚠️ Veuillez vous connecter', 'warning');
             setTimeout(() => { window.location.href = 'index.html'; }, 2000);
-            return; // currentUser reste null → init() s'arrête via le guard
+            return;
         }
 
         currentUser = session.user;
@@ -1352,10 +1365,10 @@ async function verifierConnexion() {
 
 // ==================== MENU HAMBURGER ====================
 function initialiserMenuHamburger() {
-    const hamburgerBtn    = document.getElementById('hamburgerBtn');
-    const hamburgerMenu   = document.getElementById('hamburgerMenu');
+    const hamburgerBtn     = document.getElementById('hamburgerBtn');
+    const hamburgerMenu    = document.getElementById('hamburgerMenu');
     const hamburgerOverlay = document.getElementById('hamburgerOverlay');
-    const closeMenuBtn    = document.getElementById('closeMenu');
+    const closeMenuBtn     = document.getElementById('closeMenu');
 
     if (!hamburgerBtn || !hamburgerMenu || !hamburgerOverlay) {
         console.error('❌ Éléments du menu manquants');
@@ -1417,7 +1430,6 @@ async function chargerConversations() {
 
         if (error) throw error;
 
-        // ✅ OPT : reconstruire la Map proprement à chaque appel
         conversations.clear();
 
         if (!data || data.length === 0) {
@@ -1452,13 +1464,13 @@ function afficherConversationsVides() {
             <p style="font-size:.9rem;line-height:1.6">Les messages de vos clients apparaîtront ici.</p>
         </div>`;
 
-    const el = document.getElementById('unreadCount');
+    const el    = document.getElementById('unreadCount');
     const badge = document.getElementById('unreadBadge');
-    if (el) el.textContent = '0';
+    if (el)    el.textContent = '0';
     if (badge) badge.style.display = 'none';
 }
 
-// ==================== LISTE CONVERSATIONS AVEC EMOJIS ====================
+// ==================== LISTE CONVERSATIONS ====================
 function afficherListeConversations(filtre = 'all', recherche = '') {
     const container = document.getElementById('messagesListContent');
     if (!container) { console.error('❌ Container introuvable'); return; }
@@ -1469,10 +1481,10 @@ function afficherListeConversations(filtre = 'all', recherche = '') {
         const contientProduit = !!(dernierMsg.product_data && Object.keys(dernierMsg.product_data).length);
         return {
             client, messages,
-            dernierMessage:   dernierMsg.message || (contientProduit ? '📦 Produit partagé' : ''),
-            date:             dernierMsg.created_at,
-            nonLu:            nonLus > 0,
-            countNonLus:      nonLus,
+            dernierMessage:  dernierMsg.message || (contientProduit ? '📦 Produit partagé' : ''),
+            date:            dernierMsg.created_at,
+            nonLu:           nonLus > 0,
+            countNonLus:     nonLus,
             contientProduit
         };
     });
@@ -1487,7 +1499,6 @@ function afficherListeConversations(filtre = 'all', recherche = '') {
     }
     liste.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    // Mise à jour badge non-lus
     const totalNonLus = liste.reduce((s, c) => s + c.countNonLus, 0);
     const unreadEl    = document.getElementById('unreadCount');
     const badge       = document.getElementById('unreadBadge');
@@ -1503,7 +1514,6 @@ function afficherListeConversations(filtre = 'all', recherche = '') {
         return;
     }
 
-    // ✅ OPT + EMOJIS : construction HTML en une passe avec emoji+couleur par client
     container.innerHTML = liste.map(conv => {
         const { emoji, couleur } = genererAvatarClient(conv.client);
         const isActive = conversationActive === conv.client;
@@ -1528,7 +1538,6 @@ function afficherListeConversations(filtre = 'all', recherche = '') {
             </div>`;
     }).join('');
 
-    // ✅ OPT : délégation d'événements (1 seul listener au lieu de N)
     attacherEventListenersConversations();
 }
 
@@ -1577,7 +1586,7 @@ function creerCarteProduit(productData, sender) {
     return card;
 }
 
-// ==================== OUVRIR CONVERSATION AVEC EMOJI ====================
+// ==================== OUVRIR CONVERSATION ====================
 async function ouvrirConversation(clientName) {
     if (!clientName) { console.error('❌ Nom du client manquant'); return; }
 
@@ -1624,16 +1633,15 @@ async function ouvrirConversation(clientName) {
                 </div>
             </div>`;
 
+        // ✅ FIX : afficherMessagesAvecProduits dans le try
         afficherMessagesAvecProduits(messages);
         attacherEventListenersConversation(clientName);
 
-        // ✅ OPT : requestAnimationFrame pour scroll fluide
         requestAnimationFrame(() => {
             const chat = document.getElementById('chatMessages');
             if (chat) chat.scrollTop = chat.scrollHeight;
         });
 
-        // Rafraîchir la liste (état actif mis à jour)
         afficherListeConversations(
             document.querySelector('.filter-btn.active')?.dataset.filter || 'all',
             document.getElementById('searchMessages')?.value || ''
@@ -1652,7 +1660,6 @@ function afficherMessagesAvecProduits(messages) {
     const chatMessages = document.getElementById('chatMessages');
     if (!chatMessages) return;
 
-    // ✅ OPT : DocumentFragment pour un seul reflow DOM
     const fragment   = document.createDocumentFragment();
     let dateActuelle = null;
 
@@ -1672,15 +1679,13 @@ function afficherMessagesAvecProduits(messages) {
         }
 
         const group = document.createElement('div');
-        group.className = `message-group ${msg.sender === 'admin' ? 'sent' : 'received'}`;
+        group.className   = `message-group ${msg.sender === 'admin' ? 'sent' : 'received'}`;
         group.style.animation = `fadeIn .4s ease ${index * 0.03}s backwards`;
 
-        // Carte produit
         if (msg.product_data && Object.keys(msg.product_data).length > 0) {
             group.appendChild(creerCarteProduit(msg.product_data, msg.sender));
         }
 
-        // Bulle texte
         if (msg.message?.trim()) {
             const bubble = document.createElement('div');
             bubble.className = `message-bubble ${msg.sender === 'admin' ? 'sent' : 'received'}`;
@@ -1738,8 +1743,8 @@ function attacherEventListenersConversation(clientName) {
 // ==================== MARQUER COMME LU ====================
 async function marquerCommeLu(clientName) {
     try {
-        const msgs       = conversations.get(clientName) || [];
-        const nonLus     = msgs.filter(m => m.sender === 'client' && !m.read);
+        const msgs   = conversations.get(clientName) || [];
+        const nonLus = msgs.filter(m => m.sender === 'client' && !m.read);
         if (nonLus.length === 0) return;
 
         const { error } = await supabase
@@ -1773,7 +1778,10 @@ async function envoyerReponse(clientName) {
     try {
         const { data, error } = await supabase
             .from('conversations')
-            .insert({ user_id: currentUser.id, client_name: clientName, sender: 'admin', message: texte, read: true })
+            .insert({
+                user_id: currentUser.id, client_name: clientName,
+                sender: 'admin', message: texte, read: true
+            })
             .select().single();
 
         if (error) throw error;
@@ -1832,7 +1840,7 @@ async function supprimerConversation(clientName) {
 
 // ==================== POLLING TEMPS RÉEL ====================
 function demarrerPolling() {
-    if (pollingInterval) clearInterval(pollingInterval); // ✅ sécurité anti-doublon
+    if (pollingInterval) clearInterval(pollingInterval);
 
     pollingInterval = setInterval(async () => {
         await chargerConversations();
@@ -1891,6 +1899,59 @@ window.addEventListener('resize', () => {
     if (window.innerWidth > 768) retourListeMobile();
 });
 
+// ==================== CORRECTIF CLAVIER VIRTUEL MOBILE ====================
+// ✅ Résout le problème de la zone de saisie cachée sous le clavier iOS/Android
+function initialiserGestionClavierMobile() {
+    // Méthode 1 : visualViewport API (Chrome 61+, Safari 13+)
+    if (window.visualViewport) {
+        const headerH = parseInt(
+            getComputedStyle(document.documentElement).getPropertyValue('--header-height')
+        ) || 70;
+
+        const onViewportChange = () => {
+            const panel = document.getElementById('conversationPanel');
+            if (!panel || !panel.classList.contains('mobile-show')) return;
+
+            const vp        = window.visualViewport;
+            const keyboardH = Math.max(0, window.innerHeight - vp.height - vp.offsetTop);
+
+            panel.style.bottom = keyboardH + 'px';
+            panel.style.height = (vp.height - headerH) + 'px';
+
+            requestAnimationFrame(() => {
+                const chat = document.getElementById('chatMessages');
+                if (chat) chat.scrollTop = chat.scrollHeight;
+            });
+        };
+
+        const resetPanel = () => {
+            const panel = document.getElementById('conversationPanel');
+            if (!panel) return;
+            panel.style.bottom = '';
+            panel.style.height = '';
+        };
+
+        window.visualViewport.addEventListener('resize', onViewportChange);
+        window.visualViewport.addEventListener('scroll', onViewportChange);
+
+        document.addEventListener('focusout', (e) => {
+            if (e.target.id === 'messageInput') setTimeout(resetPanel, 300);
+        });
+
+        console.log('✅ visualViewport clavier mobile actif');
+    }
+
+    // Méthode 2 : fallback scroll sur focus (iOS 12 / anciens Android)
+    document.addEventListener('focusin', (e) => {
+        if (e.target.id !== 'messageInput') return;
+        setTimeout(() => {
+            e.target.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            const chat = document.getElementById('chatMessages');
+            if (chat) chat.scrollTop = chat.scrollHeight;
+        }, 400);
+    });
+}
+
 // ==================== NETTOYAGE ====================
 window.addEventListener('beforeunload', () => {
     if (pollingInterval) clearInterval(pollingInterval);
@@ -1921,7 +1982,9 @@ function formatPrice(price) {
 
 function escapeHtml(text) {
     if (!text) return '';
-    return String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[c]);
+    return String(text).replace(/[&<>"']/g, c =>
+        ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[c]
+    );
 }
 
 // ==================== NOTIFICATION TOAST ====================
@@ -1931,13 +1994,13 @@ function afficherNotification(message, type = 'info') {
         conteneur = document.createElement('div');
         conteneur.id = 'notification-container';
         Object.assign(conteneur.style, {
-            position:'fixed', top:'100px', right:'20px',
-            zIndex:'10000', display:'flex', flexDirection:'column', gap:'12px'
+            position: 'fixed', top: '100px', right: '20px',
+            zIndex: '10000', display: 'flex', flexDirection: 'column', gap: '12px'
         });
         document.body.appendChild(conteneur);
     }
 
-    const couleurs = { success:'#4CAF50', error:'#f44336', info:'#007AFF', warning:'#FF9800' };
+    const couleurs = { success: '#4CAF50', error: '#f44336', info: '#007AFF', warning: '#FF9800' };
 
     const notif = document.createElement('div');
     notif.style.cssText = `
@@ -1957,22 +2020,23 @@ function afficherNotification(message, type = 'info') {
 }
 
 // ==================== HOOKS NOTIFICATIONS EXTERNES ====================
-function handleNotificationToggle(checkbox) {
+// ✅ Ces fonctions doivent être exposées globalement car appelées depuis message-notifications.js
+window.handleNotificationToggle = function(checkbox) {
     const sys = window.messageNotificationSystem;
     if (!sys) return;
     sys.isEnabled = checkbox.checked;
     sys.saveUserPreferences();
-}
+};
 
-function handleSoundToggle(checkbox) {
+window.handleSoundToggle = function(checkbox) {
     const sys = window.messageNotificationSystem;
     if (!sys) return;
     sys.soundEnabled = checkbox.checked;
     sys.saveUserPreferences();
     if (checkbox.checked) sys.sounds?.newMessage?.play();
-}
+};
 
-async function handleDesktopToggle(checkbox) {
+window.handleDesktopToggle = async function(checkbox) {
     const sys = window.messageNotificationSystem;
     if (!sys) return;
     if (checkbox.checked) {
@@ -1981,7 +2045,7 @@ async function handleDesktopToggle(checkbox) {
     }
     sys.desktopNotificationEnabled = checkbox.checked;
     sys.saveUserPreferences();
-}
+};
 
 // ==================== DEBUG ====================
 window.debugMessages = {
@@ -1989,7 +2053,7 @@ window.debugMessages = {
     activeConversation: () => conversationActive,
     currentUser:        () => currentUser,
     recharger:          () => chargerConversations(),
-    ouvrir:   client   => ouvrirConversation(client),
+    ouvrir:  client    => ouvrirConversation(client),
     forceReload:        () => window.location.reload(),
     testEmoji: nom => {
         const av = genererAvatarClient(nom);
@@ -2007,6 +2071,6 @@ window.debugMessages = {
 console.log('%c💬 Messages ODA — Emojis + Produits', 'color:#007AFF;font-size:18px;font-weight:bold');
 console.log(`%c🎨 ${TOUS_LES_EMOJIS.length} emojis | ${COULEURS_AVATAR.length} couleurs`, 'color:#E91E63');
 console.log('%c✅ Prêt', 'color:#4CAF50;font-weight:bold');
- </script>
+</script>
 </body>
 </html>
