@@ -315,6 +315,7 @@
         </aside>
     </div>
     <script src="dashboard-notifications.js"></script>
+    <script src="modal-setup-boutique.js"></script>
 <script type="module">
     // ==================== CONFIGURATION SUPABASE ====================
 const SUPABASE_URL = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
@@ -1650,6 +1651,8 @@ async function gererSoumissionFormulaire(e) {
             await sauvegarderProduit(produitData);
             afficherNotification('✅ Produit créé avec succès !', 'success');
         }
+        // 2. Dans soumettreFormulaire(), après le succès
+           document.dispatchEvent(new CustomEvent('product:created'));
         
         // 🔄 Recharger et réinitialiser
         await chargerProduits();
@@ -1673,6 +1676,7 @@ async function gererSoumissionFormulaire(e) {
         btnSubmit.textContent = textOriginal;
     }
 }
+
 // ==================== UTILITAIRES ====================
 function reinitialiserFormulaire() {
     document.getElementById('productForm').reset();
