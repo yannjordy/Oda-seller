@@ -1,5 +1,3 @@
-
-
 (function () {
   const SUPABASE_URL = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2ticWJxeGN3emNybG11dnpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MTk1MzMsImV4cCI6MjA3NjA5NTUzM30.AMzAUwtjFt7Rvof5r2enMyYIYToc1wNWWEjvZqK_YXM';
@@ -582,6 +580,84 @@
     }
     #sm-modal .sm-success-sub strong { color: rgba(255,255,255,.8); }
 
+    /* ── Boutons d'action succès ── */
+    #sm-modal .sm-success-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 340px;
+      margin: 0 auto;
+    }
+    #sm-modal .sm-btn-view-shop {
+      background: linear-gradient(135deg, #34C759 0%, #2aab4a 100%);
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(52,199,89,.4);
+      width: 100%;
+      justify-content: center;
+      font-size: .9rem;
+      padding: 14px 22px;
+    }
+    #sm-modal .sm-btn-view-shop:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(52,199,89,.5);
+    }
+    #sm-modal .sm-success-actions-row {
+      display: flex;
+      gap: 10px;
+    }
+    #sm-modal .sm-btn-share {
+      flex: 1;
+      background: rgba(0,122,255,.18);
+      border: 1.5px solid rgba(0,122,255,.45);
+      color: #60B4FF;
+      justify-content: center;
+      font-size: .82rem;
+      padding: 12px 16px;
+    }
+    #sm-modal .sm-btn-share:hover {
+      background: rgba(0,122,255,.28);
+      border-color: rgba(0,122,255,.7);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+    #sm-modal .sm-btn-param {
+      flex: 1;
+      background: rgba(255,255,255,.07);
+      border: 1.5px solid rgba(255,255,255,.14);
+      color: rgba(255,255,255,.55);
+      justify-content: center;
+      font-size: .82rem;
+      padding: 12px 16px;
+    }
+    #sm-modal .sm-btn-param:hover {
+      background: rgba(255,255,255,.12);
+      border-color: rgba(255,255,255,.28);
+      color: rgba(255,255,255,.85);
+      transform: translateY(-2px);
+    }
+
+    /* Toast de copie lien */
+    #sm-copy-toast {
+      position: fixed;
+      bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: rgba(30,30,50,.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(52,199,89,.35);
+      color: #34C759;
+      font-family: 'Sora','Poppins',sans-serif;
+      font-size: .8rem; font-weight: 600;
+      padding: 10px 20px; border-radius: 20px;
+      z-index: 999999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s, transform .3s;
+      white-space: nowrap;
+    }
+    #sm-copy-toast.sm-toast-show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
     /* ── Keyframes ── */
     @keyframes smOverlayIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes smModalIn {
@@ -630,6 +706,7 @@
       #sm-modal .sm-upload-row { flex-direction: column; }
       #sm-modal .sm-color-row { flex-direction: column; }
       #sm-modal .sm-slide-title { font-size: 1.25rem; }
+      #sm-modal .sm-success-actions-row { flex-direction: column; }
     }
   `;
 
@@ -929,11 +1006,28 @@
             <h2 class="sm-success-title">Boutique prête !</h2>
             <p class="sm-success-sub">
               Votre boutique est configurée et <strong>prête à recevoir des clients</strong>.
-              Vous pouvez affiner tous ces réglages à tout moment depuis <strong>Paramètres</strong>.
+              Partagez-la, visitez-la ou affinez vos réglages depuis <strong>Paramètres</strong>.
             </p>
-            <button class="sm-btn sm-btn-success" id="sm-goto-param" style="margin:0 auto;">
-              ⚙️ Aller aux paramètres
-            </button>
+
+            <!-- ── Boutons d'action ── -->
+            <div class="sm-success-actions">
+
+              <!-- Bouton principal : Voir ma boutique -->
+              <button class="sm-btn sm-btn-view-shop" id="sm-goto-boutique">
+                🏪 Voir ma boutique
+              </button>
+
+              <!-- Ligne secondaire : Partager + Paramètres -->
+              <div class="sm-success-actions-row">
+                <button class="sm-btn sm-btn-share" id="sm-btn-share-link">
+                  🔗 Partager le lien
+                </button>
+                <button class="sm-btn sm-btn-param" id="sm-goto-param">
+                  ⚙️ Paramètres
+                </button>
+              </div>
+
+            </div>
           </div>
 
         </div><!-- /sm-body -->
@@ -949,6 +1043,9 @@
 
       </div>
     </div>
+
+    <!-- Toast copie lien -->
+    <div id="sm-copy-toast">✅ Lien copié dans le presse-papier !</div>
     `;
   }
 
@@ -1177,6 +1274,20 @@
     });
   }
 
+  /* ── Obtenir l'URL de la boutique ── */
+  function getShopUrl(cfg) {
+    const slug = cfg?.slug || cfg?.identifiant?.slug || currentUser?.id || '';
+    return `https://oda.shop/${slug}`;
+  }
+
+  /* ── Toast copie ── */
+  function showCopyToast() {
+    const toast = document.getElementById('sm-copy-toast');
+    if (!toast) return;
+    toast.classList.add('sm-toast-show');
+    setTimeout(() => toast.classList.remove('sm-toast-show'), 2800);
+  }
+
   /* ── Bind tous les events ── */
   function bindEvents() {
     // Paiement — click sur les cards
@@ -1235,7 +1346,7 @@
         btn.disabled = true;
         btn.innerHTML = '<span>⏳ Enregistrement…</span>';
         try {
-          await save();
+          const savedCfg = await save();
           // Succès
           document.getElementById('sm-slide-' + step)?.classList.remove('sm-visible');
           document.getElementById('sm-success').classList.add('sm-visible');
@@ -1246,6 +1357,10 @@
             d.classList.remove('active'); d.classList.add('done');
           });
           document.getElementById('sm-step-counter').textContent = 'Configuration terminée ✓';
+
+          // Stocker la config sauvegardée pour les boutons d'action
+          existingCfg = savedCfg;
+
         } catch {
           btn.disabled = false;
           btn.innerHTML = '✓ Terminer';
@@ -1266,7 +1381,43 @@
       }
     });
 
-    // Succès → paramètres
+    // ── Bouton : Voir ma boutique ──
+    document.getElementById('sm-goto-boutique')?.addEventListener('click', () => {
+      const url = getShopUrl(existingCfg);
+      removeModal();
+      window.open(url, '_blank');
+    });
+
+    // ── Bouton : Partager le lien ──
+    document.getElementById('sm-btn-share-link')?.addEventListener('click', async () => {
+      const url = getShopUrl(existingCfg);
+      const shopName = existingCfg?.general?.nom || 'Ma boutique';
+
+      // Tentative Web Share API (mobile natif)
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: shopName,
+            text: `Découvrez ma boutique : ${shopName}`,
+            url: url
+          });
+          return;
+        } catch (e) {
+          // L'utilisateur a annulé ou erreur → fallback copie
+        }
+      }
+
+      // Fallback : copie dans le presse-papier
+      try {
+        await navigator.clipboard.writeText(url);
+        showCopyToast();
+      } catch (e) {
+        // Dernier recours : prompt
+        window.prompt('Copiez ce lien :', url);
+      }
+    });
+
+    // ── Bouton : Paramètres ──
     document.getElementById('sm-goto-param')?.addEventListener('click', () => {
       removeModal();
       window.location.href = 'parametres.html';
@@ -1276,6 +1427,7 @@
   /* ── Nettoyage ── */
   function removeModal() {
     document.getElementById('sm-overlay')?.remove();
+    document.getElementById('sm-copy-toast')?.remove();
     document.getElementById('sm-styles')?.remove();
   }
 
@@ -1317,7 +1469,10 @@
     // HTML
     const div = document.createElement('div');
     div.innerHTML = buildHTML();
-    document.body.appendChild(div.firstElementChild);
+    // Injecter tous les enfants (overlay + toast)
+    while (div.firstElementChild) {
+      document.body.appendChild(div.firstElementChild);
+    }
 
     prefill(cfg);
     bindEvents();
@@ -1351,17 +1506,4 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
-
-  /*
-  ══════════════════════════════════════════════════════════
-  INTÉGRATION dans tableau.html
-  ══════════════════════════════════════════════════════════
-
-  1) Avant </body> :
-     <script src="modal-setup-boutique.js"></script>
-
-  2) Dans soumettreFormulaire(), après le succès :
-     document.dispatchEvent(new CustomEvent('product:created'));
-
-  ══════════════════════════════════════════════════════════ */
 })();
