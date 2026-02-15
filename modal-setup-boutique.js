@@ -228,1056 +228,900 @@
     #sm-modal .sm-textarea,
     #sm-modal .sm-select {
       width: 100%;
-      padding: 13px 16px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1.5px solid rgba(255,255,255,.12);
       border-radius: 14px;
-      font-family: 'Sora', 'Poppins', sans-serif;
-      font-size: .875rem; color: #fff;
-      outline: none;
-      transition: border-color .2s, background .2s, box-shadow .2s;
+      color: #fff;
+      font-size: .88rem; font-weight: 500;
+      padding: 13px 16px;
+      transition: all .3s ease;
+      font-family: 'Sora', -apple-system, sans-serif;
     }
     #sm-modal .sm-input::placeholder,
     #sm-modal .sm-textarea::placeholder {
-      color: rgba(255,255,255,.28);
+      color: rgba(255,255,255,.25);
     }
-    #sm-modal .sm-select option { background: #1c1c2e; color: #fff; }
     #sm-modal .sm-input:focus,
     #sm-modal .sm-textarea:focus,
     #sm-modal .sm-select:focus {
-      border-color: rgba(0,122,255,.7);
-      background: rgba(0,122,255,.08);
-      box-shadow: 0 0 0 3px rgba(0,122,255,.18);
+      outline: none;
+      background: rgba(255,255,255,.12);
+      border-color: rgba(0,122,255,.8);
+      box-shadow: 0 0 0 3px rgba(0,122,255,.15);
     }
-    #sm-modal .sm-textarea { resize: vertical; min-height: 78px; }
-    #sm-modal .sm-hint {
-      display: block; margin-top: 5px;
-      font-size: .72rem; color: rgba(255,255,255,.32);
-    }
-    #sm-modal .sm-grid2 {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-    }
-    @media (max-width: 450px) {
-      #sm-modal .sm-grid2 { grid-template-columns: 1fr; }
+    #sm-modal .sm-textarea {
+      min-height: 90px; resize: vertical;
     }
 
-    /* ── Cards de paiement (obligatoire) ── */
-    #sm-modal .sm-pay-warning {
-      display: flex; align-items: center; gap: 8px;
-      padding: 10px 14px;
-      background: rgba(255,149,0,.12);
-      border: 1px solid rgba(255,149,0,.25);
-      border-radius: 12px;
-      font-size: .75rem; color: #FFAA38; font-weight: 600;
-      margin-bottom: 16px;
+    /* ── Chips délai ── */
+    #sm-modal .sm-chip-group {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+    }
+    #sm-modal .sm-chip {
+      padding: 9px 16px;
+      background: rgba(255,255,255,.08);
+      border: 1.5px solid rgba(255,255,255,.12);
+      border-radius: 20px;
+      font-size: .77rem; font-weight: 600;
+      color: rgba(255,255,255,.5);
+      cursor: pointer;
+      transition: all .3s ease;
+      letter-spacing: .02em;
+    }
+    #sm-modal .sm-chip:hover {
+      background: rgba(255,255,255,.12);
+      border-color: rgba(255,255,255,.2);
+      color: rgba(255,255,255,.7);
+    }
+    #sm-modal .sm-chip.sm-chip-on {
+      background: linear-gradient(135deg,#007AFF,#5856D6);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(0,122,255,.3);
     }
 
+    /* ── Cartes paiement ── */
     #sm-modal .sm-pay-cards {
-      display: flex; flex-direction: column; gap: 10px;
-      margin-bottom: 14px;
+      display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px;
     }
     #sm-modal .sm-pay-card {
-      display: flex; align-items: center; gap: 14px;
-      padding: 15px 16px;
-      background: rgba(255,255,255,.06);
-      border: 1.5px solid rgba(255,255,255,.1);
-      border-radius: 16px;
-      cursor: pointer;
-      transition: all .25s cubic-bezier(.4,0,.2,1);
-      user-select: none;
       position: relative;
-      overflow: hidden;
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 2px solid rgba(255,255,255,.12);
+      border-radius: 16px;
+      padding: 16px 18px;
+      cursor: pointer;
+      transition: all .3s cubic-bezier(.4,0,.2,1);
     }
-    #sm-modal .sm-pay-card::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(0,122,255,.08) 0%, transparent 60%);
-      opacity: 0; transition: opacity .3s;
-    }
-    #sm-modal .sm-pay-card:hover::before { opacity: 1; }
     #sm-modal .sm-pay-card:hover {
-      border-color: rgba(0,122,255,.35);
-      transform: translateY(-1px);
-      box-shadow: 0 8px 24px rgba(0,0,0,.2);
+      background: rgba(255,255,255,.12);
+      border-color: rgba(255,255,255,.22);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 22px rgba(0,0,0,.2);
     }
-    #sm-modal .sm-pay-card.sm-selected {
-      border-color: rgba(0,122,255,.7);
-      background: rgba(0,122,255,.12);
-      box-shadow: 0 0 0 3px rgba(0,122,255,.15), 0 8px 24px rgba(0,0,0,.2);
+    #sm-modal .sm-pay-card.sm-pay-on {
+      background: linear-gradient(135deg, rgba(0,122,255,.15), rgba(88,86,214,.15));
+      border-color: #007AFF;
+      box-shadow: 0 6px 20px rgba(0,122,255,.25);
     }
-    #sm-modal .sm-pay-card.sm-selected::before { opacity: 1; }
-
-    /* Icône de paiement */
+    #sm-modal .sm-pay-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+    }
     #sm-modal .sm-pay-icon {
       width: 44px; height: 44px; border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem; flex-shrink: 0;
-      transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+      font-size: 1.3rem;
+      background: rgba(255,255,255,.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,.1), 0 0 0 1px rgba(255,255,255,.15) inset;
     }
-    #sm-modal .sm-pay-card.sm-selected .sm-pay-icon { transform: scale(1.1); }
-    .sm-pi-mobile { background: linear-gradient(135deg,#FF9500,#FF6B00); box-shadow: 0 4px 12px rgba(255,149,0,.35); }
-    .sm-pi-cash   { background: linear-gradient(135deg,#34C759,#2aab4a); box-shadow: 0 4px 12px rgba(52,199,89,.35); }
-    .sm-pi-carte  { background: linear-gradient(135deg,#007AFF,#5856D6); box-shadow: 0 4px 12px rgba(0,122,255,.35); }
-
-    #sm-modal .sm-pay-info { flex: 1; }
-    #sm-modal .sm-pay-name {
-      font-size: .9rem; font-weight: 700; color: #fff; margin-bottom: 2px;
+    #sm-modal .sm-pay-title {
+      font-size: 1rem; font-weight: 700; color: #fff;
     }
     #sm-modal .sm-pay-desc {
-      font-size: .72rem; color: rgba(255,255,255,.45);
+      font-size: .75rem; color: rgba(255,255,255,.45); line-height: 1.45;
+      padding-left: 56px;
     }
-
-    /* Checkbox visuel */
     #sm-modal .sm-pay-check {
-      width: 22px; height: 22px; border-radius: 50%;
+      position: absolute;
+      top: 18px; right: 18px;
+      width: 24px; height: 24px;
       border: 2px solid rgba(255,255,255,.2);
+      border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; font-size: .75rem; font-weight: 700;
-      transition: all .25s cubic-bezier(.34,1.56,.64,1);
-      color: transparent;
+      transition: all .3s ease;
     }
-    #sm-modal .sm-pay-card.sm-selected .sm-pay-check {
-      background: linear-gradient(135deg,#007AFF,#5856D6);
-      border-color: transparent; color: #fff;
+    #sm-modal .sm-pay-on .sm-pay-check {
+      background: #007AFF;
+      border-color: #007AFF;
       box-shadow: 0 0 10px rgba(0,122,255,.5);
     }
-
-    /* ── Sous-champs Mobile Money ── */
-    #sm-modal .sm-sub-panel {
-      margin-top: 10px; padding: 16px;
-      background: rgba(255,255,255,.04);
-      border: 1px dashed rgba(255,149,0,.25);
-      border-radius: 14px;
-      display: none;
-      animation: smExpandIn .3s ease;
+    #sm-modal .sm-pay-check::after {
+      content: '';
+      width: 6px; height: 10px;
+      border: solid #fff;
+      border-width: 0 2.5px 2.5px 0;
+      transform: rotate(45deg) scale(0);
+      transition: transform .2s cubic-bezier(.34,1.56,.64,1);
     }
-    #sm-modal .sm-sub-panel.sm-open { display: block; }
-
-    #sm-modal .sm-sub-title {
-      font-size: .72rem; font-weight: 700; letter-spacing: .06em;
-      text-transform: uppercase; margin-bottom: 10px;
-    }
-    #sm-modal .sm-sub-mtn { color: #FF9500; }
-    #sm-modal .sm-sub-orange { color: #FF6B00; margin-top: 12px; }
-
-    /* ── Devise ── */
-    #sm-modal .sm-devise-row {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px 16px;
-      background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: 14px;
-      margin-top: 4px;
-    }
-    #sm-modal .sm-devise-label {
-      font-size: .8rem; font-weight: 600; color: rgba(255,255,255,.6);
-      flex-shrink: 0;
+    #sm-modal .sm-pay-on .sm-pay-check::after {
+      transform: rotate(45deg) scale(1);
     }
 
-    /* ── Livraison ── */
-    #sm-modal .sm-delai-chips {
-      display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
-    }
-    #sm-modal .sm-chip {
-      padding: 7px 14px; border-radius: 20px; cursor: pointer;
-      font-size: .75rem; font-weight: 600;
-      background: rgba(255,255,255,.07);
-      border: 1.5px solid rgba(255,255,255,.12);
-      color: rgba(255,255,255,.6);
-      transition: all .2s;
-      user-select: none;
-    }
-    #sm-modal .sm-chip:hover {
-      border-color: rgba(0,122,255,.4); color: rgba(255,255,255,.85);
-    }
-    #sm-modal .sm-chip.sm-chip-on {
-      background: rgba(0,122,255,.15);
-      border-color: rgba(0,122,255,.6);
-      color: #fff;
-      box-shadow: 0 0 10px rgba(0,122,255,.2);
-    }
-
-    /* ── Apparence — couleurs ── */
-    #sm-modal .sm-color-row {
-      display: flex; gap: 10px;
-    }
-    #sm-modal .sm-color-card {
-      flex: 1; display: flex; align-items: center; gap: 10px;
-      padding: 12px 14px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: 14px;
-      transition: border-color .2s;
-    }
-    #sm-modal .sm-color-card:hover { border-color: rgba(255,255,255,.25); }
-    #sm-modal .sm-swatch-wrap {
-      width: 34px; height: 34px; border-radius: 10px;
-      cursor: pointer; flex-shrink: 0; position: relative;
-      border: 2px solid rgba(255,255,255,.15);
-      overflow: hidden;
-      transition: transform .2s;
-    }
-    #sm-modal .sm-swatch-wrap:hover { transform: scale(1.08); }
-    #sm-modal .sm-swatch-fill {
-      position: absolute; inset: 0; pointer-events: none;
-      border-radius: 8px;
-    }
-    #sm-modal .sm-swatch-wrap input[type="color"] {
-      position: absolute; inset: -4px; width: 150%; height: 150%;
-      opacity: 0; cursor: pointer;
-    }
-    #sm-modal .sm-color-info .sm-cc-name {
-      font-size: .75rem; font-weight: 600; color: rgba(255,255,255,.7);
-    }
-    #sm-modal .sm-color-info .sm-cc-val {
-      font-size: .68rem; color: rgba(255,255,255,.35); font-family: monospace;
-    }
-
-    /* ── Upload cards ── */
-    #sm-modal .sm-upload-row { display: flex; gap: 10px; }
+    /* ── Upload images ── */
     #sm-modal .sm-upload-card {
-      flex: 1; display: flex; flex-direction: column; align-items: center;
-      justify-content: center; gap: 6px;
-      padding: 18px 10px;
-      background: rgba(255,255,255,.05);
-      border: 1.5px dashed rgba(255,255,255,.14);
-      border-radius: 16px; cursor: pointer;
-      transition: all .25s; position: relative; overflow: hidden;
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(10px);
+      border: 2px dashed rgba(255,255,255,.15);
+      border-radius: 16px; padding: 16px;
+      margin-bottom: 16px; cursor: pointer;
+      transition: all .3s ease;
     }
     #sm-modal .sm-upload-card:hover {
-      border-color: rgba(0,122,255,.4); background: rgba(0,122,255,.06);
-      transform: translateY(-2px);
+      background: rgba(255,255,255,.12);
+      border-color: rgba(255,255,255,.25);
     }
-    #sm-modal .sm-upload-card input[type="file"] {
-      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    #sm-modal .sm-upload-card.sm-has-img {
+      border-style: solid;
+      background: rgba(255,255,255,.1);
     }
-    #sm-modal .sm-upload-card .sm-uc-icon { font-size: 1.6rem; }
-    #sm-modal .sm-upload-card .sm-uc-name {
-      font-size: .78rem; font-weight: 700; color: rgba(255,255,255,.7);
+    #sm-modal .sm-file-input { display: none; }
+    #sm-modal .sm-upload-area {
+      display: flex; align-items: center; gap: 14px;
     }
-    #sm-modal .sm-upload-card .sm-uc-hint {
-      font-size: .68rem; color: rgba(255,255,255,.3); text-align: center;
+    #sm-modal .sm-upload-icon {
+      width: 52px; height: 52px; border-radius: 12px;
+      background: rgba(255,255,255,.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08), 0 0 0 1px rgba(255,255,255,.15) inset;
+      flex-shrink: 0;
     }
-    #sm-modal .sm-upload-card .sm-uc-preview {
-      width: 54px; height: 54px; border-radius: 10px; object-fit: contain;
-      display: none;
+    #sm-modal .sm-upload-info h5 {
+      font-size: .88rem; font-weight: 600; color: #fff;
+      margin-bottom: 3px;
     }
-    #sm-modal .sm-upload-card.sm-has-img .sm-uc-icon { display: none; }
-    #sm-modal .sm-upload-card.sm-has-img .sm-uc-preview { display: block; }
+    #sm-modal .sm-upload-info p {
+      font-size: .73rem; color: rgba(255,255,255,.4);
+      line-height: 1.4;
+    }
+    #sm-modal .sm-preview-img {
+      width: 52px; height: 52px; border-radius: 12px;
+      object-fit: cover;
+      box-shadow: 0 4px 12px rgba(0,0,0,.2);
+    }
 
-    /* ── Slug ── */
-    #sm-modal .sm-slug-row {
-      display: flex; align-items: stretch; gap: 0;
-      border-radius: 14px; overflow: hidden;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
+    /* ── Couleurs ── */
+    #sm-modal .sm-color-field {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
     }
-    #sm-modal .sm-slug-prefix {
-      padding: 13px 12px; font-size: .75rem;
-      color: rgba(255,255,255,.35); border-right: 1px solid rgba(255,255,255,.08);
-      white-space: nowrap; display: flex; align-items: center;
-      background: rgba(255,255,255,.04);
+    #sm-modal .sm-color-swatch {
+      width: 52px; height: 52px; border-radius: 12px;
+      cursor: pointer; flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(0,0,0,.2), 0 0 0 3px rgba(255,255,255,.1) inset;
+      transition: all .3s ease;
+      position: relative;
     }
-    #sm-modal .sm-slug-input {
-      flex: 1; padding: 13px 14px; background: transparent;
-      border: none; outline: none; color: #fff;
-      font-family: 'Sora', monospace; font-size: .875rem;
+    #sm-modal .sm-color-swatch:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 20px rgba(0,0,0,.3), 0 0 0 3px rgba(255,255,255,.2) inset;
     }
-    #sm-modal .sm-slug-input::placeholder { color: rgba(255,255,255,.2); }
+    #sm-modal .sm-color-input { opacity: 0; position: absolute; pointer-events: none; }
+    #sm-modal .sm-color-value {
+      font-size: .78rem; font-weight: 600; letter-spacing: .05em;
+      color: rgba(255,255,255,.6);
+      text-transform: uppercase;
+      background: rgba(255,255,255,.08);
+      padding: 8px 14px; border-radius: 10px;
+      border: 1.5px solid rgba(255,255,255,.12);
+    }
+
+    /* ── Slug et message d'erreur ── */
     #sm-modal .sm-slug-status {
-      font-size: .72rem; margin-top: 5px; display: none;
+      display: none; margin-top: 6px; font-size: .75rem;
+      font-weight: 500; color: #FF9500;
+      padding: 6px 12px; border-radius: 8px;
+      background: rgba(255,149,0,.1);
     }
-
-    /* ── Erreur inline ── */
-    #sm-modal .sm-error-box {
-      display: none;
-      padding: 10px 14px; border-radius: 12px; margin-bottom: 14px;
+    #sm-modal .sm-error-msg {
       background: rgba(255,59,48,.12);
-      border: 1px solid rgba(255,59,48,.25);
-      font-size: .78rem; color: #FF6B63; font-weight: 600;
+      border: 1.5px solid rgba(255,59,48,.3);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: .8rem; color: #FF6B63; font-weight: 500;
+      margin-bottom: 14px;
+      display: none;
       animation: smShake .4s ease;
     }
 
-    /* ── Footer ── */
+    /* ── Footer boutons ── */
     #sm-modal .sm-footer {
-      padding: 16px 28px 22px;
-      display: flex; align-items: center; justify-content: space-between;
-      flex-shrink: 0; gap: 10px;
-      border-top: 1px solid rgba(255,255,255,.07);
-      background: rgba(0,0,0,.1);
+      flex-shrink: 0;
+      padding: 20px 28px 26px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,.08));
+      display: flex; gap: 10px;
     }
     #sm-modal .sm-btn {
-      padding: 12px 22px; border-radius: 14px; border: none;
-      cursor: pointer; font-family: 'Sora','Poppins',sans-serif;
-      font-size: .84rem; font-weight: 700;
-      transition: all .2s; display: flex; align-items: center; gap: 6px;
-      letter-spacing: .01em;
+      flex: 1;
+      padding: 13px 20px;
+      border-radius: 14px;
+      font-size: .88rem; font-weight: 600;
+      cursor: pointer; border: none;
+      transition: all .3s cubic-bezier(.4,0,.2,1);
+      font-family: 'Sora', -apple-system, sans-serif;
+      letter-spacing: .02em;
     }
-    #sm-modal .sm-btn:disabled { opacity: .45; cursor: not-allowed; }
-    #sm-modal .sm-btn-ghost {
-      background: rgba(255,255,255,.07);
-      color: rgba(255,255,255,.45);
-      border: 1px solid rgba(255,255,255,.1);
+    #sm-modal .sm-btn:disabled {
+      opacity: .4; cursor: not-allowed;
+      transform: none !important;
     }
-    #sm-modal .sm-btn-ghost:hover:not(:disabled) {
-      background: rgba(255,255,255,.12); color: rgba(255,255,255,.7);
+    #sm-modal .sm-btn-secondary {
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.7);
+      border: 1.5px solid rgba(255,255,255,.12);
+    }
+    #sm-modal .sm-btn-secondary:hover:not(:disabled) {
+      background: rgba(255,255,255,.12);
+      border-color: rgba(255,255,255,.2);
+      transform: translateY(-2px);
     }
     #sm-modal .sm-btn-primary {
       background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
       color: #fff;
       box-shadow: 0 6px 20px rgba(0,122,255,.35);
-      position: relative; overflow: hidden;
+      border: none;
     }
-    #sm-modal .sm-btn-primary::before {
-      content: '';
-      position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
-      transform: skewX(-20deg);
-      transition: left .5s ease;
-    }
-    #sm-modal .sm-btn-primary:hover:not(:disabled)::before { left: 150%; }
     #sm-modal .sm-btn-primary:hover:not(:disabled) {
+      box-shadow: 0 8px 26px rgba(0,122,255,.45);
       transform: translateY(-2px);
-      box-shadow: 0 10px 28px rgba(0,122,255,.45);
     }
-    #sm-modal .sm-btn-success {
-      background: linear-gradient(135deg,#34C759,#2aab4a);
-      color: #fff;
-      box-shadow: 0 6px 20px rgba(52,199,89,.35);
-    }
-    #sm-modal .sm-btn-success:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 28px rgba(52,199,89,.45);
-    }
-    #sm-modal .sm-skip-btn {
-      font-size: .72rem; color: rgba(255,255,255,.3);
-      background: none; border: none; cursor: pointer;
-      font-family: 'Sora','Poppins',sans-serif;
-      text-decoration: underline dotted; transition: color .2s;
-    }
-    #sm-modal .sm-skip-btn:hover { color: rgba(255,255,255,.55); }
 
-    /* ── Écran de succès ── */
-    #sm-modal .sm-success-screen {
-      padding: 36px 28px 28px; text-align: center;
-      display: none;
+    /* ── Écran succès ── */
+    #sm-modal .sm-success {
+      display: none; padding: 30px 0;
     }
-    #sm-modal .sm-success-screen.sm-visible { display: block; }
-    #sm-modal .sm-success-ball {
-      width: 80px; height: 80px; border-radius: 50%;
-      background: linear-gradient(135deg,#34C759,#2aab4a);
+    #sm-modal .sm-success.sm-visible {
+      display: block;
+      animation: smSlideIn .4s ease forwards;
+    }
+    #sm-modal .sm-success-icon {
+      width: 100px; height: 100px; margin: 0 auto 20px;
+      background: linear-gradient(135deg, #34C759, #30D158);
+      border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 2rem; margin: 0 auto 20px;
-      box-shadow: 0 10px 40px rgba(52,199,89,.45), 0 0 0 16px rgba(52,199,89,.08);
-      animation: smSuccessPop .6s cubic-bezier(.34,1.56,.64,1);
+      font-size: 3rem;
+      box-shadow: 0 12px 36px rgba(52,199,89,.4), 0 0 0 6px rgba(52,199,89,.2) inset;
+      animation: smPopIn .6s cubic-bezier(.34,1.56,.64,1) forwards;
     }
     #sm-modal .sm-success-title {
-      font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 10px;
+      font-size: 1.65rem; font-weight: 800; color: #fff;
+      text-align: center; margin-bottom: 10px;
     }
     #sm-modal .sm-success-sub {
-      font-size: .875rem; color: rgba(255,255,255,.5); line-height: 1.65;
-      margin-bottom: 28px; max-width: 340px; margin-left: auto; margin-right: auto;
+      font-size: .9rem; color: rgba(255,255,255,.55);
+      text-align: center; margin-bottom: 28px; line-height: 1.6;
     }
-    #sm-modal .sm-success-sub strong { color: rgba(255,255,255,.8); }
-
-    /* ── Boutons d'action succès ── */
     #sm-modal .sm-success-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-width: 340px;
-      margin: 0 auto;
+      display: flex; flex-direction: column; gap: 10px;
+      padding: 0 28px;
     }
-    #sm-modal .sm-btn-view-shop {
-      background: linear-gradient(135deg, #34C759 0%, #2aab4a 100%);
-      color: #fff;
-      box-shadow: 0 6px 20px rgba(52,199,89,.4);
+    #sm-modal .sm-success-btn {
       width: 100%;
-      justify-content: center;
-      font-size: .9rem;
-      padding: 14px 22px;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-size: .88rem; font-weight: 600;
+      cursor: pointer; border: none;
+      transition: all .3s cubic-bezier(.4,0,.2,1);
+      font-family: 'Sora', -apple-system, sans-serif;
+      letter-spacing: .02em;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
     }
-    #sm-modal .sm-btn-view-shop:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 28px rgba(52,199,89,.5);
-    }
-    #sm-modal .sm-success-actions-row {
-      display: flex;
-      gap: 10px;
-    }
-    #sm-modal .sm-btn-share {
-      flex: 1;
-      background: rgba(0,122,255,.18);
-      border: 1.5px solid rgba(0,122,255,.45);
-      color: #60B4FF;
-      justify-content: center;
-      font-size: .82rem;
-      padding: 12px 16px;
-    }
-    #sm-modal .sm-btn-share:hover {
-      background: rgba(0,122,255,.28);
-      border-color: rgba(0,122,255,.7);
+    #sm-modal .sm-success-btn-primary {
+      background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
       color: #fff;
+      box-shadow: 0 6px 20px rgba(0,122,255,.35);
+    }
+    #sm-modal .sm-success-btn-primary:hover {
+      box-shadow: 0 8px 26px rgba(0,122,255,.45);
       transform: translateY(-2px);
     }
-    #sm-modal .sm-btn-param {
-      flex: 1;
-      background: rgba(255,255,255,.07);
-      border: 1.5px solid rgba(255,255,255,.14);
-      color: rgba(255,255,255,.55);
-      justify-content: center;
-      font-size: .82rem;
-      padding: 12px 16px;
+    #sm-modal .sm-success-btn-secondary {
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.8);
+      border: 1.5px solid rgba(255,255,255,.12);
     }
-    #sm-modal .sm-btn-param:hover {
+    #sm-modal .sm-success-btn-secondary:hover {
       background: rgba(255,255,255,.12);
-      border-color: rgba(255,255,255,.28);
-      color: rgba(255,255,255,.85);
+      border-color: rgba(255,255,255,.2);
+      transform: translateY(-2px);
+    }
+    
+    /* ── Bouton fermer modal ── */
+    #sm-modal .sm-close-modal {
+      margin-top: 12px;
+      background: rgba(255,59,48,.15);
+      color: #FF6B63;
+      border: 1.5px solid rgba(255,59,48,.3);
+    }
+    #sm-modal .sm-close-modal:hover {
+      background: rgba(255,59,48,.25);
+      border-color: rgba(255,59,48,.4);
       transform: translateY(-2px);
     }
 
-    /* Toast de copie lien */
+    /* ── Toast copie ── */
     #sm-copy-toast {
       position: fixed;
-      bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: rgba(30,30,50,.95);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(52,199,89,.35);
-      color: #34C759;
-      font-family: 'Sora','Poppins',sans-serif;
-      font-size: .8rem; font-weight: 600;
-      padding: 10px 20px; border-radius: 20px;
-      z-index: 999999;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .3s, transform .3s;
-      white-space: nowrap;
+      bottom: -100px;
+      left: 50%; transform: translateX(-50%);
+      background: rgba(52,199,89,.95);
+      backdrop-filter: blur(20px);
+      color: #fff;
+      padding: 14px 26px;
+      border-radius: 14px;
+      font-size: .85rem; font-weight: 600;
+      box-shadow: 0 12px 32px rgba(0,0,0,.3);
+      z-index: 100000;
+      transition: bottom .4s cubic-bezier(.34,1.56,.64,1);
+      display: flex; align-items: center; gap: 10px;
     }
-    #sm-copy-toast.sm-toast-show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
+    #sm-copy-toast.sm-toast-show { bottom: 30px; }
 
-    /* ── Keyframes ── */
-    @keyframes smOverlayIn { from { opacity: 0; } to { opacity: 1; } }
+    /* ── Animations ── */
+    @keyframes smOverlayIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
     @keyframes smModalIn {
-      from { opacity: 0; transform: translateY(50px) scale(.93); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
+      from {
+        opacity: 0;
+        transform: scale(.92) translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
     }
     @keyframes smSlideIn {
-      from { opacity: 0; transform: translateX(24px); }
-      to   { opacity: 1; transform: translateX(0); }
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
     @keyframes smSlideOut {
-      from { opacity: 1; transform: translateX(0); }
-      to   { opacity: 0; transform: translateX(-24px); }
-    }
-    @keyframes smExpandIn {
-      from { opacity: 0; transform: translateY(-8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes smProgressShimmer {
-      0%   { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
     }
     @keyframes smPulse {
-      0%,100% { transform: translate(-50%,-50%) scale(1);   opacity: .7; }
-      50%      { transform: translate(-50%,-50%) scale(1.15); opacity: 1; }
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: .15; }
+      50% { transform: translate(-50%, -50%) scale(1.15); opacity: .25; }
     }
     @keyframes smFloat {
-      0%,100% { transform: translate(0,0); }
-      50%      { transform: translate(20px,30px); }
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-30px); }
     }
-    @keyframes smSuccessPop {
-      from { transform: scale(.2); opacity: 0; }
-      to   { transform: scale(1); opacity: 1; }
+    @keyframes smProgressShimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    @keyframes smPopIn {
+      0% { transform: scale(0); }
+      70% { transform: scale(1.1); }
+      100% { transform: scale(1); }
     }
     @keyframes smShake {
-      0%,100% { transform: translateX(0); }
-      20%,60% { transform: translateX(-6px); }
-      40%,80% { transform: translateX(6px); }
-    }
-
-    /* ── Responsive ── */
-    @media (max-width: 520px) {
-      #sm-modal { border-radius: 22px; max-height: 95vh; }
-      #sm-modal .sm-header, #sm-modal .sm-footer { padding-left: 18px; padding-right: 18px; }
-      #sm-modal .sm-body { padding: 0 18px; }
-      #sm-modal .sm-upload-row { flex-direction: column; }
-      #sm-modal .sm-color-row { flex-direction: column; }
-      #sm-modal .sm-slide-title { font-size: 1.25rem; }
-      #sm-modal .sm-success-actions-row { flex-direction: column; }
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
     }
   `;
 
+  let sb = null;
+  let currentUser = null;
+  let existingCfg = null;
+  let step = 0;
+  const TOTAL = 4;
+
   /* ═══════════════════════════════════════════════════════
-     HTML
+     HTML DU MODAL
   ═══════════════════════════════════════════════════════ */
   function buildHTML() {
     return `
-    <div id="sm-overlay">
-      <div id="sm-orb-1"></div>
-      <div id="sm-orb-2"></div>
+      <!-- Overlay + orbes -->
+      <div id="sm-overlay">
+        <div id="sm-orb-1"></div>
+        <div id="sm-orb-2"></div>
 
-      <div id="sm-modal" role="dialog" aria-modal="true">
+        <!-- Modal -->
+        <div id="sm-modal">
+          <!-- Header -->
+          <div class="sm-header">
+            <div class="sm-brand-row">
+              <div class="sm-brand">
+                <div class="sm-logo-badge">🏪</div>
+                <div class="sm-app-name">ODA SETUP</div>
+              </div>
+              <div class="sm-step-info" id="sm-step-counter">Étape 1 / ${TOTAL}</div>
+            </div>
 
-        <!-- HEADER -->
-        <div class="sm-header">
-          <div class="sm-brand-row">
-            <div class="sm-brand">
-              <div class="sm-logo-badge">🏪</div>
-              <span class="sm-app-name">ODA · Setup</span>
+            <div class="sm-progress-track">
+              <div class="sm-progress-fill" id="sm-progress" style="width: 25%;"></div>
             </div>
-            <span class="sm-step-info" id="sm-step-counter">Étape 1 sur 4</span>
-          </div>
 
-          <!-- Indicateurs -->
-          <div class="sm-step-dots" id="sm-step-dots">
-            <div class="sm-dot active" data-step="0">
-              <div class="sm-dot-circle">1</div>
-              <span class="sm-dot-label">Boutique</span>
-            </div>
-            <div class="sm-dot" data-step="1">
-              <div class="sm-dot-circle">2</div>
-              <span class="sm-dot-label">Paiement</span>
-            </div>
-            <div class="sm-dot" data-step="2">
-              <div class="sm-dot-circle">3</div>
-              <span class="sm-dot-label">Livraison</span>
-            </div>
-            <div class="sm-dot" data-step="3">
-              <div class="sm-dot-circle">4</div>
-              <span class="sm-dot-label">Apparence</span>
+            <div class="sm-step-dots" id="sm-step-dots">
+              ${[1,2,3,4].map(i => `
+                <div class="sm-dot ${i === 1 ? 'active' : ''}">
+                  <div class="sm-dot-circle">${i}</div>
+                  <span class="sm-dot-label">${
+                    i === 1 ? 'Infos' : i === 2 ? 'Paiement' : i === 3 ? 'Identité' : 'Livraison'
+                  }</span>
+                </div>
+              `).join('')}
             </div>
           </div>
 
-          <!-- Barre de progression -->
-          <div class="sm-progress-track">
-            <div class="sm-progress-fill" id="sm-progress" style="width:25%"></div>
-          </div>
-        </div>
+          <!-- Body (slides) -->
+          <div class="sm-body">
+            <!-- Slide 1 : Infos générales -->
+            <div class="sm-slide sm-visible" id="sm-slide-0">
+              <div class="sm-error-msg" id="sm-error-0"></div>
+              <h2 class="sm-slide-title">Informations générales</h2>
+              <p class="sm-slide-sub">Les coordonnées essentielles de votre boutique.</p>
 
-        <!-- BODY -->
-        <div class="sm-body" id="sm-body">
-
-          <!-- ═══ SLIDE 0 — Informations boutique ═══ -->
-          <div class="sm-slide sm-visible" id="sm-slide-0">
-            <p class="sm-slide-title">🏪 Votre boutique</p>
-            <p class="sm-slide-sub">Ces informations sont affichées à vos clients sur votre page publique.</p>
-
-            <div class="sm-error-box" id="sm-err-0"></div>
-
-            <div class="sm-field">
-              <label class="sm-label">Nom de la boutique <span class="sm-req">Requis</span></label>
-              <input id="sm-name" class="sm-input" type="text" placeholder="Ex: Boutique Élégance" maxlength="80" autocomplete="off">
-            </div>
-
-            <div class="sm-grid2">
               <div class="sm-field">
-                <label class="sm-label">E-mail <span class="sm-req">Requis</span></label>
-                <input id="sm-email" class="sm-input" type="email" placeholder="contact@maboutique.com" autocomplete="off">
+                <label class="sm-label">
+                  Nom de la boutique
+                  <span class="sm-req">REQUIS</span>
+                </label>
+                <input type="text" class="sm-input" id="sm-nom" placeholder="Ma Boutique Élégante" required />
               </div>
+
               <div class="sm-field">
-                <label class="sm-label">Téléphone <span class="sm-req">Requis</span></label>
-                <input id="sm-phone" class="sm-input" type="tel" placeholder="+237 6XX XXX XXX" autocomplete="off">
-              </div>
-            </div>
-
-            <div class="sm-field">
-              <label class="sm-label">Adresse / Ville <span class="sm-req">Requis</span></label>
-              <input id="sm-address" class="sm-input" type="text" placeholder="Douala, Cameroun" autocomplete="off">
-            </div>
-
-            <div class="sm-field">
-              <label class="sm-label">Description <span class="sm-opt">Facultatif</span></label>
-              <textarea id="sm-desc" class="sm-textarea" placeholder="Présentez votre boutique en quelques phrases..."></textarea>
-            </div>
-          </div>
-
-          <!-- ═══ SLIDE 1 — Paiement (OBLIGATOIRE) ═══ -->
-          <div class="sm-slide" id="sm-slide-1">
-            <p class="sm-slide-title">💳 Modes de paiement</p>
-            <p class="sm-slide-sub">Choisissez comment vos clients règlent leurs commandes.</p>
-
-            <div class="sm-error-box" id="sm-err-1"></div>
-
-            <div class="sm-pay-warning">
-              ⚡ Au moins un mode de paiement est requis pour activer votre boutique.
-            </div>
-
-            <div class="sm-pay-cards">
-
-              <!-- Mobile Money -->
-              <div class="sm-pay-card" id="sm-pc-mobile" data-key="mobile">
-                <div class="sm-pay-icon sm-pi-mobile">📱</div>
-                <div class="sm-pay-info">
-                  <p class="sm-pay-name">Mobile Money</p>
-                  <p class="sm-pay-desc">MTN MoMo &amp; Orange Money</p>
-                </div>
-                <div class="sm-pay-check" id="sm-chk-mobile">✓</div>
+                <label class="sm-label">
+                  Email
+                  <span class="sm-req">REQUIS</span>
+                </label>
+                <input type="email" class="sm-input" id="sm-email" placeholder="contact@maboutique.com" required />
               </div>
 
-              <!-- Sous-panel Mobile Money -->
-              <div class="sm-sub-panel" id="sm-mobile-panel">
-                <!-- MTN -->
-                <p class="sm-sub-title sm-sub-mtn">🟡 MTN MoMo</p>
-                <div class="sm-grid2">
-                  <div class="sm-field" style="margin-bottom:10px;">
-                    <label class="sm-label" style="font-size:.72rem;">Numéro</label>
-                    <input id="sm-mtn-num" class="sm-input" type="tel" placeholder="6XX XXX XXX" style="padding:10px 14px;">
-                  </div>
-                  <div class="sm-field" style="margin-bottom:10px;">
-                    <label class="sm-label" style="font-size:.72rem;">Nom du compte</label>
-                    <input id="sm-mtn-nom" class="sm-input" type="text" placeholder="Jean Dupont" style="padding:10px 14px;">
-                  </div>
-                </div>
-                <!-- Orange -->
-                <p class="sm-sub-title sm-sub-orange">🟠 Orange Money</p>
-                <div class="sm-grid2">
-                  <div class="sm-field" style="margin-bottom:4px;">
-                    <label class="sm-label" style="font-size:.72rem;">Numéro</label>
-                    <input id="sm-orange-num" class="sm-input" type="tel" placeholder="6XX XXX XXX" style="padding:10px 14px;">
-                  </div>
-                  <div class="sm-field" style="margin-bottom:4px;">
-                    <label class="sm-label" style="font-size:.72rem;">Nom du compte</label>
-                    <input id="sm-orange-nom" class="sm-input" type="text" placeholder="Jean Dupont" style="padding:10px 14px;">
-                  </div>
-                </div>
-              </div>
-
-              <!-- Cash -->
-              <div class="sm-pay-card" id="sm-pc-cash" data-key="cash">
-                <div class="sm-pay-icon sm-pi-cash">💵</div>
-                <div class="sm-pay-info">
-                  <p class="sm-pay-name">Paiement à la livraison</p>
-                  <p class="sm-pay-desc">Le client paie en espèces à la réception</p>
-                </div>
-                <div class="sm-pay-check" id="sm-chk-cash">✓</div>
-              </div>
-
-              <!-- Carte -->
-              <div class="sm-pay-card" id="sm-pc-carte" data-key="carte">
-                <div class="sm-pay-icon sm-pi-carte">💳</div>
-                <div class="sm-pay-info">
-                  <p class="sm-pay-name">Carte bancaire</p>
-                  <p class="sm-pay-desc">Visa, Mastercard (configuration avancée)</p>
-                </div>
-                <div class="sm-pay-check" id="sm-chk-carte">✓</div>
-              </div>
-
-            </div><!-- /sm-pay-cards -->
-
-            <!-- Devise -->
-            <div class="sm-devise-row">
-              <span class="sm-devise-label">Devise :</span>
-              <select id="sm-devise" class="sm-select" style="flex:1;padding:9px 12px;border:none;background:transparent;">
-                <option value="FCFA">FCFA — Franc CFA</option>
-                <option value="EUR">EUR — Euro</option>
-                <option value="USD">USD — Dollar US</option>
-                <option value="XAF">XAF — Franc CFA (CEMAC)</option>
-                <option value="GHS">GHS — Cedi Ghanéen</option>
-                <option value="NGN">NGN — Naira Nigérian</option>
-                <option value="KES">KES — Shilling Kenyan</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- ═══ SLIDE 2 — Livraison ═══ -->
-          <div class="sm-slide" id="sm-slide-2">
-            <p class="sm-slide-title">🚚 Livraison</p>
-            <p class="sm-slide-sub">Frais et délais affichés lors du paiement client.</p>
-
-            <div class="sm-error-box" id="sm-err-2"></div>
-
-            <div class="sm-grid2">
               <div class="sm-field">
-                <label class="sm-label">Frais Douala <span class="sm-req">Requis</span></label>
-                <input id="sm-frais-dla" class="sm-input" type="number" min="0" value="1000">
-                <span class="sm-hint">En FCFA</span>
+                <label class="sm-label">
+                  Téléphone
+                  <span class="sm-req">REQUIS</span>
+                </label>
+                <input type="tel" class="sm-input" id="sm-tel" placeholder="+237 6XX XXX XXX" required />
               </div>
+
               <div class="sm-field">
-                <label class="sm-label">Autres villes <span class="sm-req">Requis</span></label>
-                <input id="sm-frais-autres" class="sm-input" type="number" min="0" value="2500">
-                <span class="sm-hint">En FCFA</span>
+                <label class="sm-label">
+                  Adresse complète
+                  <span class="sm-req">REQUIS</span>
+                </label>
+                <textarea class="sm-textarea" id="sm-adresse" placeholder="Ville, quartier, rue…" required></textarea>
+              </div>
+
+              <div class="sm-field">
+                <label class="sm-label">
+                  Description
+                  <span class="sm-opt">OPTIONNEL</span>
+                </label>
+                <textarea class="sm-textarea" id="sm-desc" placeholder="Un texte d'introduction pour votre boutique…"></textarea>
               </div>
             </div>
 
-            <div class="sm-field">
-              <label class="sm-label">Délai de livraison <span class="sm-req">Requis</span></label>
-              <div class="sm-delai-chips" id="sm-delai-chips">
-                <span class="sm-chip" data-val="24h">24h</span>
-                <span class="sm-chip sm-chip-on" data-val="2-5 jours ouvrables">2-5 jours</span>
-                <span class="sm-chip" data-val="1-2 semaines">1-2 semaines</span>
-                <span class="sm-chip" data-val="Sur commande">Sur commande</span>
-              </div>
-              <input id="sm-delai" class="sm-input" type="text" value="2-5 jours ouvrables" placeholder="Ex: 3-7 jours ouvrables">
-            </div>
+            <!-- Slide 2 : Paiements -->
+            <div class="sm-slide" id="sm-slide-1">
+              <div class="sm-error-msg" id="sm-error-1"></div>
+              <h2 class="sm-slide-title">Modes de paiement</h2>
+              <p class="sm-slide-sub">Choisissez au moins un moyen de paiement.</p>
 
-            <div class="sm-field">
-              <label class="sm-label">Livraison gratuite dès <span class="sm-opt">Facultatif</span></label>
-              <input id="sm-gratuit-montant" class="sm-input" type="number" min="0" value="50000" placeholder="0 = désactivé">
-              <span class="sm-hint">Mettez 0 pour désactiver. Au-dessus de ce montant, la livraison est offerte.</span>
-            </div>
-          </div>
-
-          <!-- ═══ SLIDE 3 — Apparence ═══ -->
-          <div class="sm-slide" id="sm-slide-3">
-            <p class="sm-slide-title">🎨 Apparence</p>
-            <p class="sm-slide-sub">L'identité visuelle de votre boutique. Tout est facultatif.</p>
-
-            <!-- Couleurs -->
-            <div class="sm-field">
-              <label class="sm-label">Couleurs <span class="sm-opt">Facultatif</span></label>
-              <div class="sm-color-row">
-                <div class="sm-color-card">
-                  <div class="sm-swatch-wrap" id="sm-sw-primary">
-                    <div class="sm-swatch-fill" id="sm-sf-primary" style="background:#007AFF;"></div>
-                    <input type="color" id="sm-col-primary" value="#007AFF">
+              <div class="sm-pay-cards">
+                <!-- Mobile Money -->
+                <div class="sm-pay-card" id="sm-pc-mobile">
+                  <div class="sm-pay-header">
+                    <div class="sm-pay-icon">📱</div>
+                    <div class="sm-pay-title">Mobile Money</div>
                   </div>
-                  <div class="sm-color-info">
-                    <p class="sm-cc-name">Principale</p>
-                    <p class="sm-cc-val" id="sm-cv-primary">#007AFF</p>
-                  </div>
+                  <div class="sm-pay-desc">MTN / Orange Money</div>
+                  <div class="sm-pay-check"></div>
                 </div>
-                <div class="sm-color-card">
-                  <div class="sm-swatch-wrap" id="sm-sw-secondary">
-                    <div class="sm-swatch-fill" id="sm-sf-secondary" style="background:#1A1A1A;"></div>
-                    <input type="color" id="sm-col-secondary" value="#1A1A1A">
-                  </div>
-                  <div class="sm-color-info">
-                    <p class="sm-cc-name">Secondaire</p>
-                    <p class="sm-cc-val" id="sm-cv-secondary">#1A1A1A</p>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            <!-- Police -->
-            <div class="sm-field">
-              <label class="sm-label">Police <span class="sm-opt">Facultatif</span></label>
-              <select id="sm-police" class="sm-select">
-                <option value="Poppins">Poppins</option>
-                <option value="Inter">Inter</option>
-                <option value="Roboto">Roboto</option>
-                <option value="Montserrat">Montserrat</option>
-                <option value="Open Sans">Open Sans</option>
-                <option value="Lato">Lato</option>
-                <option value="Raleway">Raleway</option>
-                <option value="Playfair Display">Playfair Display</option>
-              </select>
-            </div>
-
-            <!-- Logo & Favicon -->
-            <div class="sm-field">
-              <label class="sm-label">Logo &amp; Favicon <span class="sm-opt">Facultatif</span></label>
-              <div class="sm-upload-row">
-                <div class="sm-upload-card" id="sm-card-logo">
-                  <span class="sm-uc-icon">🖼️</span>
-                  <img class="sm-uc-preview" id="sm-prev-logo" alt="">
-                  <p class="sm-uc-name">Logo</p>
-                  <p class="sm-uc-hint">PNG, JPG · max 2 MB</p>
-                  <input type="file" id="sm-file-logo" accept="image/*">
+                <!-- Paiement à la livraison -->
+                <div class="sm-pay-card" id="sm-pc-cash">
+                  <div class="sm-pay-header">
+                    <div class="sm-pay-icon">💵</div>
+                    <div class="sm-pay-title">Paiement à la livraison</div>
+                  </div>
+                  <div class="sm-pay-desc">Espèces, chèque, virement…</div>
+                  <div class="sm-pay-check"></div>
                 </div>
-                <div class="sm-upload-card" id="sm-card-favicon">
-                  <span class="sm-uc-icon">🔖</span>
-                  <img class="sm-uc-preview" id="sm-prev-favicon" alt="">
-                  <p class="sm-uc-name">Favicon</p>
-                  <p class="sm-uc-hint">PNG · 32×32 px</p>
-                  <input type="file" id="sm-file-favicon" accept="image/*">
+
+                <!-- Carte bancaire -->
+                <div class="sm-pay-card" id="sm-pc-carte">
+                  <div class="sm-pay-header">
+                    <div class="sm-pay-icon">💳</div>
+                    <div class="sm-pay-title">Carte bancaire</div>
+                  </div>
+                  <div class="sm-pay-desc">Via passerelle de paiement</div>
+                  <div class="sm-pay-check"></div>
                 </div>
               </div>
             </div>
 
-            <!-- Identifiant -->
-            <div class="sm-field">
-              <label class="sm-label">Identifiant boutique <span class="sm-opt">Facultatif</span></label>
-              <div class="sm-slug-row">
-                <span class="sm-slug-prefix">oda.shop/</span>
-                <input id="sm-slug" class="sm-slug-input" type="text" placeholder="ma-boutique" maxlength="50">
+            <!-- Slide 3 : Identité visuelle -->
+            <div class="sm-slide" id="sm-slide-2">
+              <div class="sm-error-msg" id="sm-error-2"></div>
+              <h2 class="sm-slide-title">Identité visuelle</h2>
+              <p class="sm-slide-sub">Personnalisez l'apparence de votre boutique.</p>
+
+              <!-- Identifiant unique (slug) -->
+              <div class="sm-field">
+                <label class="sm-label">
+                  Identifiant unique (slug)
+                  <span class="sm-req">REQUIS</span>
+                </label>
+                <input
+                  type="text"
+                  class="sm-input"
+                  id="sm-slug"
+                  placeholder="ma-boutique"
+                  required
+                />
+                <div class="sm-slug-status" id="sm-slug-status"></div>
               </div>
-              <span class="sm-slug-status" id="sm-slug-status"></span>
-              <span class="sm-hint">Lettres minuscules, chiffres et tirets. Laissez vide pour garder l'ID automatique.</span>
+
+              <!-- Logo -->
+              <div class="sm-upload-card" id="sm-card-logo">
+                <input type="file" class="sm-file-input" id="sm-file-logo" accept="image/*" />
+                <div class="sm-upload-area">
+                  <div class="sm-upload-icon" id="sm-prev-logo">🖼️</div>
+                  <div class="sm-upload-info">
+                    <h5>Logo de la boutique</h5>
+                    <p>PNG, JPG · Max 2 Mo · Optionnel</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Favicon -->
+              <div class="sm-upload-card" id="sm-card-favicon">
+                <input type="file" class="sm-file-input" id="sm-file-favicon" accept="image/*" />
+                <div class="sm-upload-area">
+                  <div class="sm-upload-icon" id="sm-prev-favicon">🌟</div>
+                  <div class="sm-upload-info">
+                    <h5>Favicon (icône)</h5>
+                    <p>PNG, ICO · 64×64 · Optionnel</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Couleur primaire -->
+              <div class="sm-field">
+                <label class="sm-label">Couleur primaire</label>
+                <div class="sm-color-field">
+                  <div class="sm-color-swatch" id="sm-sw-primary" style="background: #007AFF;">
+                    <input type="color" class="sm-color-input" id="sm-col-primary" value="#007AFF" />
+                    <div class="sm-color-fill" id="sm-sf-primary" style="width: 100%; height: 100%; border-radius: 12px; background: #007AFF;"></div>
+                  </div>
+                  <div class="sm-color-value" id="sm-cv-primary">#007AFF</div>
+                </div>
+              </div>
+
+              <!-- Couleur secondaire -->
+              <div class="sm-field">
+                <label class="sm-label">Couleur secondaire</label>
+                <div class="sm-color-field">
+                  <div class="sm-color-swatch" id="sm-sw-secondary" style="background: #5856D6;">
+                    <input type="color" class="sm-color-input" id="sm-col-secondary" value="#5856D6" />
+                    <div class="sm-color-fill" id="sm-sf-secondary" style="width: 100%; height: 100%; border-radius: 12px; background: #5856D6;"></div>
+                  </div>
+                  <div class="sm-color-value" id="sm-cv-secondary">#5856D6</div>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <!-- ═══ SUCCÈS ═══ -->
-          <div class="sm-success-screen" id="sm-success">
-            <div class="sm-success-ball">✅</div>
-            <h2 class="sm-success-title">Boutique prête !</h2>
-            <p class="sm-success-sub">
-              Votre boutique est configurée et <strong>prête à recevoir des clients</strong>.
-              Partagez-la, visitez-la ou affinez vos réglages depuis <strong>Paramètres</strong>.
-            </p>
+            <!-- Slide 4 : Livraison -->
+            <div class="sm-slide" id="sm-slide-3">
+              <div class="sm-error-msg" id="sm-error-3"></div>
+              <h2 class="sm-slide-title">Paramètres de livraison</h2>
+              <p class="sm-slide-sub">Définissez vos délais et zones de livraison.</p>
 
-            <!-- ── Boutons d'action ── -->
-            <div class="sm-success-actions">
+              <div class="sm-field">
+                <label class="sm-label">
+                  Délai moyen (en jours)
+                  <span class="sm-opt">OPTIONNEL</span>
+                </label>
+                <input type="number" class="sm-input" id="sm-delai" placeholder="Ex: 2" min="0" />
+                <div class="sm-chip-group" id="sm-delai-chips">
+                  <div class="sm-chip" data-val="1">24h</div>
+                  <div class="sm-chip" data-val="2">2 jours</div>
+                  <div class="sm-chip" data-val="3">3 jours</div>
+                  <div class="sm-chip" data-val="7">1 semaine</div>
+                </div>
+              </div>
 
-              <!-- Bouton principal : Voir ma boutique -->
-              <button class="sm-btn sm-btn-view-shop" id="sm-goto-boutique">
-                🏪 Voir ma boutique
-              </button>
+              <div class="sm-field">
+                <label class="sm-label">
+                  Frais de livraison (Douala)
+                  <span class="sm-opt">OPTIONNEL</span>
+                </label>
+                <input type="number" class="sm-input" id="sm-frais-douala" placeholder="Ex: 1000" min="0" />
+              </div>
 
-              <!-- Ligne secondaire : Partager + Paramètres -->
-              <div class="sm-success-actions-row">
-                <button class="sm-btn sm-btn-share" id="sm-btn-share-link">
-                  🔗 Partager le lien
+              <div class="sm-field">
+                <label class="sm-label">
+                  Frais de livraison (Autres villes)
+                  <span class="sm-opt">OPTIONNEL</span>
+                </label>
+                <input type="number" class="sm-input" id="sm-frais-autres" placeholder="Ex: 2500" min="0" />
+              </div>
+            </div>
+
+            <!-- Écran succès -->
+            <div class="sm-success" id="sm-success">
+              <div class="sm-success-icon">✓</div>
+              <h2 class="sm-success-title">Configuration terminée !</h2>
+              <p class="sm-success-sub">
+                Votre boutique est prête à accueillir vos premiers clients.
+              </p>
+              <div class="sm-success-actions">
+                <button class="sm-success-btn sm-success-btn-primary" id="sm-goto-boutique">
+                  <span>🏪</span>
+                  <span>Voir ma boutique</span>
                 </button>
-                <button class="sm-btn sm-btn-param" id="sm-goto-param">
-                  ⚙️ Paramètres
+                <button class="sm-success-btn sm-success-btn-secondary" id="sm-btn-share-link">
+                  <span>📤</span>
+                  <span>Partager le lien</span>
+                </button>
+                <button class="sm-success-btn sm-success-btn-secondary" id="sm-goto-param">
+                  <span>⚙️</span>
+                  <span>Aller aux paramètres</span>
+                </button>
+                <button class="sm-success-btn sm-close-modal" id="sm-btn-close-modal">
+                  <span>✕</span>
+                  <span>Fermer</span>
                 </button>
               </div>
-
             </div>
           </div>
 
-        </div><!-- /sm-body -->
-
-        <!-- FOOTER -->
-        <div class="sm-footer" id="sm-footer">
-          <button class="sm-skip-btn" id="sm-btn-skip">Configurer plus tard</button>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <button class="sm-btn sm-btn-ghost" id="sm-btn-prev" style="display:none;">← Retour</button>
+          <!-- Footer (boutons) -->
+          <div class="sm-footer" id="sm-footer">
+            <button class="sm-btn sm-btn-secondary" id="sm-btn-prev">← Retour</button>
             <button class="sm-btn sm-btn-primary" id="sm-btn-next">Suivant →</button>
+            <button class="sm-btn sm-btn-secondary" id="sm-btn-skip" style="display: none;">Ignorer</button>
           </div>
         </div>
-
       </div>
-    </div>
 
-    <!-- Toast copie lien -->
-    <div id="sm-copy-toast">✅ Lien copié dans le presse-papier !</div>
+      <!-- Toast de copie -->
+      <div id="sm-copy-toast">
+        ✓ Lien copié !
+      </div>
     `;
   }
 
-  /* ═══════════════════════════════════════════════════════
-     LOGIQUE
-  ═══════════════════════════════════════════════════════ */
-  const TOTAL = 4;
-  let step = 0;
-  let paySelected = new Set(); // modes de paiement sélectionnés
-  let uploads = { logo: null, favicon: null };
-  let currentUser = null;
-  let sb = null;
-  let existingCfg = null;
-
-  /* ── Progression ── */
-  function setProgress(s) {
-    const pct = Math.round(((s + 1) / TOTAL) * 100);
-    const fill = document.getElementById('sm-progress');
-    if (fill) fill.style.width = pct + '%';
-    document.getElementById('sm-step-counter').textContent = `Étape ${s + 1} sur ${TOTAL}`;
-
-    document.querySelectorAll('#sm-step-dots .sm-dot').forEach((dot, i) => {
-      dot.classList.remove('active', 'done');
-      if (i < s) dot.classList.add('done');
-      else if (i === s) dot.classList.add('active');
-    });
-  }
-
-  /* ── Navigation ── */
-  function goTo(newStep) {
-    const current = document.getElementById('sm-slide-' + step);
-    if (current) {
-      current.classList.add('sm-out');
-      setTimeout(() => {
-        current.classList.remove('sm-visible', 'sm-out');
-        step = newStep;
-        const next = document.getElementById('sm-slide-' + step);
-        if (next) next.classList.add('sm-visible');
-        setProgress(step);
-        document.getElementById('sm-btn-prev').style.display = step === 0 ? 'none' : 'inline-flex';
-        document.getElementById('sm-btn-next').innerHTML = step === TOTAL - 1 ? '<span>✓ Terminer</span>' : 'Suivant →';
-        document.getElementById('sm-body').scrollTo({ top: 0, behavior: 'smooth' });
-      }, 250);
-    }
-  }
-
-  /* ── Erreur inline ── */
-  function showErr(slideIdx, msg) {
-    const box = document.getElementById('sm-err-' + slideIdx);
-    if (!box) return;
-    box.textContent = '⚠️ ' + msg;
-    box.style.display = 'block';
-    setTimeout(() => { box.style.display = 'none'; }, 4500);
-  }
-
-  /* ── Validation ── */
-  function validate(s) {
-    const v = id => (document.getElementById(id)?.value || '').trim();
-    if (s === 0) {
-      if (!v('sm-name')) return { ok: false, msg: 'Le nom de la boutique est requis.' };
-      if (!v('sm-email') || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('sm-email')))
-        return { ok: false, msg: 'Un e-mail valide est requis.' };
-      if (!v('sm-phone')) return { ok: false, msg: 'Le numéro de téléphone est requis.' };
-      if (!v('sm-address')) return { ok: false, msg: "L'adresse est requise." };
-    }
-    if (s === 1) {
-      if (paySelected.size === 0)
-        return { ok: false, msg: 'Sélectionnez au moins un mode de paiement.' };
-    }
-    if (s === 2) {
-      if (isNaN(parseInt(v('sm-frais-dla'))) || parseInt(v('sm-frais-dla')) < 0)
-        return { ok: false, msg: 'Les frais de livraison Douala sont invalides.' };
-      if (!v('sm-delai'))
-        return { ok: false, msg: 'Indiquez un délai de livraison.' };
-    }
-    return { ok: true };
-  }
-
-  /* ── Pré-remplissage ── */
+  /* ── Pré-remplir avec config existante ── */
   function prefill(cfg) {
     if (!cfg) return;
-    const set = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
     const g = cfg.general || {};
-    set('sm-name', g.nom); set('sm-email', g.email);
-    set('sm-phone', g.telephone); set('sm-address', g.adresse);
-    set('sm-desc', g.description);
-
     const p = cfg.paiement || {};
-    if ((p.mobile || {}).actif) togglePay('mobile');
-    if ((p.cash || {}).actif)   togglePay('cash');
-    if ((p.carte || {}).actif)  togglePay('carte');
-    set('sm-devise', p.devise || 'FCFA');
-    set('sm-mtn-num',    ((p.mobile || {}).mtn || {}).numero);
-    set('sm-mtn-nom',    ((p.mobile || {}).mtn || {}).nomCompte);
-    set('sm-orange-num', ((p.mobile || {}).orange || {}).numero);
-    set('sm-orange-nom', ((p.mobile || {}).orange || {}).nomCompte);
-
-    const l = cfg.livraison || {};
-    set('sm-frais-dla',        l.fraisDouala || 1000);
-    set('sm-frais-autres',     l.fraisAutres || 2500);
-    set('sm-delai',            l.delai || '2-5 jours ouvrables');
-    set('sm-gratuit-montant',  l.montantMin || 50000);
-
     const a = cfg.apparence || {};
+    const i = cfg.identifiant || {};
+    const l = cfg.livraison || {};
+
+    if (g.nom) document.getElementById('sm-nom').value = g.nom;
+    if (g.email) document.getElementById('sm-email').value = g.email;
+    if (g.telephone) document.getElementById('sm-tel').value = g.telephone;
+    if (g.adresse) document.getElementById('sm-adresse').value = g.adresse;
+    if (g.description) document.getElementById('sm-desc').value = g.description;
+
+    if (p.mobile?.actif) document.getElementById('sm-pc-mobile')?.classList.add('sm-pay-on');
+    if (p.cash?.actif) document.getElementById('sm-pc-cash')?.classList.add('sm-pay-on');
+    if (p.carte?.actif) document.getElementById('sm-pc-carte')?.classList.add('sm-pay-on');
+
+    if (i.slug) document.getElementById('sm-slug').value = i.slug;
+
     if (a.couleurPrimaire) {
-      set('sm-col-primary', a.couleurPrimaire);
-      const sf = document.getElementById('sm-sf-primary');
-      if (sf) sf.style.background = a.couleurPrimaire;
-      const cv = document.getElementById('sm-cv-primary');
-      if (cv) cv.textContent = a.couleurPrimaire;
+      const colP = a.couleurPrimaire;
+      document.getElementById('sm-col-primary').value = colP;
+      document.getElementById('sm-sf-primary').style.background = colP;
+      document.getElementById('sm-cv-primary').textContent = colP;
     }
     if (a.couleurSecondaire) {
-      set('sm-col-secondary', a.couleurSecondaire);
-      const sf = document.getElementById('sm-sf-secondary');
-      if (sf) sf.style.background = a.couleurSecondaire;
-      const cv = document.getElementById('sm-cv-secondary');
-      if (cv) cv.textContent = a.couleurSecondaire;
-    }
-    set('sm-police', a.police);
-    const ident = cfg.identifiant || {};
-    if (ident.slug && !ident.auto) set('sm-slug', ident.slug);
-  }
-
-  /* ── Toggle paiement ── */
-  function togglePay(key) {
-    const card = document.getElementById('sm-pc-' + key);
-    if (!card) return;
-    if (paySelected.has(key)) {
-      paySelected.delete(key);
-      card.classList.remove('sm-selected');
-      if (key === 'mobile') document.getElementById('sm-mobile-panel')?.classList.remove('sm-open');
-    } else {
-      paySelected.add(key);
-      card.classList.add('sm-selected');
-      if (key === 'mobile') document.getElementById('sm-mobile-panel')?.classList.add('sm-open');
-    }
-  }
-
-  /* ── Collecte des données ── */
-  function collectData() {
-    const v = id => (document.getElementById(id)?.value || '').trim();
-    const cfg = { ...(existingCfg || {}) };
-
-    cfg.general = {
-      nom: v('sm-name'), email: v('sm-email'),
-      telephone: v('sm-phone'), adresse: v('sm-address'),
-      description: v('sm-desc')
-    };
-
-    const mobileOn = paySelected.has('mobile');
-    cfg.paiement = {
-      carte: { actif: paySelected.has('carte') },
-      cash:  { actif: paySelected.has('cash') },
-      mobile: {
-        actif: mobileOn,
-        mtn: {
-          actif: mobileOn && v('sm-mtn-num') !== '',
-          numero: v('sm-mtn-num'), nomCompte: v('sm-mtn-nom')
-        },
-        orange: {
-          actif: mobileOn && v('sm-orange-num') !== '',
-          numero: v('sm-orange-num'), nomCompte: v('sm-orange-nom')
-        }
-      },
-      devise: v('sm-devise') || 'FCFA'
-    };
-
-    const montant = parseInt(v('sm-gratuit-montant')) || 0;
-    cfg.livraison = {
-      fraisDouala: parseInt(v('sm-frais-dla')) || 1000,
-      fraisAutres: parseInt(v('sm-frais-autres')) || 2500,
-      delai: v('sm-delai') || '2-5 jours ouvrables',
-      gratuit: montant > 0, montantMin: montant,
-      zonesPersonnalisees: (cfg.livraison || {}).zonesPersonnalisees || []
-    };
-
-    cfg.apparence = {
-      couleurPrimaire:   document.getElementById('sm-col-primary')?.value  || '#007AFF',
-      couleurSecondaire: document.getElementById('sm-col-secondary')?.value || '#1A1A1A',
-      police: v('sm-police') || 'Poppins',
-      logo:    uploads.logo    || (cfg.apparence || {}).logo    || '',
-      favicon: uploads.favicon || (cfg.apparence || {}).favicon || ''
-    };
-
-    const slug = v('sm-slug').toLowerCase().replace(/[^a-z0-9\-]/g, '');
-    if (slug.length >= 4) {
-      cfg.identifiant = { ...(cfg.identifiant || {}), slug, auto: false, disponible: true };
-      cfg.slug = slug;
+      const colS = a.couleurSecondaire;
+      document.getElementById('sm-col-secondary').value = colS;
+      document.getElementById('sm-sf-secondary').style.background = colS;
+      document.getElementById('sm-cv-secondary').textContent = colS;
     }
 
-    return cfg;
+    if (a.logo) showImagePreview('sm-prev-logo', a.logo, 'sm-card-logo');
+    if (a.favicon) showImagePreview('sm-prev-favicon', a.favicon, 'sm-card-favicon');
+
+    if (l.delai) document.getElementById('sm-delai').value = l.delai;
+    if (l.fraisDouala != null) document.getElementById('sm-frais-douala').value = l.fraisDouala;
+    if (l.fraisAutres != null) document.getElementById('sm-frais-autres').value = l.fraisAutres;
   }
 
-  /* ── Sauvegarde ── */
-  async function save() {
-    const cfg = collectData();
-    try {
-      await sb.from('parametres_boutique').upsert(
-        { user_id: currentUser.id, config: cfg, updated_at: new Date().toISOString() },
-        { onConflict: 'user_id' }
-      );
-    } catch (e) { console.warn('⚠️ Supabase save error:', e); }
-    try {
-      localStorage.setItem(`parametres_${currentUser.id}`, JSON.stringify(cfg));
-      localStorage.setItem('parametres_boutique', JSON.stringify(cfg));
-    } catch (e) { /* ignore */ }
-    return cfg;
+  /* ── Afficher preview image ── */
+  function showImagePreview(previewId, base64, cardId) {
+    const prev = document.getElementById(previewId);
+    if (!prev) return;
+    prev.innerHTML = `<img class="sm-preview-img" src="${base64}" alt="Preview" />`;
+    document.getElementById(cardId)?.classList.add('sm-has-img');
   }
 
   /* ── Upload image ── */
   function bindUpload(inputId, previewId, cardId, key) {
-    const input = document.getElementById(inputId);
-    if (!input) return;
-    input.addEventListener('change', e => {
-      const file = e.target.files[0];
+    const fileInput = document.getElementById(inputId);
+    const card = document.getElementById(cardId);
+    if (!fileInput || !card) return;
+
+    card.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', e => {
+      const file = e.target.files?.[0];
       if (!file) return;
-      if (file.size > 2 * 1024 * 1024) { alert('Image trop lourde (max 2 MB).'); return; }
+      if (file.size > 2 * 1024 * 1024) {
+        alert('⚠️ Fichier trop lourd (max 2 Mo).');
+        return;
+      }
       const reader = new FileReader();
-      reader.onload = ev => {
-        uploads[key] = ev.target.result;
-        const prev = document.getElementById(previewId);
-        if (prev) prev.src = ev.target.result;
-        document.getElementById(cardId)?.classList.add('sm-has-img');
+      reader.onload = evt => {
+        const base64 = evt.target.result;
+        showImagePreview(previewId, base64, cardId);
+        // Stocker dans variable temporaire
+        if (key === 'logo') existingCfg = { ...existingCfg, apparence: { ...(existingCfg?.apparence || {}), logo: base64 }};
+        if (key === 'favicon') existingCfg = { ...existingCfg, apparence: { ...(existingCfg?.apparence || {}), favicon: base64 }};
       };
       reader.readAsDataURL(file);
     });
   }
 
-  /* ── Obtenir l'URL de la boutique ── */
+  /* ── Toggle paiement ── */
+  function togglePay(key) {
+    const el = document.getElementById('sm-pc-' + key);
+    if (!el) return;
+    el.classList.toggle('sm-pay-on');
+  }
+
+  /* ── Changer de slide ── */
+  function goTo(newStep) {
+    const curr = document.getElementById('sm-slide-' + step);
+    const next = document.getElementById('sm-slide-' + newStep);
+    if (!curr || !next) return;
+
+    curr.classList.remove('sm-visible');
+    curr.classList.add('sm-out');
+    setTimeout(() => {
+      curr.classList.remove('sm-out');
+      curr.style.display = 'none';
+    }, 250);
+
+    next.style.display = 'block';
+    setTimeout(() => next.classList.add('sm-visible'), 10);
+
+    step = newStep;
+    updateUI();
+  }
+
+  /* ── MAJ UI (progression, dots, boutons) ── */
+  function updateUI() {
+    const percent = ((step + 1) / TOTAL) * 100;
+    document.getElementById('sm-progress').style.width = percent + '%';
+    document.getElementById('sm-step-counter').textContent = `Étape ${step + 1} / ${TOTAL}`;
+
+    const dots = document.querySelectorAll('#sm-step-dots .sm-dot');
+    dots.forEach((d, i) => {
+      d.classList.remove('active', 'done');
+      if (i < step) d.classList.add('done');
+      else if (i === step) d.classList.add('active');
+    });
+
+    const btnPrev = document.getElementById('sm-btn-prev');
+    const btnNext = document.getElementById('sm-btn-next');
+    btnPrev.disabled = step === 0;
+    btnNext.textContent = step < TOTAL - 1 ? 'Suivant →' : '✓ Terminer';
+  }
+
+  /* ── Afficher erreur ── */
+  function showErr(s, msg) {
+    const el = document.getElementById('sm-error-' + s);
+    if (!el) return;
+    el.textContent = msg;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 4000);
+  }
+
+  /* ── Validation ── */
+  function validate(s) {
+    if (s === 0) {
+      const nom = (document.getElementById('sm-nom')?.value || '').trim();
+      const email = (document.getElementById('sm-email')?.value || '').trim();
+      const tel = (document.getElementById('sm-tel')?.value || '').trim();
+      const adr = (document.getElementById('sm-adresse')?.value || '').trim();
+      if (!nom) return { ok: false, msg: '⚠️ Nom de boutique requis.' };
+      if (!email || !/\S+@\S+\.\S+/.test(email)) return { ok: false, msg: '⚠️ Email invalide.' };
+      if (!tel) return { ok: false, msg: '⚠️ Téléphone requis.' };
+      if (!adr) return { ok: false, msg: '⚠️ Adresse requise.' };
+    }
+    if (s === 1) {
+      const mobile = document.getElementById('sm-pc-mobile')?.classList.contains('sm-pay-on');
+      const cash = document.getElementById('sm-pc-cash')?.classList.contains('sm-pay-on');
+      const carte = document.getElementById('sm-pc-carte')?.classList.contains('sm-pay-on');
+      if (!mobile && !cash && !carte) return { ok: false, msg: '⚠️ Sélectionnez au moins un mode de paiement.' };
+    }
+    if (s === 2) {
+      const slug = (document.getElementById('sm-slug')?.value || '').trim();
+      if (!slug) return { ok: false, msg: '⚠️ Identifiant unique requis.' };
+      if (slug.length < 4) return { ok: false, msg: '⚠️ Au moins 4 caractères.' };
+    }
+    return { ok: true };
+  }
+
+  /* ── Sauvegarder config ── */
+  async function save() {
+    const nom = document.getElementById('sm-nom')?.value?.trim() || '';
+    const email = document.getElementById('sm-email')?.value?.trim() || '';
+    const tel = document.getElementById('sm-tel')?.value?.trim() || '';
+    const adr = document.getElementById('sm-adresse')?.value?.trim() || '';
+    const desc = document.getElementById('sm-desc')?.value?.trim() || '';
+
+    const mobile = document.getElementById('sm-pc-mobile')?.classList.contains('sm-pay-on');
+    const cash = document.getElementById('sm-pc-cash')?.classList.contains('sm-pay-on');
+    const carte = document.getElementById('sm-pc-carte')?.classList.contains('sm-pay-on');
+
+    const slug = document.getElementById('sm-slug')?.value?.trim() || '';
+    const colP = document.getElementById('sm-col-primary')?.value || '#007AFF';
+    const colS = document.getElementById('sm-col-secondary')?.value || '#5856D6';
+    const logo = existingCfg?.apparence?.logo || '';
+    const favicon = existingCfg?.apparence?.favicon || '';
+
+    const delai = parseInt(document.getElementById('sm-delai')?.value || '0', 10);
+    const fraisD = parseInt(document.getElementById('sm-frais-douala')?.value || '0', 10);
+    const fraisA = parseInt(document.getElementById('sm-frais-autres')?.value || '0', 10);
+
+    const cfg = {
+      general: { nom, email, telephone: tel, adresse: adr, description: desc },
+      paiement: {
+        mobile: { actif: mobile },
+        cash: { actif: cash },
+        carte: { actif: carte },
+        devise: 'FCFA'
+      },
+      identifiant: { slug },
+      apparence: { couleurPrimaire: colP, couleurSecondaire: colS, logo, favicon },
+      livraison: { delai, fraisDouala: fraisD, fraisAutres: fraisA }
+    };
+
+    const { data, error } = await sb.from('parametres_boutique').upsert({
+      user_id: currentUser.id,
+      config: cfg,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' }).select().single();
+
+    if (error) throw error;
+    return data.config;
+  }
+
+  /* ── Construire URL boutique ── */
   function getShopUrl(cfg) {
-    const slug = cfg?.slug || cfg?.identifiant?.slug || currentUser?.id || '';
-    return `https://oda.shop/${slug}`;
+    const slug = cfg?.identifiant?.slug || '';
+    if (!slug) return window.location.origin + '/boutique.html';
+    // ✅ Utiliser l'identifiant unique (slug) pour construire l'URL
+    return window.location.origin + '/boutique.html?shop=' + encodeURIComponent(slug);
   }
 
   /* ── Toast copie ── */
@@ -1421,6 +1265,11 @@
     document.getElementById('sm-goto-param')?.addEventListener('click', () => {
       removeModal();
       window.location.href = 'parametres.html';
+    });
+
+    // ── ✅ Bouton : Fermer le modal ──
+    document.getElementById('sm-btn-close-modal')?.addEventListener('click', () => {
+      removeModal();
     });
   }
 
