@@ -9,7 +9,7 @@
     <link rel="icon" type="image/png" href="oda.jpg">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="styles.css">
-    <script src="/notifications.js"></script>
+    <script src="notifications.js"></script>
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
@@ -375,6 +375,7 @@ async function verifierAuthentification() {
         window.location.href = 'connexion.html';
     }
 }
+await window.odaNotificationSystem.init(supabase, currentUser);
 
 // ==================== MENU HAMBURGER ====================
 function initialiserMenuHamburger() {
@@ -1662,7 +1663,15 @@ async function gererSoumissionFormulaire(e) {
         await afficherStatutAbonnement();
         reinitialiserFormulaire();
         
-      
+        
+    } catch (error) {
+        console.error('❌ Erreur lors de la soumission:', error);
+        afficherNotification('❌ Erreur : ' + error.message, 'error');
+    } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = textOriginal;
+    }
+}
 
 // ==================== UTILITAIRES ====================
 function reinitialiserFormulaire() {
