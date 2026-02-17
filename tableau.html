@@ -10,6 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="styles.css">
     <script src="/notifications.js"></script>
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
     <!-- Menu Hamburger Overlay -->
@@ -316,9 +317,8 @@
     </div>
     <script src="dashboard-notifications.js"></script>
     <script src="modal-setup-boutique.js"></script>
-    <script src="cache-manager.js"></script>
+<script src="cache-manager.js"></script>
 <script type="module">
-    
     // ==================== CONFIGURATION SUPABASE ====================
 const SUPABASE_URL = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2ticWJxeGN3emNybG11dnpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MTk1MzMsImV4cCI6MjA3NjA5NTUzM30.AMzAUwtjFt7Rvof5r2enMyYIYToc1wNWWEjvZqK_YXM';
@@ -1662,22 +1662,7 @@ async function gererSoumissionFormulaire(e) {
         await afficherStatutAbonnement();
         reinitialiserFormulaire();
         
-        // 🎉 Redirection optionnelle
-        setTimeout(() => {
-            const confirmer = confirm('Produit enregistré ! Voulez-vous voir vos produits ?');
-            if (confirmer) {
-                window.location.href = 'produit.html';
-            }
-        }, 1000);
-        
-    } catch (error) {
-        console.error('❌ Erreur lors de la soumission:', error);
-        afficherNotification('❌ Erreur : ' + error.message, 'error');
-    } finally {
-        btnSubmit.disabled = false;
-        btnSubmit.textContent = textOriginal;
-    }
-}
+      
 
 // ==================== UTILITAIRES ====================
 function reinitialiserFormulaire() {
