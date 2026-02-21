@@ -9,7 +9,6 @@
     <link rel="icon" type="image/png" href="oda.jpg">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="styles.css">
-    <script src="notifications.js"></script>
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
@@ -105,10 +104,61 @@
     <div class="dashboard-container">
         <aside class="sidebar-left">
             <div class="action-section">
-                <button class="btn-new-product">
+                <!-- APRÈS -->
+<!-- APRÈS -->
+<div class="user-welcome-card" id="userWelcomeCard">
+    <div class="welcome-avatar" id="welcomeAvatar">👤</div>
+    <div class="welcome-info">
+        <span class="welcome-label">Bienvenue</span>
+        <span class="welcome-username" id="welcomeUsername">...</span>
+    </div>
+    <div class="welcome-pulse"></div>
+    <button class="welcome-customize-btn" id="welcomeCustomizeBtn" title="Personnaliser">✏️</button>
+</div>
+
+<!-- Modal personnalisation -->
+<div class="customize-modal-overlay" id="customizeModalOverlay">
+    <div class="customize-modal">
+        <div class="customize-modal-header">
+            <h3>🎨 Personnaliser</h3>
+            <button class="customize-modal-close" id="customizeModalClose">×</button>
+        </div>
+
+        <div class="customize-section">
+            <label class="customize-label">📸 Logo personnalisé</label>
+            <div class="logo-upload-area" id="logoUploadArea">
+                <div class="logo-preview" id="logoPreview">
+                    <span id="logoPreviewContent">👤</span>
+                </div>
+                <div class="logo-upload-actions">
+                    <label for="logoFileInput" class="logo-upload-btn">📂 Choisir une image</label>
+                    <input type="file" id="logoFileInput" accept="image/*" style="display:none">
+                    <button class="logo-reset-btn" id="logoResetBtn">🗑️ Supprimer</button>
+                </div>
+                <p class="logo-hint">PNG, JPG jusqu'à 2MB — sera affiché en cercle</p>
+            </div>
+        </div>
+
+        <div class="customize-section">
+            <label class="customize-label">🎨 Couleur du bouton</label>
+            <div class="color-grid">
+                <div class="color-swatch active" data-color="linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%)" style="background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%)"></div>
+                <div class="color-swatch" data-color="linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)" style="background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)"></div>
+                <div class="color-swatch" data-color="linear-gradient(135deg, #A855F7 0%, #EC4899 100%)" style="background: linear-gradient(135deg, #A855F7 0%, #EC4899 100%)"></div>
+                <div class="color-swatch" data-color="linear-gradient(135deg, #10B981 0%, #34D399 100%)" style="background: linear-gradient(135deg, #10B981 0%, #34D399 100%)"></div>
+                <div class="color-swatch" data-color="linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)" style="background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)"></div>
+                <div class="color-swatch" data-color="linear-gradient(135deg, #1E293B 0%, #475569 100%)" style="background: linear-gradient(135deg, #1E293B 0%, #475569 100%)"></div>
+                <div class="color-swatch" data-color="linear-gradient(135deg, #DC2626 0%, #F87171 100%)" style="background: linear-gradient(135deg, #DC2626 0%, #F87171 100%)"></div>
+                <div class="color-swatch color-swatch-custom" id="customColorSwatch" title="Couleur personnalisée">
+                    <input type="color" id="customColorInput" value="#007AFF">
                     <span>+</span>
-                    <span>Nouveau produit</span>
-                </button>
+                </div>
+            </div>
+        </div>
+
+        <button class="customize-save-btn" id="customizeSaveBtn">✅ Enregistrer</button>
+    </div>
+</div>
             </div>
 
             <section class="kpi-section">
@@ -315,7 +365,7 @@
             </section>
         </aside>
     </div>
-    <script src="dashboard-notifications.js"></script>
+    <script src="notifications.js"></script>
     <script src="modal-setup-boutique.js"></script>
 <script src="cache-manager.js"></script>
 <script type="module">
@@ -365,17 +415,143 @@ async function verifierAuthentification() {
         currentUser = session.user;
         console.log('✅ Utilisateur connecté:', currentUser.email);
         
-        const userNameElement = document.querySelector('.user-name');
-        if (userNameElement) {
-            userNameElement.textContent = currentUser.email.split('@')[0];
-        }
+      // APRÈS
+// APRÈS
+const userNameElement = document.querySelector('.user-name');
+if (userNameElement) {
+    userNameElement.textContent = currentUser.email.split('@')[0];
+}
+
+// Carte de bienvenue
+const welcomeUsername = document.getElementById('welcomeUsername');
+if (welcomeUsername) {
+    const nom = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+    welcomeUsername.textContent = nom;
+    chargerPersonnalisationSauvegardee(nom);
+}
+initialiserPersonnalisation();
         
     } catch (error) {
         console.error('❌ Erreur authentification:', error);
         window.location.href = 'connexion.html';
     }
 }
-await window.odaNotificationSystem.init(supabase, currentUser);
+await window.odaNotifications.init(supabase, currentUser);
+// ==================== PERSONNALISATION CARTE BIENVENUE ====================
+function chargerPersonnalisationSauvegardee(nomDefaut) {
+    const saved = JSON.parse(localStorage.getItem('oda_welcome_style') || '{}');
+
+    if (saved.color) appliquerCouleur(saved.color);
+    if (saved.logo) appliquerLogo(saved.logo);
+    else {
+        const av = document.getElementById('welcomeAvatar');
+        if (av) av.textContent = (nomDefaut || '?').charAt(0).toUpperCase();
+    }
+}
+
+function appliquerCouleur(color) {
+    const card = document.getElementById('userWelcomeCard');
+    if (card) card.style.background = color;
+}
+
+function appliquerLogo(dataUrl) {
+    const av = document.getElementById('welcomeAvatar');
+    const preview = document.getElementById('logoPreviewContent');
+    if (av) {
+        av.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    }
+    if (preview) {
+        preview.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    }
+}
+
+function initialiserPersonnalisation() {
+    const btn = document.getElementById('welcomeCustomizeBtn');
+    const overlay = document.getElementById('customizeModalOverlay');
+    const closeBtn = document.getElementById('customizeModalClose');
+    const saveBtn = document.getElementById('customizeSaveBtn');
+    const logoInput = document.getElementById('logoFileInput');
+    const logoResetBtn = document.getElementById('logoResetBtn');
+    const customColorInput = document.getElementById('customColorInput');
+    const swatches = document.querySelectorAll('.color-swatch:not(.color-swatch-custom)');
+
+    let selectedColor = JSON.parse(localStorage.getItem('oda_welcome_style') || '{}').color 
+        || 'linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%)';
+    let selectedLogo = JSON.parse(localStorage.getItem('oda_welcome_style') || '{}').logo || null;
+
+    // Marquer la couleur active au chargement
+    swatches.forEach(s => {
+        s.classList.toggle('active', s.dataset.color === selectedColor);
+    });
+
+    btn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        overlay.classList.add('active');
+    });
+
+    overlay?.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.classList.remove('active');
+    });
+
+    closeBtn?.addEventListener('click', () => overlay.classList.remove('active'));
+
+    // Choix couleur prédéfinie
+    swatches.forEach(swatch => {
+        swatch.addEventListener('click', () => {
+            swatches.forEach(s => s.classList.remove('active'));
+            document.getElementById('customColorSwatch').classList.remove('active');
+            swatch.classList.add('active');
+            selectedColor = swatch.dataset.color;
+            appliquerCouleur(selectedColor);
+        });
+    });
+
+    // Couleur personnalisée
+    customColorInput?.addEventListener('input', () => {
+        swatches.forEach(s => s.classList.remove('active'));
+        document.getElementById('customColorSwatch').classList.add('active');
+        const hex = customColorInput.value;
+        selectedColor = `linear-gradient(135deg, ${hex} 0%, ${hex}BB 100%)`;
+        appliquerCouleur(selectedColor);
+    });
+
+    // Upload logo
+    logoInput?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+            afficherNotification('❌ Image trop lourde (max 2MB)', 'error');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            selectedLogo = ev.target.result;
+            appliquerLogo(selectedLogo);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Supprimer logo
+    logoResetBtn?.addEventListener('click', () => {
+        selectedLogo = null;
+        const nom = document.getElementById('welcomeUsername')?.textContent || '?';
+        const av = document.getElementById('welcomeAvatar');
+        const preview = document.getElementById('logoPreviewContent');
+        if (av) av.textContent = nom.charAt(0).toUpperCase();
+        if (preview) { preview.innerHTML = ''; preview.textContent = '👤'; }
+        logoInput.value = '';
+    });
+
+    // Sauvegarder
+    saveBtn?.addEventListener('click', () => {
+        localStorage.setItem('oda_welcome_style', JSON.stringify({
+            color: selectedColor,
+            logo: selectedLogo
+        }));
+        overlay.classList.remove('active');
+        afficherNotification('✅ Personnalisation sauvegardée !', 'success');
+    });
+}
 
 // ==================== MENU HAMBURGER ====================
 function initialiserMenuHamburger() {
