@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="styles-param.css">
     <script src="/notifications.js"></script>
+    <link rel="manifest" href="manifest.json">
 </head>
 <style>
     /* ==================== VARIABLES ==================== */
@@ -1256,6 +1257,137 @@ input:checked + .toggle-slider-small:before {
     background: #0088cc;
     color: white;
 }
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+/* ==================== MODAL PREVIEW BOUTIQUE ==================== */
+#previewModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+#previewModal.active {
+    display: flex;
+    animation: fadeIn 0.25s ease;
+}
+.preview-modal-box {
+    background: #fff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 420px;
+    height: 85vh;
+    max-height: 800px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+    animation: slideUpPreview 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+@keyframes slideUpPreview {
+    from { opacity: 0; transform: translateY(40px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+.preview-modal-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid #E5E7EB;
+    background: #F8F9FA;
+    flex-shrink: 0;
+    gap: 10px;
+}
+.preview-modal-dots {
+    display: flex;
+    gap: 5px;
+}
+.preview-modal-dots span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+.preview-modal-dots span:nth-child(1) { background: #FF5F56; }
+.preview-modal-dots span:nth-child(2) { background: #FFBD2E; }
+.preview-modal-dots span:nth-child(3) { background: #27C93F; }
+.preview-modal-url {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    color: #6B7280;
+    font-family: monospace;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.preview-modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.3rem;
+    color: #6B7280;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+.preview-modal-close:hover { background: #F3F4F6; color: #1A1A1A; }
+.preview-modal-iframe {
+    flex: 1;
+    border: none;
+    width: 100%;
+    background: #fff;
+}
+.preview-modal-footer {
+    padding: 10px 18px;
+    border-top: 1px solid #E5E7EB;
+    background: #F8F9FA;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.preview-reload-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.preview-reload-btn:hover { opacity: 0.85; }
+.preview-open-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: transparent;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.preview-open-btn:hover { background: var(--primary-color); color: white; }
 </style>
 <body>
     <!-- Menu Hamburger Overlay -->
@@ -1903,35 +2035,63 @@ input:checked + .toggle-slider-small:before {
 
     <div class="hamburger-divider" style="margin: 32px 0;"></div>
 
-    <!-- Police -->
-    <div class="appearance-group">
-        <h4 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; color: var(--text-primary);">📝 Typographie</h4>
-        
-        <div class="form-group">
-            <label class="form-label">Police d'écriture</label>
-            <select class="form-select" id="fontFamily">
-                <option value="Inter">Inter (Moderne)</option>
-                <option value="Poppins">Poppins (Arrondie)</option>
-                <option value="Roboto">Roboto (Classique)</option>
-                <option value="Montserrat">Montserrat (Élégante)</option>
-                <option value="Open Sans">Open Sans (Lisible)</option>
-                <option value="Lato">Lato (Professionnelle)</option>
-                <option value="Raleway">Raleway (Raffinée)</option>
-                <option value="Playfair Display">Playfair Display (Luxe)</option>
-            </select>
-            <small class="form-hint">Cette police sera utilisée sur tout votre site e-commerce</small>
-        </div>
-
-        <div class="font-preview" style="margin-top: 16px; padding: 20px; background: var(--bg-primary); border-radius: 12px; border: 2px solid var(--border-color);">
-            <p style="font-size: 1.2rem; font-weight: 600; margin-bottom: 8px;" id="fontPreviewTitle">Aperçu de la police</p>
-            <p style="font-size: 0.9rem; color: var(--text-secondary);" id="fontPreviewText">
-                Voici comment apparaîtra le texte dans votre boutique. 
-                Les titres seront clairs et lisibles, tandis que les descriptions de produits seront agréables à lire.
-            </p>
-        </div>
+   <!-- Police -->
+   <div class="appearance-group">
+    <h4 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; color: var(--text-primary);">📝 Typographie</h4>
+    
+    <div class="form-group">
+        <label class="form-label">Police d'écriture</label>
+        <select class="form-select" id="fontFamily">
+            <optgroup label="— Sans-Serif Modernes">
+                <option value="Inter">Inter — Moderne & Tech</option>
+                <option value="Poppins">Poppins — Douce & Arrondie</option>
+                <option value="Nunito">Nunito — Conviviale & Ronde</option>
+                <option value="DM Sans">DM Sans — Propre & Minimaliste</option>
+                <option value="Plus Jakarta Sans">Plus Jakarta Sans — Contemporaine</option>
+                <option value="Outfit">Outfit — Géométrique & Claire</option>
+            </optgroup>
+            <optgroup label="— Élégantes & Professionnelles">
+                <option value="Montserrat">Montserrat — Élégante</option>
+                <option value="Raleway">Raleway — Raffinée & Fine</option>
+                <option value="Josefin Sans">Josefin Sans — Sophistiquée</option>
+                <option value="Lato">Lato — Professionnelle & Neutre</option>
+                <option value="Open Sans">Open Sans — Très Lisible</option>
+                <option value="Roboto">Roboto — Classique Google</option>
+            </optgroup>
+            <optgroup label="— Luxe & Éditorial">
+                <option value="Playfair Display">Playfair Display — Luxe & Serif</option>
+                <option value="Cormorant Garamond">Cormorant Garamond — Haute Couture</option>
+                <option value="Libre Baskerville">Libre Baskerville — Éditoriale</option>
+                <option value="DM Serif Display">DM Serif Display — Élégance Moderne</option>
+            </optgroup>
+            <optgroup label="— Créatives & Originales">
+                <option value="Pacifico">Pacifico — Manuscrite & Fun</option>
+                <option value="Righteous">Righteous — Dynamique & Rétro</option>
+                <option value="Bebas Neue">Bebas Neue — Impact & Puissante</option>
+                <option value="Abril Fatface">Abril Fatface — Audacieuse</option>
+            </optgroup>
+        </select>
+        <small class="form-hint">Cette police sera appliquée sur tout votre site e-commerce</small>
     </div>
 
-    <div class="hamburger-divider" style="margin: 32px 0;"></div>
+    <!-- Cartes visuelles de prévisualisation -->
+    <div id="fontPreviewCards" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 16px;">
+        <!-- Générées dynamiquement par JS -->
+    </div>
+
+    <div class="font-preview" style="margin-top: 16px; padding: 24px; background: var(--bg-primary); border-radius: 12px; border: 2px solid var(--border-color);">
+        <p style="font-size: 1.4rem; font-weight: 700; margin-bottom: 6px;" id="fontPreviewTitle">Ma Boutique Élégante</p>
+        <p style="font-size: 1rem; font-weight: 500; margin-bottom: 8px; color: var(--primary-color);" id="fontPreviewSubtitle">Découvrez notre nouvelle collection</p>
+        <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;" id="fontPreviewText">
+            Voici comment apparaîtra le texte dans votre boutique. Les titres seront clairs, les descriptions agréables à lire.
+        </p>
+        <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <span id="fontPreviewBadge" style="padding: 4px 14px; background: var(--primary-color); color: white; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Ajouter au panier</span>
+            <span id="fontPreviewPrice" style="padding: 4px 14px; border: 2px solid var(--primary-color); color: var(--primary-color); border-radius: 20px; font-size: 0.8rem; font-weight: 600;">25 000 FCFA</span>
+        </div>
+        <p style="margin-top: 12px; font-size: 0.75rem; color: var(--text-secondary); font-style: italic;" id="fontPreviewName">Police actuelle : Inter</p>
+    </div>
+</div>
 
     <!-- Logo et Favicon -->
     <div class="appearance-group">
@@ -2016,28 +2176,28 @@ input:checked + .toggle-slider-small:before {
 </section>
         </main>
     </div>
-   <script src="cache-manager.js"></script>
+    <script src="cache-manager.js"></script>
  <script type="module">
-    // ==================== PARTIE 1/4 : CONFIGURATION & BASE ====================
+// ==================== PARTIE 1/4 : CONFIG, AUTH & SAUVEGARDE ====================
 
+// ✅ Corriger d'abord les credentials Supabase
 const SUPABASE_URL = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2ticWJxeGN3emNybG11dnpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MTk1MzMsImV4cCI6MjA3NjA5NTUzM30.AMzAUwtjFt7Rvof5r2enMyYIYToc1wNWWEjvZqK_YXM';
-
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ==================== ÉTAT GLOBAL ====================
 let currentUser = null;
 let parametres = {
     general: { nom: '', description: '', email: '', telephone: '', adresse: '' },
     identifiant: { slug: '', disponible: false },
     paiement: {
-        carte: { actif: false, cle: '', confirme: false },
+        carte:  { actif: false, cle: '', confirme: false },
         mobile: {
-            actif: false,
-            confirme: false,
-            mtn: { actif: false, nomCompte: '', numero: '', confirme: false },
+            actif: false, confirme: false,
+            mtn:    { actif: false, nomCompte: '', numero: '', confirme: false },
             orange: { actif: false, nomCompte: '', numero: '', confirme: false }
         },
-        cash: { actif: false, confirme: false },
+        cash:   { actif: false, confirme: false },
         devise: 'FCFA'
     },
     livraison: {
@@ -2049,35 +2209,52 @@ let parametres = {
         zonesPersonnalisees: []
     },
     apparence: {
-        couleurPrimaire: '#FF6B00',
+        couleurPrimaire:   '#FF6B00',
         couleurSecondaire: '#1A1A1A',
-        logo: '',
+        logo:    '',
         favicon: '',
-        police: 'Inter'
+        police:  'Inter'
     },
     notifications: { commandes: true, stock: true, clients: false, rapports: true }
 };
 
+// ==================== AUTHENTIFICATION ====================
 async function verifierAuthentification() {
     try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) throw error;
+        // Tentative 1 : session directe
+        let { data: { session } } = await supabase.auth.getSession();
+
+        // Tentative 2 : si null, attendre onAuthStateChange (max 3 secondes)
         if (!session) {
-            window.location.href = 'index.html';
+            session = await new Promise((resolve) => {
+                const timeout = setTimeout(() => resolve(null), 3000);
+                supabase.auth.onAuthStateChange((_event, s) => {
+                    clearTimeout(timeout);
+                    resolve(s);
+                });
+            });
+        }
+
+        if (!session) {
+            console.warn('⚠️ Aucune session active');
+            window.location.href = 'connexion.html';
             return;
         }
+
         currentUser = session.user;
-        const userNameElement = document.querySelector('.user-name');
-        if (userNameElement) userNameElement.textContent = currentUser.email.split('@')[0];
-    } catch (error) {
-        console.error('Erreur auth:', error);
-        window.location.href = 'index.html';
+        const el = document.querySelector('.user-name');
+        if (el) el.textContent = currentUser.email.split('@')[0];
+
+    } catch (e) {
+        console.error('Erreur auth:', e);
+        window.location.href = 'connexion.html';
     }
 }
 
+// ==================== CHARGEMENT PARAMÈTRES ====================
 async function chargerParametres() {
     try {
-        const { data, error } = await supabase
+        const { data } = await supabase
             .from('parametres_boutique')
             .select('*')
             .eq('user_id', currentUser.id)
@@ -2086,94 +2263,109 @@ async function chargerParametres() {
         if (data) {
             parametres = { ...parametres, ...data.config };
         } else {
-            const localParams = localStorage.getItem(`parametres_${currentUser.id}`);
-            if (localParams) parametres = JSON.parse(localParams);
+            const local = localStorage.getItem(`parametres_${currentUser.id}`);
+            if (local) {
+                try { parametres = { ...parametres, ...JSON.parse(local) }; } catch (_) {}
+            }
         }
-        
-        await initialiserIdentifiantUnique();
-        appliquerParametres();
-    } catch (error) {
-        await initialiserIdentifiantUnique();
-        appliquerParametres();
-    }
+    } catch (_) {}
+
+    await initialiserIdentifiantUnique();
+    appliquerParametres();
 }
 
-async function sauvegarderParametres() {
-    try {
-        const { error } = await supabase
-            .from('parametres_boutique')
-            .upsert({
-                user_id: currentUser.id,
-                config: parametres,
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'user_id' });
 
+async function sauvegarderParametres() {
+    // 1. Sauvegarde locale immédiate (jamais bloquante)
+    const _syncLocal = () => {
+        if (!currentUser?.id) return;
+        const json = JSON.stringify(parametres);
+        localStorage.setItem(`parametres_${currentUser.id}`, json);
+        // Clé lue par boutique.html
+        localStorage.setItem('parametres_boutique', json);
+        // Invalider le cache visiteur → boutique.html rechargera depuis Supabase
+        if (parametres.identifiant?.slug) {
+            localStorage.removeItem(`boutique_cache_${parametres.identifiant.slug}`);
+        }
+        _exposerConfigPaiement();
+    };
+
+    if (!currentUser?.id) { _syncLocal(); return false; }
+
+    try {
+        // 2. Appel Supabase avec timeout de 5 secondes
+        const timeout = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Timeout')), 5000)
+        );
+        const upsert = supabase
+            .from('parametres_boutique')
+            .upsert({ user_id: currentUser.id, config: parametres, updated_at: new Date().toISOString() },
+                    { onConflict: 'user_id' });
+
+        const { error } = await Promise.race([upsert, timeout]);
         if (error) throw error;
-        localStorage.setItem(`parametres_${currentUser.id}`, JSON.stringify(parametres));
+
+        _syncLocal();
         return true;
-    } catch (error) {
-        localStorage.setItem(`parametres_${currentUser.id}`, JSON.stringify(parametres));
+    } catch (e) {
+        console.warn('⚠️ Supabase indisponible, sauvegarde locale:', e.message);
+        _syncLocal();
         return false;
     }
 }
 
+// Exposer la config paiement dans localStorage (pour boutique.html)
+function _exposerConfigPaiement() {
+    try {
+        if (!parametres.identifiant?.slug) return;
+        const json = JSON.stringify({ ...parametres });
+        localStorage.setItem('parametres_boutique', json);
+    } catch (e) {
+        console.error('❌ Erreur exposition config:', e);
+    }
+}
+
+// ==================== IDENTIFIANT BOUTIQUE ====================
 function genererIdentifiantAuto() {
-    const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).substring(2, 6);
-    return `oda-${timestamp}-${random}`;
+    return `oda-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
 }
 
 async function initialiserIdentifiantUnique() {
-    if (!parametres.identifiant || !parametres.identifiant.slug) {
-        const identifiantAuto = genererIdentifiantAuto();
+    if (!parametres.identifiant?.slug) {
+        const slug = genererIdentifiantAuto();
         parametres.identifiant = {
-            slug: identifiantAuto,
+            slug,
             disponible: true,
             auto: true,
             dateCreation: new Date().toISOString()
         };
-        parametres.slug = identifiantAuto;
+        parametres.slug = slug;
         await sauvegarderParametres();
-        
-        if (currentUser?.id) {
-            localStorage.setItem(`boutique_cache_${identifiantAuto}`, JSON.stringify({
-                config: parametres,
-                user_id: currentUser.id,
-                timestamp: Date.now()
-            }));
-        }
         afficherNotification('🔖 Identifiant unique généré automatiquement', 'success');
     }
     afficherIdentifiantActuel();
 }
 
 function afficherIdentifiantActuel() {
-    const identifiantActuel = document.getElementById('identifiantActuel');
-    const identifiantActif = document.getElementById('identifiantActif');
-    const lienBoutique = document.getElementById('lienBoutique');
-    const formulaire = document.getElementById('identifiantForm');
-    
-    if (parametres.identifiant && parametres.identifiant.slug) {
-        if (identifiantActuel) identifiantActuel.style.display = 'block';
-        if (identifiantActif) identifiantActif.textContent = parametres.identifiant.slug;
-        if (lienBoutique) {
-            lienBoutique.value = `${window.location.origin}/boutique.html?shop=${parametres.identifiant.slug}`;
-        }
-        if (formulaire) formulaire.style.display = 'none';
+    const el    = document.getElementById('identifiantActuel');
+    const actif = document.getElementById('identifiantActif');
+    const lien  = document.getElementById('lienBoutique');
+    const form  = document.getElementById('identifiantForm');
+
+    if (parametres.identifiant?.slug) {
+        if (el)    el.style.display = 'block';
+        if (actif) actif.textContent = parametres.identifiant.slug;
+        if (lien)  lien.value = `${window.location.origin}/boutique.html?shop=${parametres.identifiant.slug}`;
+        if (form)  form.style.display = 'none';
     }
 }
 
 async function verifierDisponibiliteSlug(slug) {
     try {
-        if (parametres.identifiant.slug === slug) {
-            const availability = document.getElementById('slugAvailability');
-            if (availability) {
-                availability.className = 'slug-status available';
-                availability.textContent = '✓ C\'est votre identifiant actuel';
-            }
+        if (parametres.identifiant?.slug === slug) {
+            _setSlugStatus('available', '✓ C\'est votre identifiant actuel');
             return true;
         }
-
         const { data } = await supabase
             .from('parametres_boutique')
             .select('user_id')
@@ -2181,24 +2373,19 @@ async function verifierDisponibiliteSlug(slug) {
             .neq('user_id', currentUser.id)
             .single();
 
-        const disponible = !data;
-        const availability = document.getElementById('slugAvailability');
-        
-        if (availability) {
-            if (disponible) {
-                availability.className = 'slug-status available';
-                availability.textContent = '✓ Identifiant disponible';
-            } else {
-                availability.className = 'slug-status unavailable';
-                availability.textContent = '✗ Identifiant déjà utilisé';
-            }
-        }
-        return disponible;
-    } catch (error) {
-        return false;
-    }
+        const dispo = !data;
+        _setSlugStatus(dispo ? 'available' : 'unavailable',
+                       dispo ? '✓ Identifiant disponible' : '✗ Identifiant déjà utilisé');
+        return dispo;
+    } catch (_) { return false; }
 }
 
+function _setSlugStatus(cls, txt) {
+    const el = document.getElementById('slugAvailability');
+    if (el) { el.className = `slug-status ${cls}`; el.textContent = txt; }
+}
+
+// ==================== NOTIFICATIONS UI ====================
 function afficherNotification(message, type = 'info') {
     let conteneur = document.getElementById('notification-container');
     if (!conteneur) {
@@ -2207,976 +2394,88 @@ function afficherNotification(message, type = 'info') {
         conteneur.style.cssText = 'position:fixed;top:100px;right:20px;z-index:10000;display:flex;flex-direction:column;gap:12px';
         document.body.appendChild(conteneur);
     }
-
     const couleurs = { success: '#34C759', error: '#FF3B30', info: '#007AFF', warning: '#FF9500' };
-    const notification = document.createElement('div');
-    notification.style.cssText = `background:white;padding:16px 24px;border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,0.15);border-left:4px solid ${couleurs[type]};animation:slideIn 0.5s ease;max-width:350px;font-family:'Poppins',sans-serif;font-weight:500;color:#1D1D1F`;
-    notification.textContent = message;
-    conteneur.appendChild(notification);
-
+    const notif = document.createElement('div');
+    notif.style.cssText = `background:white;padding:16px 24px;border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,0.15);border-left:4px solid ${couleurs[type]};animation:slideIn 0.5s ease;max-width:350px;font-family:'Poppins',sans-serif;font-weight:500;color:#1D1D1F`;
+    notif.textContent = message;
+    conteneur.appendChild(notif);
     setTimeout(() => {
-        notification.style.animation = 'fadeOut 0.5s ease';
-        setTimeout(() => notification.remove(), 500);
+        notif.style.animation = 'fadeOut 0.5s ease';
+        setTimeout(() => notif.remove(), 500);
     }, 3000);
 }
 
-window.afficherFormulaireModification = function() {
-    const formulaire = document.getElementById('identifiantForm');
-    const shopSlug = document.getElementById('shopSlug');
-    if (formulaire) formulaire.style.display = 'block';
-    if (parametres.identifiant?.slug && !parametres.identifiant.auto && shopSlug) {
-        shopSlug.value = parametres.identifiant.slug;
-    }
-    if (formulaire) formulaire.scrollIntoView({ behavior: 'smooth', block: 'center' });
-};
-
-window.copierLienBoutique = function() {
-    const lienBoutiqueInput = document.getElementById('lienBoutique');
-    if (lienBoutiqueInput) {
-        lienBoutiqueInput.select();
-        document.execCommand('copy');
-        afficherNotification('✅ Lien copié dans le presse-papiers !', 'success');
-        lienBoutiqueInput.style.background = 'rgba(52, 199, 89, 0.1)';
-        setTimeout(() => { lienBoutiqueInput.style.background = 'white'; }, 500);
-    }
-};
-function ajouterBoutonNotifications() {
-    const container = document.querySelector('.header-actions');
-    if (!container || document.getElementById('btn-notifications')) return;
-    
-    const btn = document.createElement('button');
-    btn.id = 'btn-notifications';
-    btn.className = 'icon-btn';
-    btn.innerHTML = '🔔';
-    btn.title = 'Activer les notifications';
-    
-    btn.style.cssText = `
-        position: relative;
-        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-        color: white;
-        border-radius: 50%;
-        width: 44px;
-        height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: none;
-        font-size: 1.2rem;
-    `;
-    
-    btn.addEventListener('click', async () => {
-        if (window.notificationManager) {
-            if (Notification.permission === 'default') {
-                const granted = await window.notificationManager.requestPermission();
-                if (granted) {
-                    btn.innerHTML = '🔔';
-                    btn.style.background = 'linear-gradient(135deg, #34C759 0%, #4CAF50 100%)';
-                    afficherNotification('✅ Notifications activées !', 'success');
-                }
-            } else if (Notification.permission === 'granted') {
-                afficherNotification('✅ Notifications déjà activées', 'success');
-            } else {
-                alert('❌ Notifications bloquées. Autorisez-les dans les paramètres du navigateur.');
-            }
-        }
-    });
-    
-    // Changer la couleur selon l'état
-    if (Notification.permission === 'granted') {
-        btn.style.background = 'linear-gradient(135deg, #34C759 0%, #4CAF50 100%)';
-    } else if (Notification.permission === 'denied') {
-        btn.style.background = 'linear-gradient(135deg, #FF3B30 0%, #CC2F26 100%)';
-    }
-    
-    container.appendChild(btn);
-}
-
-// Appeler au chargement
-document.addEventListener('DOMContentLoaded', ajouterBoutonNotifications);
-// ==================== PARTIE 2/4 : NAVIGATION & MENUS ====================
-
-function initialiserMenuHamburger() {
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const hamburgerMenu = document.getElementById('hamburgerMenu');
-    const hamburgerOverlay = document.getElementById('hamburgerOverlay');
-    const closeMenu = document.getElementById('closeMenu');
-    
-    if (hamburgerBtn) {
-        hamburgerBtn.addEventListener('click', () => {
-            const isOpening = !hamburgerMenu?.classList.contains('active');
-            hamburgerBtn.classList.toggle('active');
-            hamburgerMenu?.classList.toggle('active');
-            hamburgerOverlay?.classList.toggle('active');
-            document.body.style.overflow = isOpening ? 'hidden' : '';
-        });
-    }
-    
-    const fermerMenu = () => {
-        hamburgerBtn?.classList.remove('active');
-        hamburgerMenu?.classList.remove('active');
-        hamburgerOverlay?.classList.remove('active');
-        document.body.style.overflow = '';
-    };
-    
-    if (closeMenu) closeMenu.addEventListener('click', fermerMenu);
-    if (hamburgerOverlay) hamburgerOverlay.addEventListener('click', fermerMenu);
-    
-    document.querySelectorAll('.hamburger-link').forEach(link => {
-        link.addEventListener('click', () => setTimeout(fermerMenu, 300));
-    });
-}
-
-function creerMenuMobileAndroid() {
-    if (window.innerWidth > 768) return;
-
-    const menuExistant = document.getElementById('menu-mobile-android');
-    if (menuExistant) menuExistant.remove();
-
-    const menuMobile = document.createElement('div');
-    menuMobile.id = 'menu-mobile-android';
-
-    const menuItems = [
-        { icon: '🏪', label: 'Général', section: 'general' },
-        { icon: '🔖', label: 'Identifiant', section: 'identifiant' },
-        { icon: '💳', label: 'Paiement', section: 'payment' },
-        { icon: '📦', label: 'Livraison', section: 'shipping' },
-        { icon: '🔔', label: 'Notifications', section: 'notifications' },
-        { icon: '🔒', label: 'Sécurité', section: 'security' },
-        { icon: '🎨', label: 'Apparence', section: 'apparence' }
-    ];
-
-    menuItems.forEach(item => {
-        const bouton = document.createElement('button');
-        bouton.className = 'menu-mobile-btn';
-        bouton.dataset.section = item.section;
-        
-        const sectionElement = document.getElementById(item.section);
-        const isActive = sectionElement && sectionElement.style.display !== 'none';
-        if (isActive) bouton.classList.add('active');
-
-        const iconSpan = document.createElement('span');
-        iconSpan.className = 'link-icon';
-        iconSpan.textContent = item.icon;
-
-        const labelSpan = document.createElement('span');
-        labelSpan.textContent = item.label;
-
-        bouton.appendChild(iconSpan);
-        bouton.appendChild(labelSpan);
-
-        if (isActive) {
-            const indicator = document.createElement('div');
-            indicator.className = 'active-indicator';
-            bouton.appendChild(indicator);
-        }
-
-        bouton.addEventListener('click', () => {
-            naviguerVersSection(item.section);
-            mettreAJourMenuActif(bouton);
-        });
-
-        menuMobile.appendChild(bouton);
-    });
-
-    document.body.appendChild(menuMobile);
-    document.body.style.paddingBottom = '85px';
-}
-
-function naviguerVersSection(sectionId) {
-    document.querySelectorAll('.settings-section').forEach(s => s.style.display = 'none');
-    const section = document.getElementById(sectionId);
-    if (section) {
-        section.style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.querySelectorAll('.settings-menu-link').forEach(link => {
-            link.classList.toggle('active', link.getAttribute('data-section') === sectionId);
-        });
-    }
-}
-
-function mettreAJourMenuActif(boutonActif) {
-    document.querySelectorAll('.menu-mobile-btn').forEach(btn => {
-        btn.classList.remove('active');
-        const indicator = btn.querySelector('.active-indicator');
-        if (indicator) indicator.remove();
-    });
-
-    boutonActif.classList.add('active');
-    const indicator = document.createElement('div');
-    indicator.className = 'active-indicator';
-    boutonActif.appendChild(indicator);
-
-    const icon = boutonActif.querySelector('.link-icon');
-    if (icon) {
-        icon.style.transform = 'scale(1.2)';
-        setTimeout(() => { icon.style.transform = 'scale(1)'; }, 200);
-    }
-
-    boutonActif.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-}
-
-function initialiserMenuMobileAndroid() {
-    if (window.innerWidth <= 768) creerMenuMobileAndroid();
-    window.addEventListener('resize', () => {
-        const menuMobile = document.getElementById('menu-mobile-android');
-        if (window.innerWidth > 768) {
-            if (menuMobile) {
-                menuMobile.style.display = 'none';
-                document.body.style.paddingBottom = '0';
-            }
-        } else {
-            if (menuMobile) {
-                menuMobile.style.display = 'flex';
-                document.body.style.paddingBottom = '90px';
-            } else {
-                creerMenuMobileAndroid();
-            }
-        }
-    });
-
-    document.querySelectorAll('.settings-menu-link').forEach(link => {
-        link.addEventListener('click', () => {
-            const section = link.getAttribute('data-section');
-            if (section) {
-                const boutonMobile = document.querySelector(`.menu-mobile-btn[data-section="${section}"]`);
-                if (boutonMobile) mettreAJourMenuActif(boutonMobile);
-            }
-        });
-    });
-}
-
-function initialiserNavigation() {
-    document.querySelectorAll('.settings-menu-link').forEach(lien => {
-        lien.addEventListener('click', (e) => {
-            e.preventDefault();
-            document.querySelectorAll('.settings-menu-link').forEach(l => l.classList.remove('active'));
-            lien.classList.add('active');
-            document.querySelectorAll('.settings-section').forEach(s => s.style.display = 'none');
-            const sectionId = lien.getAttribute('data-section');
-            const section = document.getElementById(sectionId);
-            if (section) {
-                section.style.display = 'block';
-                if (window.innerWidth <= 768) {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-            }
-        });
-    });
-}
-
+// ==================== APPLIQUER PARAMÈTRES AUX FORMULAIRES ====================
 function appliquerParametres() {
     if (parametres.general) {
-        ['shopName', 'shopDescription', 'shopEmail', 'shopPhone', 'shopAddress'].forEach((id, i) => {
+        const map = { shopName: 'nom', shopDescription: 'description', shopEmail: 'email', shopPhone: 'telephone', shopAddress: 'adresse' };
+        Object.entries(map).forEach(([id, key]) => {
             const el = document.getElementById(id);
-            const keys = ['nom', 'description', 'email', 'telephone', 'adresse'];
-            if (el) el.value = parametres.general[keys[i]] || '';
+            if (el) el.value = parametres.general[key] || '';
         });
     }
 
     if (parametres.identifiant) {
-        const slugInput = document.getElementById('shopSlug');
+        const slugInput   = document.getElementById('shopSlug');
         const slugPreview = document.getElementById('slugPreview');
-        if (slugInput) slugInput.value = parametres.identifiant.slug || '';
+        if (slugInput)   slugInput.value     = parametres.identifiant.slug || '';
         if (slugPreview) slugPreview.textContent = parametres.identifiant.slug || 'votre-identifiant';
     }
 
     if (parametres.paiement) {
-        const paymentCard = document.getElementById('paymentCard');
-        const paymentMobile = document.getElementById('paymentMobile');
-        const paymentCash = document.getElementById('paymentCash');
+        const map = { paymentCard: 'carte', paymentMobile: 'mobile', paymentCash: 'cash' };
+        Object.entries(map).forEach(([id, key]) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.checked = parametres.paiement[key].actif;
+                if (el.checked) {
+                    const details = document.getElementById(id === 'paymentCard' ? 'cardDetails' : id === 'paymentMobile' ? 'mobileDetails' : 'cashDetails');
+                    if (details) details.style.display = 'block';
+                }
+            }
+        });
         const currency = document.getElementById('currency');
-        
-        if (paymentCard) paymentCard.checked = parametres.paiement.carte.actif;
-        if (paymentMobile) paymentMobile.checked = parametres.paiement.mobile.actif;
-        if (paymentCash) paymentCash.checked = parametres.paiement.cash.actif;
         if (currency) currency.value = parametres.paiement.devise;
-        
-        if (paymentCard?.checked) {
-            const cardDetails = document.getElementById('cardDetails');
-            if (cardDetails) cardDetails.style.display = 'block';
-        }
-        if (paymentMobile?.checked) {
-            const mobileDetails = document.getElementById('mobileDetails');
-            if (mobileDetails) mobileDetails.style.display = 'block';
-        }
-        if (paymentCash?.checked) {
-            const cashDetails = document.getElementById('cashDetails');
-            if (cashDetails) cashDetails.style.display = 'block';
-        }
     }
 
     if (parametres.livraison) {
-        const fraisDouala = document.getElementById('fraisDouala');
-        const fraisAutres = document.getElementById('fraisAutres');
-        const delaiLivraison = document.getElementById('delaiLivraison');
-        const freeShipping = document.getElementById('freeShipping');
-        const montantMinimum = document.getElementById('montantMinimum');
-        
-        if (fraisDouala) fraisDouala.value = parametres.livraison.fraisDouala;
-        if (fraisAutres) fraisAutres.value = parametres.livraison.fraisAutres;
-        if (delaiLivraison) delaiLivraison.value = parametres.livraison.delai;
-        if (freeShipping) freeShipping.checked = parametres.livraison.gratuit;
-        if (montantMinimum) montantMinimum.value = parametres.livraison.montantMin;
+        const map = { fraisDouala: 'fraisDouala', fraisAutres: 'fraisAutres', delaiLivraison: 'delai', montantMinimum: 'montantMin' };
+        Object.entries(map).forEach(([id, key]) => {
+            const el = document.getElementById(id);
+            if (el) el.value = parametres.livraison[key];
+        });
+        const fs = document.getElementById('freeShipping');
+        if (fs) fs.checked = parametres.livraison.gratuit;
     }
 
     if (parametres.notifications) {
-        ['notifOrders', 'notifStock', 'notifClients', 'notifReports'].forEach((id, i) => {
+        const map = { notifOrders: 'commandes', notifStock: 'stock', notifClients: 'clients', notifReports: 'rapports' };
+        Object.entries(map).forEach(([id, key]) => {
             const el = document.getElementById(id);
-            const keys = ['commandes', 'stock', 'clients', 'rapports'];
-            if (el) el.checked = parametres.notifications[keys[i]];
-        });
-    }
-}
-// ==================== PARTIE 3/4 : FORMULAIRES & PAIEMENT ====================
-
-function initialiserFormulaires() {
-    const formGeneral = document.getElementById('generalForm');
-    if (formGeneral) {
-        formGeneral.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            parametres.general = {
-                nom: document.getElementById('shopName')?.value || '',
-                description: document.getElementById('shopDescription')?.value || '',
-                email: document.getElementById('shopEmail')?.value || '',
-                telephone: document.getElementById('shopPhone')?.value || '',
-                adresse: document.getElementById('shopAddress')?.value || ''
-            };
-            const success = await sauvegarderParametres();
-            afficherNotification(success ? '✅ Paramètres généraux enregistrés' : '⚠️ Sauvegardé localement', success ? 'success' : 'warning');
-        });
-    }
-
-    const formLivraison = document.getElementById('shippingForm');
-    if (formLivraison) {
-        formLivraison.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            sauvegarderZonesLivraison();
-            parametres.livraison = {
-                fraisDouala: parseInt(document.getElementById('fraisDouala')?.value) || 0,
-                fraisAutres: parseInt(document.getElementById('fraisAutres')?.value) || 0,
-                delai: document.getElementById('delaiLivraison')?.value || '',
-                livraisonGratuite: document.getElementById('freeShipping')?.checked || false,
-                montantMinimum: parseInt(document.getElementById('montantMinimum')?.value) || 0,
-                zonesPersonnalisees: parametres.livraison.zonesPersonnalisees || []
-            };
-            const success = await sauvegarderParametres();
-            afficherNotification(success ? '📦 Options de livraison sauvegardées' : '⚠️ Sauvegardé localement', success ? 'success' : 'warning');
-        });
-    }
-
-    const formSecurite = document.getElementById('securityForm');
-    if (formSecurite) {
-        formSecurite.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const currentPassword = document.getElementById('currentPassword')?.value;
-            const newPassword = document.getElementById('newPassword')?.value;
-            const confirmPassword = document.getElementById('confirmPassword')?.value;
-            
-            if (!currentPassword || !newPassword || !confirmPassword) {
-                afficherNotification('⚠️ Veuillez remplir tous les champs', 'warning');
-                return;
-            }
-            if (newPassword !== confirmPassword) {
-                afficherNotification('❌ Les mots de passe ne correspondent pas', 'error');
-                return;
-            }
-            if (newPassword.length < 8) {
-                afficherNotification('⚠️ Le mot de passe doit contenir au moins 8 caractères', 'warning');
-                return;
-            }
-            
-            try {
-                const { error } = await supabase.auth.updateUser({ password: newPassword });
-                if (error) throw error;
-                formSecurite.reset();
-                afficherNotification('🔒 Mot de passe modifié avec succès', 'success');
-            } catch (error) {
-                afficherNotification('❌ Erreur lors du changement de mot de passe', 'error');
-            }
-        });
-    }
-
-    [
-        { id: 'notifOrders', key: 'commandes' },
-        { id: 'notifStock', key: 'stock' },
-        { id: 'notifClients', key: 'clients' },
-        { id: 'notifReports', key: 'rapports' }
-    ].forEach(({ id, key }) => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.addEventListener('change', async () => {
-                parametres.notifications[key] = element.checked;
-                await sauvegarderParametres();
-                afficherNotification('🔔 Préférences de notifications mises à jour', 'info');
-            });
-        }
-    });
-
-    const currencySelect = document.getElementById('currency');
-    if (currencySelect) {
-        currencySelect.addEventListener('change', async () => {
-            parametres.paiement.devise = currencySelect.value;
-            await sauvegarderParametres();
-            afficherNotification('💱 Devise mise à jour', 'info');
+            if (el) el.checked = parametres.notifications[key];
         });
     }
 }
 
-function initialiserIdentifiant() {
-    const slugInput = document.getElementById('shopSlug');
-    const slugPreview = document.getElementById('slugPreview');
-    const urlBase = document.getElementById('urlBase');
-    let timeoutId;
-
-    if (urlBase) urlBase.textContent = `${window.location.origin}/e-commerce2.html`;
-
-    if (slugInput) {
-        slugInput.addEventListener('input', (e) => {
-            let value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/--+/g, '-').substring(0, 50);
-            e.target.value = value;
-            if (slugPreview) slugPreview.textContent = value || 'votre-identifiant';
-            clearTimeout(timeoutId);
-            if (value.length >= 3) {
-                timeoutId = setTimeout(() => verifierDisponibiliteSlug(value), 500);
-            } else {
-                const slugAvailability = document.getElementById('slugAvailability');
-                if (slugAvailability) slugAvailability.innerHTML = '';
-            }
-        });
+// ==================== FONCTIONS GLOBALES ====================
+window.afficherFormulaireModification = function() {
+    const form = document.getElementById('identifiantForm');
+    const slug = document.getElementById('shopSlug');
+    if (form) form.style.display = 'block';
+    if (parametres.identifiant?.slug && !parametres.identifiant.auto && slug) {
+        slug.value = parametres.identifiant.slug;
     }
-
-    const formIdentifiant = document.getElementById('identifiantForm');
-    if (formIdentifiant) {
-        formIdentifiant.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const slug = slugInput.value.trim();
-            
-            if (!slug) {
-                afficherNotification('⚠️ Veuillez entrer un identifiant', 'warning');
-                return;
-            }
-            if (slug.length < 3) {
-                afficherNotification('⚠️ L\'identifiant doit contenir au moins 3 caractères', 'warning');
-                return;
-            }
-            
-            const disponible = await verifierDisponibiliteSlug(slug);
-            if (!disponible && parametres.identifiant.slug !== slug) {
-                afficherNotification('❌ Cet identifiant est déjà utilisé', 'error');
-                return;
-            }
-            
-            parametres.identifiant = {
-                slug: slug,
-                disponible: true,
-                auto: false,
-                dateCreation: parametres.identifiant?.dateCreation || new Date().toISOString(),
-                dateModification: new Date().toISOString()
-            };
-            parametres.slug = slug;
-            
-            const success = await sauvegarderParametres();
-            if (success) {
-                afficherNotification('🔖 Identifiant unique enregistré avec succès', 'success');
-                afficherIdentifiantActuel();
-                if (currentUser?.id) {
-                    localStorage.setItem(`boutique_cache_${slug}`, JSON.stringify({
-                        config: parametres,
-                        user_id: currentUser.id,
-                        timestamp: Date.now()
-                    }));
-                }
-            } else {
-                afficherNotification('⚠️ Sauvegardé localement uniquement', 'warning');
-            }
-        });
-    }
-}
-
-function initialiserPaiement() {
-    const paymentCard = document.getElementById('paymentCard');
-    if (paymentCard) {
-        paymentCard.addEventListener('change', async () => {
-            const details = document.getElementById('cardDetails');
-            if (details) details.style.display = paymentCard.checked ? 'block' : 'none';
-            parametres.paiement.carte.actif = paymentCard.checked;
-            await sauvegarderParametres();
-        });
-        if (paymentCard.checked) {
-            const details = document.getElementById('cardDetails');
-            if (details) details.style.display = 'block';
-        }
-    }
-
-    const paymentMobile = document.getElementById('paymentMobile');
-    if (paymentMobile) {
-        paymentMobile.addEventListener('change', async () => {
-            const details = document.getElementById('mobileDetails');
-            if (details) details.style.display = paymentMobile.checked ? 'block' : 'none';
-            parametres.paiement.mobile.actif = paymentMobile.checked;
-            await sauvegarderParametres();
-        });
-        if (paymentMobile.checked) {
-            const details = document.getElementById('mobileDetails');
-            if (details) details.style.display = 'block';
-        }
-    }
-
-    const paymentCash = document.getElementById('paymentCash');
-    if (paymentCash) {
-        paymentCash.addEventListener('change', async () => {
-            const details = document.getElementById('cashDetails');
-            if (details) details.style.display = paymentCash.checked ? 'block' : 'none';
-            parametres.paiement.cash.actif = paymentCash.checked;
-            await sauvegarderParametres();
-        });
-        if (paymentCash.checked) {
-            const details = document.getElementById('cashDetails');
-            if (details) details.style.display = 'block';
-        }
-    }
-}
-
-window.confirmerPaiement = async function(type) {
-    if (type === 'card') {
-        const cle = document.getElementById('stripeKey')?.value;
-        if (!cle) {
-            afficherNotification('⚠️ Veuillez entrer votre clé API Stripe', 'warning');
-            return;
-        }
-        parametres.paiement.carte.cle = cle;
-        parametres.paiement.carte.confirme = true;
-    } else if (type === 'cash') {
-        parametres.paiement.cash.confirme = true;
-    }
-    const success = await sauvegarderParametres();
-    afficherNotification(success ? `✅ ${type === 'card' ? 'Carte bancaire' : 'Paiement à la livraison'} configuré` : '⚠️ Sauvegardé localement', success ? 'success' : 'warning');
+    if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 
-function initialiserZonesLivraison() {
-    const btnAjouterZone = document.getElementById('ajouterZone');
-    if (btnAjouterZone) {
-        btnAjouterZone.addEventListener('click', () => ajouterZoneLivraison());
-    }
-    if (parametres.livraison.zonesPersonnalisees?.length > 0) {
-        parametres.livraison.zonesPersonnalisees.forEach(zone => ajouterZoneLivraison(zone));
-        const emptyMessage = document.getElementById('emptyZonesMessage');
-        if (emptyMessage) emptyMessage.style.display = 'none';
-    }
-}
-
-function ajouterZoneLivraison(zoneExistante = null) {
-    const zonesContainer = document.getElementById('zonesContainer');
-    if (!zonesContainer) return;
-
-    const zoneId = Date.now();
-    const zoneCard = document.createElement('div');
-    zoneCard.className = 'zone-card';
-    zoneCard.dataset.zoneId = zoneId;
-    zoneCard.style.cssText = 'background:var(--bg-primary);padding:16px;border-radius:12px;margin-bottom:12px;opacity:0;transform:translateY(10px);transition:all 0.3s ease';
-
-    zoneCard.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-            <span style="font-weight:600">📍 Zone ${zonesContainer.children.length + 1}</span>
-            <button type="button" onclick="supprimerZone(${zoneId})" style="padding:6px 12px;background:var(--danger-color);color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem">🗑️ Supprimer</button>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div><label style="font-size:0.85rem">Nom du lieu</label><input type="text" class="form-input zone-nom" placeholder="Ex: Yaoundé" value="${zoneExistante?.nom || ''}" style="font-size:0.9rem"></div>
-            <div><label style="font-size:0.85rem">Frais (FCFA)</label><input type="number" class="form-input zone-frais" placeholder="0" value="${zoneExistante?.frais || ''}" min="0" style="font-size:0.9rem"></div>
-        </div>
-    `;
-
-    zonesContainer.appendChild(zoneCard);
-    const emptyMessage = document.getElementById('emptyZonesMessage');
-    if (emptyMessage) emptyMessage.style.display = 'none';
-
-    setTimeout(() => {
-        zoneCard.style.opacity = '1';
-        zoneCard.style.transform = 'translateY(0)';
-    }, 10);
-
-    zoneCard.querySelectorAll('input').forEach(input => {
-        input.addEventListener('change', sauvegarderZonesLivraison);
-    });
-}
-
-window.supprimerZone = function(zoneId) {
-    if (!confirm('Voulez-vous vraiment supprimer cette zone de livraison ?')) return;
-    const zoneCard = document.querySelector(`[data-zone-id="${zoneId}"]`);
-    if (zoneCard) {
-        zoneCard.style.animation = 'fadeOut 0.3s ease';
-        setTimeout(() => {
-            zoneCard.remove();
-            sauvegarderZonesLivraison();
-            const zonesContainer = document.getElementById('zonesContainer');
-            const emptyMessage = document.getElementById('emptyZonesMessage');
-            if (zonesContainer?.children.length === 0 && emptyMessage) {
-                emptyMessage.style.display = 'block';
-            }
-        }, 300);
-    }
-};
-
-function sauvegarderZonesLivraison() {
-    const zones = [];
-    document.querySelectorAll('.zone-card').forEach(card => {
-        const nom = card.querySelector('.zone-nom').value.trim();
-        const frais = parseInt(card.querySelector('.zone-frais').value) || 0;
-        if (nom) zones.push({ nom, frais });
-    });
-    parametres.livraison.zonesPersonnalisees = zones;
-}
-// ==================== PARTIE 4/4 : MOBILE MONEY & INITIALISATION ====================
-
-function initialiserMobileMoney() {
-    const paymentMobile = document.getElementById('paymentMobile');
-    const mobileDetails = document.getElementById('mobileDetails');
-    
-    if (paymentMobile) {
-        paymentMobile.addEventListener('change', async () => {
-            if (mobileDetails) mobileDetails.style.display = paymentMobile.checked ? 'block' : 'none';
-            parametres.paiement.mobile.actif = paymentMobile.checked;
-            await sauvegarderParametres();
-        });
-        if (paymentMobile.checked && mobileDetails) mobileDetails.style.display = 'block';
-    }
-    
-    const mtnActive = document.getElementById('mtnActive');
-    const mtnInputs = document.getElementById('mtnInputs');
-    if (mtnActive) {
-        mtnActive.addEventListener('change', async () => {
-            if (mtnInputs) mtnInputs.style.display = mtnActive.checked ? 'block' : 'none';
-            parametres.paiement.mobile.mtn.actif = mtnActive.checked;
-            await sauvegarderParametres();
-            afficherNotification(mtnActive.checked ? '✅ MTN Money activé' : '❌ MTN Money désactivé', 'info');
-        });
-        
-        if (parametres.paiement.mobile.mtn) {
-            mtnActive.checked = parametres.paiement.mobile.mtn.actif || false;
-            if (mtnActive.checked && mtnInputs) mtnInputs.style.display = 'block';
-            const mtnNom = document.getElementById('mtnNomCompte');
-            const mtnNum = document.getElementById('mtnNumero');
-            if (mtnNom) mtnNom.value = parametres.paiement.mobile.mtn.nomCompte || '';
-            if (mtnNum) mtnNum.value = parametres.paiement.mobile.mtn.numero || '';
-        }
-    }
-    
-    const orangeActive = document.getElementById('orangeActive');
-    const orangeInputs = document.getElementById('orangeInputs');
-    if (orangeActive) {
-        orangeActive.addEventListener('change', async () => {
-            if (orangeInputs) orangeInputs.style.display = orangeActive.checked ? 'block' : 'none';
-            parametres.paiement.mobile.orange.actif = orangeActive.checked;
-            await sauvegarderParametres();
-            afficherNotification(orangeActive.checked ? '✅ Orange Money activé' : '❌ Orange Money désactivé', 'info');
-        });
-        
-        if (parametres.paiement.mobile.orange) {
-            orangeActive.checked = parametres.paiement.mobile.orange.actif || false;
-            if (orangeActive.checked && orangeInputs) orangeInputs.style.display = 'block';
-            const orangeNom = document.getElementById('orangeNomCompte');
-            const orangeNum = document.getElementById('orangeNumero');
-            if (orangeNom) orangeNom.value = parametres.paiement.mobile.orange.nomCompte || '';
-            if (orangeNum) orangeNum.value = parametres.paiement.mobile.orange.numero || '';
-        }
-    }
-    
-    const btnConfirmer = document.getElementById('confirmerMobileMoney');
-    if (btnConfirmer) {
-        btnConfirmer.addEventListener('click', async () => {
-            const mtnActive = document.getElementById('mtnActive')?.checked;
-            const orangeActive = document.getElementById('orangeActive')?.checked;
-            
-            if (!mtnActive && !orangeActive) {
-                afficherNotification('⚠️ Veuillez activer au moins MTN Money ou Orange Money', 'warning');
-                return;
-            }
-            
-            let erreurs = [];
-            if (mtnActive) {
-                const mtnNom = document.getElementById('mtnNomCompte')?.value.trim();
-                const mtnNum = document.getElementById('mtnNumero')?.value.replace(/\s/g, '');
-                if (!mtnNom) erreurs.push('Nom du compte MTN Money manquant');
-                if (!mtnNum) erreurs.push('Numéro MTN Money manquant');
-                else if (!mtnNum.match(/^\+237[67]\d{8}$/)) erreurs.push('Format de numéro MTN Money invalide');
-                
-                if (erreurs.length === 0) {
-                    parametres.paiement.mobile.mtn = {
-                        actif: true,
-                        nomCompte: mtnNom,
-                        numero: mtnNum,
-                        confirme: true
-                    };
-                }
-            }
-            
-            if (orangeActive) {
-                const orangeNom = document.getElementById('orangeNomCompte')?.value.trim();
-                const orangeNum = document.getElementById('orangeNumero')?.value.replace(/\s/g, '');
-                if (!orangeNom) erreurs.push('Nom du compte Orange Money manquant');
-                if (!orangeNum) erreurs.push('Numéro Orange Money manquant');
-                else if (!orangeNum.match(/^\+237[67]\d{8}$/)) erreurs.push('Format de numéro Orange Money invalide');
-                
-                if (erreurs.length === 0 || (erreurs.length === 2 && mtnActive)) {
-                    parametres.paiement.mobile.orange = {
-                        actif: true,
-                        nomCompte: orangeNom,
-                        numero: orangeNum,
-                        confirme: true
-                    };
-                }
-            }
-            
-            if (erreurs.length > 0) {
-                erreurs.forEach(erreur => afficherNotification(`❌ ${erreur}`, 'error'));
-                return;
-            }
-            
-            parametres.paiement.mobile.confirme = true;
-            const success = await sauvegarderParametres();
-            afficherNotification(success ? '✅ Mobile Money configuré avec succès !' : '⚠️ Sauvegardé localement uniquement', success ? 'success' : 'warning');
-        });
-    }
-}
-
-function initialiserApparence() {
-    const primaryColorInput = document.getElementById('primaryColor');
-    const primaryColorHex = document.getElementById('primaryColorHex');
-    const primaryPreview = document.getElementById('primaryColorPreview');
-    
-    if (primaryColorInput) {
-        primaryColorInput.addEventListener('input', (e) => {
-            const color = e.target.value;
-            parametres.apparence.couleurPrimaire = color;
-            if (primaryPreview) primaryPreview.style.background = color;
-            if (primaryColorHex) primaryColorHex.value = color.toUpperCase();
-        });
-    }
-
-    const secondaryColorInput = document.getElementById('secondaryColor');
-    const secondaryColorHex = document.getElementById('secondaryColorHex');
-    const secondaryPreview = document.getElementById('secondaryColorPreview');
-    
-    if (secondaryColorInput) {
-        secondaryColorInput.addEventListener('input', (e) => {
-            const color = e.target.value;
-            parametres.apparence.couleurSecondaire = color;
-            if (secondaryPreview) secondaryPreview.style.background = color;
-            if (secondaryColorHex) secondaryColorHex.value = color.toUpperCase();
-        });
-    }
-
-    const saveAppearanceBtn = document.getElementById('saveAppearance');
-    if (saveAppearanceBtn) {
-        saveAppearanceBtn.addEventListener('click', async () => {
-            const success = await sauvegarderParametres();
-            afficherNotification(success ? '✅ Apparence sauvegardée avec succès' : '⚠️ Sauvegardé localement uniquement', success ? 'success' : 'warning');
-        });
-    }
-
-    const resetAppearanceBtn = document.getElementById('resetAppearance');
-    if (resetAppearanceBtn) {
-        resetAppearanceBtn.addEventListener('click', async () => {
-            if (!confirm('Voulez-vous vraiment réinitialiser l\'apparence par défaut ?')) return;
-            parametres.apparence = { couleurPrimaire: '#FF6B00', couleurSecondaire: '#1A1A1A', logo: '', favicon: '', police: 'Inter' };
-            appliquerParametres();
-            await sauvegarderParametres();
-            afficherNotification('✅ Apparence réinitialisée', 'success');
-        });
-    }
-}
-
-window.appliquerPalette = function(couleurPrimaire, couleurSecondaire) {
-    const primaryColor = document.getElementById('primaryColor');
-    const primaryColorHex = document.getElementById('primaryColorHex');
-    const primaryPreview = document.getElementById('primaryColorPreview');
-    const secondaryColor = document.getElementById('secondaryColor');
-    const secondaryColorHex = document.getElementById('secondaryColorHex');
-    const secondaryPreview = document.getElementById('secondaryColorPreview');
-    
-    if (primaryColor) {
-        primaryColor.value = couleurPrimaire;
-        parametres.apparence.couleurPrimaire = couleurPrimaire;
-        if (primaryColorHex) primaryColorHex.value = couleurPrimaire.toUpperCase();
-        if (primaryPreview) primaryPreview.style.background = couleurPrimaire;
-    }
-    if (secondaryColor) {
-        secondaryColor.value = couleurSecondaire;
-        parametres.apparence.couleurSecondaire = couleurSecondaire;
-        if (secondaryColorHex) secondaryColorHex.value = couleurSecondaire.toUpperCase();
-        if (secondaryPreview) secondaryPreview.style.background = couleurSecondaire;
-    }
-    afficherNotification('🎨 Palette appliquée !', 'success');
-};
-async function traiterImageUpload(file, type) {
-    // Vérifier la taille du fichier (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-        afficherNotification('❌ Le fichier est trop volumineux (max 2MB)', 'error');
-        return;
-    }
-
-    // Vérifier le type de fichier
-    if (!file.type.startsWith('image/')) {
-        afficherNotification('❌ Le fichier doit être une image', 'error');
-        return;
-    }
-
-    try {
-        // Convertir en base64
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const base64 = e.target.result;
-            
-            if (type === 'logo') {
-                parametres.apparence.logo = base64;
-                const logoPreview = document.getElementById('logoPreview');
-                if (logoPreview) {
-                    logoPreview.innerHTML = `<img src="${base64}" alt="Logo" style="max-width: 200px; max-height: 100px; object-fit: contain;">`;
-                }
-                afficherNotification('✅ Logo chargé', 'success');
-            } else if (type === 'favicon') {
-                parametres.apparence.favicon = base64;
-                const faviconPreview = document.getElementById('faviconPreview');
-                if (faviconPreview) {
-                    faviconPreview.innerHTML = `<img src="${base64}" alt="Favicon" style="width: 32px; height: 32px; object-fit: contain;">`;
-                }
-                // Mettre à jour le favicon dans le document
-                let link = document.querySelector("link[rel*='icon']");
-                if (!link) {
-                    link = document.createElement('link');
-                    link.rel = 'icon';
-                    document.head.appendChild(link);
-                }
-                link.href = base64;
-                afficherNotification('✅ Favicon chargé', 'success');
-            }
-            
-            await sauvegarderParametres();
-        };
-        
-        reader.readAsDataURL(file);
-    } catch (error) {
-        console.error('Erreur upload image:', error);
-        afficherNotification('❌ Erreur lors du chargement de l\'image', 'error');
-    }
-}
-function appliquerCouleurAuSite(couleur, type) {
-    const root = document.documentElement;
-    
-    if (type === 'primary') {
-        root.style.setProperty('--primary-color', couleur);
-        
-        // Appliquer aux boutons d'aperçu
-        const previewBtnPrimary = document.querySelector('.preview-btn-primary');
-        if (previewBtnPrimary) {
-            previewBtnPrimary.style.background = couleur;
-        }
-        
-        const previewBtnSecondary = document.querySelector('.preview-btn-secondary');
-        if (previewBtnSecondary) {
-            previewBtnSecondary.style.color = couleur;
-            previewBtnSecondary.style.borderColor = couleur;
-        }
-        
-        const previewCard = document.querySelector('.preview-card h3');
-        if (previewCard) {
-            previewCard.style.color = couleur;
-        }
-        
-        const previewPrice = document.querySelector('.preview-card span');
-        if (previewPrice) {
-            previewPrice.style.color = couleur;
-        }
-        
-        const previewButton = document.querySelector('.preview-card button');
-        if (previewButton) {
-            previewButton.style.background = couleur;
-        }
-    } else if (type === 'secondary') {
-        root.style.setProperty('--secondary-color', couleur);
-    }
-}
-
-function appliquerPoliceAuSite(police) {
-    document.body.style.fontFamily = `'${police}', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
-    
-    // Charger la police depuis Google Fonts si nécessaire
-    const polices = ['Inter', 'Poppins', 'Roboto', 'Montserrat', 'Open Sans', 'Lato', 'Raleway', 'Playfair Display'];
-    if (polices.includes(police)) {
-        const linkId = 'google-font-' + police.replace(/\s/g, '-');
-        let link = document.getElementById(linkId);
-        
-        if (!link) {
-            link = document.createElement('link');
-            link.id = linkId;
-            link.rel = 'stylesheet';
-            link.href = `https://fonts.googleapis.com/css2?family=${police.replace(/\s/g, '+')}:wght@300;400;500;600;700&display=swap`;
-            document.head.appendChild(link);
-        }
-    }
-}
-    // Upload du logo
-    const logoInput = document.getElementById('logoUpload');
-    if (logoInput) {
-        logoInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                await traiterImageUpload(file, 'logo');
-            }
-        });
-    }
-
-    // Upload du favicon
-    const faviconInput = document.getElementById('faviconUpload');
-    if (faviconInput) {
-        faviconInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                await traiterImageUpload(file, 'favicon');
-            }
-        });
-    }
-
-window.exporterDonnees = async function() {
-    if (!confirm('Voulez-vous exporter toutes vos données ?')) return;
-    try {
-        const { data: produits } = await supabase.from('produits').select('*').eq('user_id', currentUser.id);
-        const { data: commandes } = await supabase.from('commandes').select('*').eq('user_id', currentUser.id);
-        const donnees = { parametres, produits: produits || [], commandes: commandes || [], date: new Date().toISOString() };
-        const dataBlob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(dataBlob);
-        const lien = document.createElement('a');
-        lien.href = url;
-        lien.download = `export_boutique_${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(lien);
-        lien.click();
-        document.body.removeChild(lien);
-        URL.revokeObjectURL(url);
-        afficherNotification('📥 Données exportées avec succès', 'success');
-    } catch (error) {
-        afficherNotification('❌ Erreur lors de l\'export', 'error');
-    }
-};
-
-window.supprimerCompte = async function() {
-    const confirmation = prompt('⚠️ ATTENTION ! Cette action est irréversible.\n\nTapez "SUPPRIMER" pour confirmer la suppression de votre compte :');
-    if (confirmation !== 'SUPPRIMER') {
-        afficherNotification('❌ Suppression annulée', 'info');
-        return;
-    }
-    try {
-        afficherNotification('⏳ Suppression en cours...', 'info');
-        await supabase.from('produits').delete().eq('user_id', currentUser.id);
-        await supabase.from('commandes').delete().eq('user_id', currentUser.id);
-        await supabase.from('parametres_boutique').delete().eq('user_id', currentUser.id);
-        localStorage.clear();
-        sessionStorage.clear();
-        afficherNotification('🗑️ Compte supprimé. Redirection...', 'success');
-        setTimeout(() => { window.location.href = 'index.html'; }, 2000);
-    } catch (error) {
-        afficherNotification('❌ Erreur lors de la suppression', 'error');
+window.copierLienBoutique = function() {
+    const input = document.getElementById('lienBoutique');
+    if (input) {
+        input.select();
+        document.execCommand('copy');
+        afficherNotification('✅ Lien copié dans le presse-papiers !', 'success');
+        input.style.background = 'rgba(52,199,89,0.1)';
+        setTimeout(() => { input.style.background = 'white'; }, 500);
     }
 };
 
@@ -3188,18 +2487,18 @@ window.getShopSettings = function() {
         telephone: parametres.general.telephone,
         adresse: parametres.general.adresse,
         slug: parametres.identifiant.slug,
-        couleurPrimaire: parametres.apparence.couleurPrimaire,
+        couleurPrimaire:   parametres.apparence.couleurPrimaire,
         couleurSecondaire: parametres.apparence.couleurSecondaire,
-        logo: parametres.apparence.logo,
+        logo:    parametres.apparence.logo,
         favicon: parametres.apparence.favicon,
-        police: parametres.apparence.police,
+        police:  parametres.apparence.police,
         paiement: {
-            carte: parametres.paiement.carte.actif,
-            mobile: parametres.paiement.mobile.actif,
-            mtn: parametres.paiement.mobile.mtn,
-            orange: parametres.paiement.mobile.orange,
-            cash: parametres.paiement.cash.actif,
-            devise: parametres.paiement.devise
+            carte:   parametres.paiement.carte.actif,
+            mobile:  parametres.paiement.mobile.actif,
+            mtn:     parametres.paiement.mobile.mtn,
+            orange:  parametres.paiement.mobile.orange,
+            cash:    parametres.paiement.cash.actif,
+            devise:  parametres.paiement.devise
         },
         livraison: parametres.livraison
     };
@@ -3207,7 +2506,7 @@ window.getShopSettings = function() {
 
 window.getZonesLivraison = function() {
     const zones = [
-        { nom: 'Douala', frais: parametres.livraison?.fraisDouala || 1000 },
+        { nom: 'Douala',       frais: parametres.livraison?.fraisDouala || 1000 },
         { nom: 'Autres villes', frais: parametres.livraison?.fraisAutres || 2500 }
     ];
     if (parametres.livraison?.zonesPersonnalisees) {
@@ -3216,80 +2515,921 @@ window.getZonesLivraison = function() {
     return zones;
 };
 
-// INITIALISATION PRINCIPALE
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('⚙️ Initialisation de la page Paramètres...');
-    
-    await verifierAuthentification();
-    initialiserMenuHamburger();
-    await chargerParametres();
-    initialiserNavigation();
-    initialiserFormulaires();
-    initialiserIdentifiant();
-    initialiserPaiement();
-    initialiserApparence();
-    initialiserZonesLivraison();
-    initialiserMobileMoney();
-    initialiserMenuMobileAndroid();
-    
-    const premiereSection = document.querySelector('.settings-section');
-    if (premiereSection) premiereSection.style.display = 'block';
-    
-    console.log('✅ Initialisation terminée');
-    console.log('%c⚙️ Paramètres - Ma Boutique Élégante', 'color: #007AFF; font-size: 20px; font-weight: bold;');
-    console.log('%c✅ Toutes les fonctionnalités chargées', 'color: #34C759; font-size: 14px; font-weight: 500;');
-});
-// ==================== EXPOSER CONFIG PAIEMENT (NOUVELLE FONCTION) ====================
-async function exposerConfigurationPaiement() {
+window.exporterDonnees = async function() {
+    if (!confirm('Voulez-vous exporter toutes vos données ?')) return;
     try {
-        if (!parametres.identifiant?.slug) {
-            console.warn('⚠ Aucun identifiant boutique défini');
-            return;
-        }
+        const { data: produits }  = await supabase.from('produits').select('*').eq('user_id', currentUser.id);
+        const { data: commandes } = await supabase.from('commandes').select('*').eq('user_id', currentUser.id);
+        const donnees = { parametres, produits: produits || [], commandes: commandes || [], date: new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
+        const url  = URL.createObjectURL(blob);
+        const a = Object.assign(document.createElement('a'), { href: url, download: `export_boutique_${new Date().toISOString().split('T')[0]}.json` });
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        afficherNotification('📥 Données exportées avec succès', 'success');
+    } catch (_) {
+        afficherNotification('❌ Erreur lors de l\'export', 'error');
+    }
+};
 
-        const configPublique = {
-            paiement: {
-                mobile: {
-                    actif: parametres.paiement?.mobile?.actif || false,
-                    mtn: parametres.paiement?.mobile?.mtn?.actif ? {
-                        actif: true,
-                        nomCompte: parametres.paiement.mobile.mtn.nomCompte || '',
-                        numero: parametres.paiement.mobile.mtn.numero || ''
-                    } : { actif: false },
-                    orange: parametres.paiement?.mobile?.orange?.actif ? {
-                        actif: true,
-                        nomCompte: parametres.paiement.mobile.orange.nomCompte || '',
-                        numero: parametres.paiement.mobile.orange.numero || ''
-                    } : { actif: false }
-                },
-                cash: {
-                    actif: parametres.paiement?.cash?.actif || false
-                },
-                devise: parametres.paiement?.devise || 'FCFA'
+window.supprimerCompte = async function() {
+    const conf = prompt('⚠️ ATTENTION ! Cette action est irréversible.\n\nTapez "SUPPRIMER" pour confirmer :');
+    if (conf !== 'SUPPRIMER') { afficherNotification('❌ Suppression annulée', 'info'); return; }
+    try {
+        afficherNotification('⏳ Suppression en cours...', 'info');
+        await supabase.from('produits').delete().eq('user_id', currentUser.id);
+        await supabase.from('commandes').delete().eq('user_id', currentUser.id);
+        await supabase.from('parametres_boutique').delete().eq('user_id', currentUser.id);
+        localStorage.clear(); sessionStorage.clear();
+        afficherNotification('🗑️ Compte supprimé. Redirection...', 'success');
+        setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+    } catch (_) {
+        afficherNotification('❌ Erreur lors de la suppression', 'error');
+    }
+};
+// ==================== PARTIE 2/4 : NAVIGATION & MENUS ====================
+
+function initialiserMenuHamburger() {
+    const btn     = document.getElementById('hamburgerBtn');
+    const menu    = document.getElementById('hamburgerMenu');
+    const overlay = document.getElementById('hamburgerOverlay');
+    const close   = document.getElementById('closeMenu');
+
+    const fermer = () => {
+        btn?.classList.remove('active');
+        menu?.classList.remove('active');
+        overlay?.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+
+    btn?.addEventListener('click', () => {
+        const opening = !menu?.classList.contains('active');
+        btn.classList.toggle('active');
+        menu?.classList.toggle('active');
+        overlay?.classList.toggle('active');
+        document.body.style.overflow = opening ? 'hidden' : '';
+    });
+
+    close?.addEventListener('click', fermer);
+    overlay?.addEventListener('click', fermer);
+    document.querySelectorAll('.hamburger-link').forEach(l => l.addEventListener('click', () => setTimeout(fermer, 300)));
+}
+
+function initialiserNavigation() {
+    document.querySelectorAll('.settings-menu-link').forEach(lien => {
+        lien.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.querySelectorAll('.settings-menu-link').forEach(l => l.classList.remove('active'));
+            lien.classList.add('active');
+            document.querySelectorAll('.settings-section').forEach(s => s.style.display = 'none');
+            const section = document.getElementById(lien.getAttribute('data-section'));
+            if (section) {
+                section.style.display = 'block';
+                if (window.innerWidth <= 768) window.scrollTo({ top: 0, behavior: 'smooth' });
             }
-        };
+        });
+    });
+}
 
-        // Sauvegarder dans localStorage avec clé standardisée
-        localStorage.setItem('parametres_boutique', JSON.stringify({
-            ...parametres,
-            configPublique: configPublique
-        }));
-
-        console.log('✅ Configuration paiement exposée:', configPublique);
-        
-    } catch (error) {
-        console.error('❌ Erreur exposition config:', error);
+function naviguerVersSection(sectionId) {
+    document.querySelectorAll('.settings-section').forEach(s => s.style.display = 'none');
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.querySelectorAll('.settings-menu-link').forEach(l => {
+            l.classList.toggle('active', l.getAttribute('data-section') === sectionId);
+        });
     }
 }
 
-// ✅ Appeler automatiquement à chaque sauvegarde
-const sauvegarderParametresOriginal = sauvegarderParametres;
-sauvegarderParametres = async function() {
-    const result = await sauvegarderParametresOriginal();
-    await exposerConfigurationPaiement();
-    return result;
+// ==================== MENU MOBILE ANDROID ====================
+function creerMenuMobileAndroid() {
+    if (window.innerWidth > 768) return;
+    document.getElementById('menu-mobile-android')?.remove();
+
+    const menuMobile = document.createElement('div');
+    menuMobile.id = 'menu-mobile-android';
+
+    const items = [
+        { icon: '🏪', label: 'Général',       section: 'general' },
+        { icon: '🔖', label: 'Identifiant',   section: 'identifiant' },
+        { icon: '💳', label: 'Paiement',      section: 'payment' },
+        { icon: '📦', label: 'Livraison',     section: 'shipping' },
+        { icon: '🔔', label: 'Notifications', section: 'notifications' },
+        { icon: '🔒', label: 'Sécurité',      section: 'security' },
+        { icon: '🎨', label: 'Apparence',     section: 'apparence' }
+    ];
+
+    items.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'menu-mobile-btn';
+        btn.dataset.section = item.section;
+        const sectionEl = document.getElementById(item.section);
+        const isActive  = sectionEl && sectionEl.style.display !== 'none';
+        if (isActive) btn.classList.add('active');
+
+        const iconSpan  = document.createElement('span');
+        iconSpan.className = 'link-icon';
+        iconSpan.textContent = item.icon;
+
+        const labelSpan = document.createElement('span');
+        labelSpan.textContent = item.label;
+
+        btn.appendChild(iconSpan);
+        btn.appendChild(labelSpan);
+
+        if (isActive) {
+            const dot = document.createElement('div');
+            dot.className = 'active-indicator';
+            btn.appendChild(dot);
+        }
+
+        btn.addEventListener('click', () => {
+            naviguerVersSection(item.section);
+            mettreAJourMenuActif(btn);
+        });
+
+        menuMobile.appendChild(btn);
+    });
+
+    document.body.appendChild(menuMobile);
+    document.body.style.paddingBottom = '85px';
+}
+
+function mettreAJourMenuActif(boutonActif) {
+    document.querySelectorAll('.menu-mobile-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.querySelector('.active-indicator')?.remove();
+    });
+    boutonActif.classList.add('active');
+    const dot = document.createElement('div');
+    dot.className = 'active-indicator';
+    boutonActif.appendChild(dot);
+
+    const icon = boutonActif.querySelector('.link-icon');
+    if (icon) {
+        icon.style.transform = 'scale(1.2)';
+        setTimeout(() => { icon.style.transform = 'scale(1)'; }, 200);
+    }
+    boutonActif.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+function initialiserMenuMobileAndroid() {
+    if (window.innerWidth <= 768) creerMenuMobileAndroid();
+
+    window.addEventListener('resize', () => {
+        const menu = document.getElementById('menu-mobile-android');
+        if (window.innerWidth > 768) {
+            if (menu) { menu.style.display = 'none'; document.body.style.paddingBottom = '0'; }
+        } else {
+            if (menu) { menu.style.display = 'flex'; document.body.style.paddingBottom = '90px'; }
+            else creerMenuMobileAndroid();
+        }
+    });
+
+    document.querySelectorAll('.settings-menu-link').forEach(link => {
+        link.addEventListener('click', () => {
+            const section = link.getAttribute('data-section');
+            if (section) {
+                const btn = document.querySelector(`.menu-mobile-btn[data-section="${section}"]`);
+                if (btn) mettreAJourMenuActif(btn);
+            }
+        });
+    });
+}
+
+// ==================== BOUTON NOTIFICATIONS ====================
+function ajouterBoutonNotifications() {
+    const container = document.querySelector('.header-actions');
+    if (!container || document.getElementById('btn-notifications')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'btn-notifications';
+    btn.className = 'icon-btn';
+    btn.innerHTML = '🔔';
+    btn.title = 'Activer les notifications';
+    btn.style.cssText = 'position:relative;background:linear-gradient(135deg,#FFD700,#FFA500);color:white;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.3s ease;border:none;font-size:1.2rem';
+
+    btn.addEventListener('click', async () => {
+        if (!window.notificationManager) return;
+        if (Notification.permission === 'default') {
+            const granted = await window.notificationManager.requestPermission();
+            if (granted) {
+                btn.style.background = 'linear-gradient(135deg,#34C759,#4CAF50)';
+                afficherNotification('✅ Notifications activées !', 'success');
+            }
+        } else if (Notification.permission === 'granted') {
+            afficherNotification('✅ Notifications déjà activées', 'success');
+        } else {
+            alert('❌ Notifications bloquées. Autorisez-les dans les paramètres du navigateur.');
+        }
+    });
+
+    if (Notification.permission === 'granted') btn.style.background = 'linear-gradient(135deg,#34C759,#4CAF50)';
+    else if (Notification.permission === 'denied') btn.style.background = 'linear-gradient(135deg,#FF3B30,#CC2F26)';
+
+    container.appendChild(btn);
+}
+document.addEventListener('DOMContentLoaded', ajouterBoutonNotifications);
+
+// ==================== FORMULAIRES GÉNÉRAUX ====================
+function initialiserFormulaires() {
+    // Formulaire général
+    document.getElementById('generalForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        parametres.general = {
+            nom:         document.getElementById('shopName')?.value        || '',
+            description: document.getElementById('shopDescription')?.value || '',
+            email:       document.getElementById('shopEmail')?.value       || '',
+            telephone:   document.getElementById('shopPhone')?.value       || '',
+            adresse:     document.getElementById('shopAddress')?.value     || ''
+        };
+        const ok = await sauvegarderParametres();
+        afficherNotification(ok ? '✅ Paramètres généraux enregistrés' : '⚠️ Sauvegardé localement', ok ? 'success' : 'warning');
+    });
+
+    // Formulaire livraison
+    document.getElementById('shippingForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        sauvegarderZonesLivraison();
+        parametres.livraison = {
+            fraisDouala:      parseInt(document.getElementById('fraisDouala')?.value)  || 0,
+            fraisAutres:      parseInt(document.getElementById('fraisAutres')?.value)  || 0,
+            delai:            document.getElementById('delaiLivraison')?.value         || '',
+            livraisonGratuite: document.getElementById('freeShipping')?.checked        || false,
+            montantMinimum:   parseInt(document.getElementById('montantMinimum')?.value) || 0,
+            zonesPersonnalisees: parametres.livraison.zonesPersonnalisees || []
+        };
+        const ok = await sauvegarderParametres();
+        afficherNotification(ok ? '📦 Options de livraison sauvegardées' : '⚠️ Sauvegardé localement', ok ? 'success' : 'warning');
+    });
+
+    // Formulaire sécurité
+    document.getElementById('securityForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const current = document.getElementById('currentPassword')?.value;
+        const nouveau = document.getElementById('newPassword')?.value;
+        const confirm = document.getElementById('confirmPassword')?.value;
+
+        if (!current || !nouveau || !confirm) { afficherNotification('⚠️ Veuillez remplir tous les champs', 'warning'); return; }
+        if (nouveau !== confirm)              { afficherNotification('❌ Les mots de passe ne correspondent pas', 'error'); return; }
+        if (nouveau.length < 8)              { afficherNotification('⚠️ Mot de passe trop court (min 8 caractères)', 'warning'); return; }
+
+        try {
+            const { error } = await supabase.auth.updateUser({ password: nouveau });
+            if (error) throw error;
+            document.getElementById('securityForm').reset();
+            afficherNotification('🔒 Mot de passe modifié avec succès', 'success');
+        } catch (_) {
+            afficherNotification('❌ Erreur lors du changement de mot de passe', 'error');
+        }
+    });
+
+    // Notifications
+    [
+        { id: 'notifOrders',  key: 'commandes' },
+        { id: 'notifStock',   key: 'stock' },
+        { id: 'notifClients', key: 'clients' },
+        { id: 'notifReports', key: 'rapports' }
+    ].forEach(({ id, key }) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', async () => {
+            parametres.notifications[key] = el.checked;
+            await sauvegarderParametres();
+            afficherNotification('🔔 Préférences de notifications mises à jour', 'info');
+        });
+    });
+
+    // Devise
+    document.getElementById('currency')?.addEventListener('change', async (e) => {
+        parametres.paiement.devise = e.target.value;
+        await sauvegarderParametres();
+        afficherNotification('💱 Devise mise à jour', 'info');
+    });
+}
+
+// ==================== IDENTIFIANT ====================
+function initialiserIdentifiant() {
+    const slugInput   = document.getElementById('shopSlug');
+    const slugPreview = document.getElementById('slugPreview');
+    const urlBase     = document.getElementById('urlBase');
+    let timeout;
+
+    if (urlBase) urlBase.textContent = `${window.location.origin}/boutique.html`;
+
+    slugInput?.addEventListener('input', (e) => {
+        const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/--+/g, '-').substring(0, 50);
+        e.target.value = val;
+        if (slugPreview) slugPreview.textContent = val || 'votre-identifiant';
+        clearTimeout(timeout);
+        if (val.length >= 3) timeout = setTimeout(() => verifierDisponibiliteSlug(val), 500);
+        else _setSlugStatus('', '');
+    });
+
+    document.getElementById('identifiantForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const slug = slugInput?.value.trim();
+        if (!slug)         { afficherNotification('⚠️ Veuillez entrer un identifiant', 'warning'); return; }
+        if (slug.length < 3) { afficherNotification('⚠️ L\'identifiant doit contenir au moins 3 caractères', 'warning'); return; }
+
+        const dispo = await verifierDisponibiliteSlug(slug);
+        if (!dispo && parametres.identifiant?.slug !== slug) {
+            afficherNotification('❌ Cet identifiant est déjà utilisé', 'error');
+            return;
+        }
+
+        parametres.identifiant = {
+            slug,
+            disponible: true,
+            auto: false,
+            dateCreation:     parametres.identifiant?.dateCreation || new Date().toISOString(),
+            dateModification: new Date().toISOString()
+        };
+        parametres.slug = slug;
+
+        const ok = await sauvegarderParametres();
+        if (ok) {
+            afficherNotification('🔖 Identifiant unique enregistré avec succès', 'success');
+            afficherIdentifiantActuel();
+        } else {
+            afficherNotification('⚠️ Sauvegardé localement uniquement', 'warning');
+        }
+    });
+}
+// ==================== PARTIE 3/4 : PAIEMENT, LIVRAISON & MOBILE MONEY ====================
+
+// ==================== PAIEMENT ====================
+function initialiserPaiement() {
+    _initTogglePaiement('paymentCard',   'cardDetails',   'carte');
+    _initTogglePaiement('paymentMobile', 'mobileDetails', 'mobile');
+    _initTogglePaiement('paymentCash',   'cashDetails',   'cash');
+}
+
+function _initTogglePaiement(checkboxId, detailsId, key) {
+    const cb      = document.getElementById(checkboxId);
+    const details = document.getElementById(detailsId);
+    if (!cb) return;
+
+    cb.addEventListener('change', async () => {
+        if (details) details.style.display = cb.checked ? 'block' : 'none';
+        parametres.paiement[key].actif = cb.checked;
+        await sauvegarderParametres();
+    });
+
+    if (cb.checked && details) details.style.display = 'block';
+}
+
+window.confirmerPaiement = async function(type) {
+    if (type === 'card') {
+        const cle = document.getElementById('stripeKey')?.value;
+        if (!cle) { afficherNotification('⚠️ Veuillez entrer votre clé API Stripe', 'warning'); return; }
+        parametres.paiement.carte.cle      = cle;
+        parametres.paiement.carte.confirme = true;
+    } else if (type === 'cash') {
+        parametres.paiement.cash.confirme = true;
+    }
+    const ok = await sauvegarderParametres();
+    afficherNotification(ok
+        ? `✅ ${type === 'card' ? 'Carte bancaire' : 'Paiement à la livraison'} configuré`
+        : '⚠️ Sauvegardé localement',
+        ok ? 'success' : 'warning');
 };
+
+// ==================== MOBILE MONEY ====================
+function initialiserMobileMoney() {
+    const paymentMobile = document.getElementById('paymentMobile');
+    const mobileDetails = document.getElementById('mobileDetails');
+
+    // Éviter double-listener avec initialiserPaiement — on écoute juste l'affichage ici
+    if (paymentMobile?.checked && mobileDetails) mobileDetails.style.display = 'block';
+
+    // MTN
+    const mtnActive = document.getElementById('mtnActive');
+    const mtnInputs = document.getElementById('mtnInputs');
+    if (mtnActive) {
+        mtnActive.addEventListener('change', async () => {
+            if (mtnInputs) mtnInputs.style.display = mtnActive.checked ? 'block' : 'none';
+            parametres.paiement.mobile.mtn.actif = mtnActive.checked;
+            await sauvegarderParametres();
+            afficherNotification(mtnActive.checked ? '✅ MTN Money activé' : '❌ MTN Money désactivé', 'info');
+        });
+        if (parametres.paiement.mobile.mtn) {
+            mtnActive.checked = parametres.paiement.mobile.mtn.actif || false;
+            if (mtnActive.checked && mtnInputs) mtnInputs.style.display = 'block';
+            const nom = document.getElementById('mtnNomCompte');
+            const num = document.getElementById('mtnNumero');
+            if (nom) nom.value = parametres.paiement.mobile.mtn.nomCompte || '';
+            if (num) num.value = parametres.paiement.mobile.mtn.numero    || '';
+        }
+    }
+
+    // Orange
+    const orangeActive = document.getElementById('orangeActive');
+    const orangeInputs = document.getElementById('orangeInputs');
+    if (orangeActive) {
+        orangeActive.addEventListener('change', async () => {
+            if (orangeInputs) orangeInputs.style.display = orangeActive.checked ? 'block' : 'none';
+            parametres.paiement.mobile.orange.actif = orangeActive.checked;
+            await sauvegarderParametres();
+            afficherNotification(orangeActive.checked ? '✅ Orange Money activé' : '❌ Orange Money désactivé', 'info');
+        });
+        if (parametres.paiement.mobile.orange) {
+            orangeActive.checked = parametres.paiement.mobile.orange.actif || false;
+            if (orangeActive.checked && orangeInputs) orangeInputs.style.display = 'block';
+            const nom = document.getElementById('orangeNomCompte');
+            const num = document.getElementById('orangeNumero');
+            if (nom) nom.value = parametres.paiement.mobile.orange.nomCompte || '';
+            if (num) num.value = parametres.paiement.mobile.orange.numero    || '';
+        }
+    }
+
+    // Bouton Confirmer Mobile Money
+    document.getElementById('confirmerMobileMoney')?.addEventListener('click', async () => {
+        const mtnOn    = document.getElementById('mtnActive')?.checked;
+        const orangeOn = document.getElementById('orangeActive')?.checked;
+
+        if (!mtnOn && !orangeOn) {
+            afficherNotification('⚠️ Veuillez activer au moins MTN Money ou Orange Money', 'warning');
+            return;
+        }
+
+        const erreurs = [];
+        const RE_TEL  = /^\+237[67]\d{8}$/;
+
+        if (mtnOn) {
+            const nom = document.getElementById('mtnNomCompte')?.value.trim();
+            const num = document.getElementById('mtnNumero')?.value.replace(/\s/g, '');
+            if (!nom) erreurs.push('Nom du compte MTN Money manquant');
+            if (!num) erreurs.push('Numéro MTN Money manquant');
+            else if (!RE_TEL.test(num)) erreurs.push('Format numéro MTN Money invalide (+237XXXXXXXXX)');
+            if (erreurs.length === 0) {
+                parametres.paiement.mobile.mtn = { actif: true, nomCompte: nom, numero: num, confirme: true };
+            }
+        } else {
+            parametres.paiement.mobile.mtn = { ...parametres.paiement.mobile.mtn, actif: false };
+        }
+
+        if (orangeOn) {
+            const nom = document.getElementById('orangeNomCompte')?.value.trim();
+            const num = document.getElementById('orangeNumero')?.value.replace(/\s/g, '');
+            if (!nom) erreurs.push('Nom du compte Orange Money manquant');
+            if (!num) erreurs.push('Numéro Orange Money manquant');
+            else if (!RE_TEL.test(num)) erreurs.push('Format numéro Orange Money invalide (+237XXXXXXXXX)');
+            if (erreurs.filter(e => e.includes('Orange')).length === 0) {
+                parametres.paiement.mobile.orange = { actif: true, nomCompte: nom, numero: num, confirme: true };
+            }
+        } else {
+            parametres.paiement.mobile.orange = { ...parametres.paiement.mobile.orange, actif: false };
+        }
+
+        if (erreurs.length > 0) {
+            erreurs.forEach(err => afficherNotification(`❌ ${err}`, 'error'));
+            return;
+        }
+
+        parametres.paiement.mobile.confirme = true;
+        const ok = await sauvegarderParametres();
+        afficherNotification(ok ? '✅ Mobile Money configuré avec succès !' : '⚠️ Sauvegardé localement', ok ? 'success' : 'warning');
+    });
+}
+
+// ==================== ZONES DE LIVRAISON ====================
+function initialiserZonesLivraison() {
+    document.getElementById('ajouterZone')?.addEventListener('click', () => ajouterZoneLivraison());
+
+    if (parametres.livraison.zonesPersonnalisees?.length > 0) {
+        parametres.livraison.zonesPersonnalisees.forEach(zone => ajouterZoneLivraison(zone));
+        const empty = document.getElementById('emptyZonesMessage');
+        if (empty) empty.style.display = 'none';
+    }
+}
+
+function ajouterZoneLivraison(zoneExistante = null) {
+    const container = document.getElementById('zonesContainer');
+    if (!container) return;
+
+    const zoneId  = Date.now();
+    const zoneCard = document.createElement('div');
+    zoneCard.className      = 'zone-card';
+    zoneCard.dataset.zoneId = zoneId;
+    zoneCard.style.cssText  = 'background:var(--bg-primary);padding:16px;border-radius:12px;margin-bottom:12px;opacity:0;transform:translateY(10px);transition:all 0.3s ease';
+
+    zoneCard.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <span style="font-weight:600">📍 Zone ${container.children.length + 1}</span>
+            <button type="button" onclick="supprimerZone(${zoneId})" style="padding:6px 12px;background:var(--danger-color);color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem">🗑️ Supprimer</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+                <label style="font-size:0.85rem">Nom du lieu</label>
+                <input type="text" class="form-input zone-nom" placeholder="Ex: Yaoundé" value="${zoneExistante?.nom || ''}" style="font-size:0.9rem">
+            </div>
+            <div>
+                <label style="font-size:0.85rem">Frais (FCFA)</label>
+                <input type="number" class="form-input zone-frais" placeholder="0" value="${zoneExistante?.frais || ''}" min="0" style="font-size:0.9rem">
+            </div>
+        </div>
+    `;
+
+    container.appendChild(zoneCard);
+    document.getElementById('emptyZonesMessage')?.style.setProperty('display', 'none');
+
+    setTimeout(() => { zoneCard.style.opacity = '1'; zoneCard.style.transform = 'translateY(0)'; }, 10);
+    zoneCard.querySelectorAll('input').forEach(inp => inp.addEventListener('change', sauvegarderZonesLivraison));
+}
+
+window.supprimerZone = function(zoneId) {
+    if (!confirm('Voulez-vous vraiment supprimer cette zone de livraison ?')) return;
+    const card = document.querySelector(`[data-zone-id="${zoneId}"]`);
+    if (!card) return;
+    card.style.animation = 'fadeOut 0.3s ease';
+    setTimeout(() => {
+        card.remove();
+        sauvegarderZonesLivraison();
+        const container = document.getElementById('zonesContainer');
+        const empty     = document.getElementById('emptyZonesMessage');
+        if (container?.children.length === 0 && empty) empty.style.display = 'block';
+    }, 300);
+};
+
+function sauvegarderZonesLivraison() {
+    const zones = [];
+    document.querySelectorAll('.zone-card').forEach(card => {
+        const nom   = card.querySelector('.zone-nom')?.value.trim();
+        const frais = parseInt(card.querySelector('.zone-frais')?.value) || 0;
+        if (nom) zones.push({ nom, frais });
+    });
+    parametres.livraison.zonesPersonnalisees = zones;
+}
+// ==================== PARTIE 4/4 : APPARENCE & INITIALISATION ====================
+
+// ==================== APPARENCE ====================
+function initialiserApparence() {
+
+// --- Couleur Primaire ---
+const primaryInput   = document.getElementById('primaryColor');
+const primaryHex     = document.getElementById('primaryColorHex');
+const primaryPreview = document.getElementById('primaryColorPreview');
+
+primaryInput?.addEventListener('input', (e) => {
+    const c = e.target.value;
+    parametres.apparence.couleurPrimaire = c;
+    if (primaryPreview) primaryPreview.style.background = c;
+    if (primaryHex)     primaryHex.value = c.toUpperCase();
+    document.documentElement.style.setProperty('--primary-color', c);
+});
+
+// --- Couleur Secondaire ---
+const secondaryInput   = document.getElementById('secondaryColor');
+const secondaryHex     = document.getElementById('secondaryColorHex');
+const secondaryPreview = document.getElementById('secondaryColorPreview');
+
+secondaryInput?.addEventListener('input', (e) => {
+    const c = e.target.value;
+    parametres.apparence.couleurSecondaire = c;
+    if (secondaryPreview) secondaryPreview.style.background = c;
+    if (secondaryHex)     secondaryHex.value = c.toUpperCase();
+    document.documentElement.style.setProperty('--secondary-color', c);
+});
+
+// --- TYPOGRAPHIE ---
+const POLICES = [
+    'Inter','Poppins','Nunito','DM Sans','Plus Jakarta Sans','Outfit',
+    'Montserrat','Raleway','Josefin Sans','Lato','Open Sans','Roboto',
+    'Playfair Display','Cormorant Garamond','Libre Baskerville','DM Serif Display',
+    'Pacifico','Righteous','Bebas Neue','Abril Fatface'
+];
+
+// Précharger toutes les polices pour les cartes d'aperçu
+POLICES.forEach(p => {
+    const id = 'gf-' + p.replace(/\s/g, '-');
+    if (!document.getElementById(id)) {
+        const link = document.createElement('link');
+        link.id   = id;
+        link.rel  = 'stylesheet';
+        link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(p)}:wght@300;400;500;600;700;800&display=swap`;
+        document.head.appendChild(link);
+    }
+});
+
+// appliquerPolice : uniquement sur les éléments preview — PAS sur document.body
+// La police s'appliquera sur boutique.html via appliquerTheme() au chargement
+function appliquerPolice(police) {
+    parametres.apparence.police = police;
+    const ids = [
+        'fontPreviewTitle','fontPreviewSubtitle','fontPreviewText',
+        'fontPreviewBadge','fontPreviewPrice','fontPreviewName'
+    ];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.fontFamily = `'${police}', sans-serif`;
+    });
+    const nameEl = document.getElementById('fontPreviewName');
+    if (nameEl) nameEl.textContent = `Police actuelle : ${police}`;
+}
+
+function genererCartesPolice(policeActive) {
+    const container = document.getElementById('fontPreviewCards');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const exemples = [
+        { police: 'Inter',              texte: 'Aa — The quick brown fox',  style: 'normal' },
+        { police: 'Playfair Display',   texte: 'Aa — La Boutique Élégante', style: 'italic' },
+        { police: 'Pacifico',           texte: 'Aa — Bienvenue chez nous',  style: 'normal' },
+        { police: 'Bebas Neue',         texte: 'AA — COLLECTION 2025',      style: 'normal' },
+        { police: 'Poppins',            texte: 'Aa — Style & Élégance',     style: 'normal' },
+        { police: 'Cormorant Garamond', texte: 'Aa — Haute Couture',        style: 'italic' },
+    ];
+
+    exemples.forEach(({ police, texte, style }) => {
+        const isActive = policeActive === police;
+        const card = document.createElement('div');
+        card.style.cssText = `
+            padding:14px 16px;border-radius:10px;cursor:pointer;transition:all 0.2s ease;
+            border:2px solid ${isActive ? 'var(--primary-color)' : 'var(--border-color)'};
+            background:${isActive ? 'rgba(0,122,255,0.05)' : '#fff'};
+        `;
+        card.innerHTML = `
+            <p style="font-family:'${police}',serif;font-size:1rem;font-style:${style};margin-bottom:4px;color:var(--text-primary)">${texte}</p>
+            <small style="font-size:0.75rem;color:var(--text-secondary);font-family:'Poppins',sans-serif">${police}</small>
+        `;
+        card.addEventListener('click', () => {
+            const sel = document.getElementById('fontFamily');
+            if (sel) sel.value = police;
+            appliquerPolice(police);
+            genererCartesPolice(police);
+        });
+        container.appendChild(card);
+    });
+}
+
+// Init police sauvegardée
+const fontSelect = document.getElementById('fontFamily');
+if (fontSelect) {
+    const saved = parametres.apparence?.police || 'Inter';
+    fontSelect.value = saved;
+    appliquerPolice(saved);
+    genererCartesPolice(saved);
+    fontSelect.addEventListener('change', (e) => {
+        appliquerPolice(e.target.value);
+        genererCartesPolice(e.target.value);
+    });
+}
+
+// --- BOUTON SAUVEGARDER avec effet visuel ---
+const saveBtn = document.getElementById('saveAppearance');
+if (saveBtn) {
+    saveBtn.addEventListener('click', async () => {
+        const originalHTML = saveBtn.innerHTML;
+        saveBtn.disabled   = true;
+        saveBtn.innerHTML  = `
+            <span style="display:inline-flex;align-items:center;gap:8px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                     style="animation:spin 0.8s linear infinite;flex-shrink:0">
+                    <path d="M12 2a10 10 0 1 0 10 10" stroke-linecap="round"/>
+                </svg>
+                Sauvegarde en cours...
+            </span>`;
+
+        const ok = await sauvegarderParametres();
+
+        saveBtn.innerHTML         = ok
+            ? `<span style="display:inline-flex;align-items:center;gap:6px">✅ Sauvegardé !</span>`
+            : `<span style="display:inline-flex;align-items:center;gap:6px">⚠️ Sauvegardé localement</span>`;
+        saveBtn.style.background  = ok ? '#34C759' : '#FF9500';
+        saveBtn.style.borderColor = ok ? '#34C759' : '#FF9500';
+        saveBtn.style.transform   = 'scale(1.03)';
+
+        setTimeout(() => {
+            saveBtn.innerHTML         = originalHTML;
+            saveBtn.style.background  = '';
+            saveBtn.style.borderColor = '';
+            saveBtn.style.transform   = '';
+            saveBtn.disabled          = false;
+        }, 2200);
+
+        afficherNotification(
+            ok ? '✅ Apparence sauvegardée — boutique.html mise à jour !' : '⚠️ Sauvegardé localement uniquement',
+            ok ? 'success' : 'warning'
+        );
+    });
+}
+
+// --- BOUTON RÉINITIALISER ---
+document.getElementById('resetAppearance')?.addEventListener('click', async () => {
+    if (!confirm('Voulez-vous vraiment réinitialiser l\'apparence par défaut ?')) return;
+    parametres.apparence = {
+        couleurPrimaire:   '#FF6B00',
+        couleurSecondaire: '#1A1A1A',
+        logo:    '',
+        favicon: '',
+        police:  'Inter'
+    };
+    appliquerParametres();
+    if (fontSelect) {
+        fontSelect.value = 'Inter';
+        appliquerPolice('Inter');
+        genererCartesPolice('Inter');
+    }
+    await sauvegarderParametres();
+    afficherNotification('✅ Apparence réinitialisée', 'success');
+});
+
+// --- UPLOAD LOGO ---
+document.getElementById('logoUpload')?.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (file) await traiterImageUpload(file, 'logo');
+});
+
+// --- UPLOAD FAVICON ---
+document.getElementById('faviconUpload')?.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (file) await traiterImageUpload(file, 'favicon');
+});
+
+// ==================== BOUTON PRÉVISUALISER SUR LA BOUTIQUE ====================
+const previewBtn    = document.getElementById('previewEcommerce');
+const previewModal  = document.getElementById('previewModal');
+const previewClose  = document.getElementById('previewModalClose');
+const previewFrame  = document.getElementById('previewIframe');
+const previewUrlEl  = document.getElementById('previewModalUrl');
+const previewOpen   = document.getElementById('previewOpenBtn');
+const previewReload = document.getElementById('previewReloadBtn');
+
+
+    const getBoutiqueUrl = () => {
+        // Priorité 1 : l'input #lienBoutique (déjà construit et fiable)
+        const lienInput = document.getElementById('lienBoutique');
+        if (lienInput?.value?.trim()) return lienInput.value.trim();
+
+        // Priorité 2 : reconstruire depuis le slug en mémoire
+        const slug = parametres.identifiant?.slug;
+        const base = `${window.location.origin}/boutique.html`;
+        if (slug) return `${base}?shop=${slug}`;
+
+  
+        return base;
+    };
+
+
+const syncAvantPreview = () => {
+    localStorage.setItem('parametres_boutique', JSON.stringify(parametres));
+    if (parametres.identifiant?.slug) {
+        localStorage.removeItem(`boutique_cache_${parametres.identifiant.slug}`);
+    }
+};
+
+const ouvrirPreview = () => {
+    syncAvantPreview();
+    const url = getBoutiqueUrl();
+    if (previewFrame)  previewFrame.src        = url;
+    if (previewUrlEl)  previewUrlEl.textContent = url;
+    if (previewOpen)   previewOpen.href         = url;
+    previewModal?.classList.add('active');
+    document.body.style.overflow = 'hidden';
+};
+
+const fermerPreview = () => {
+    previewModal?.classList.remove('active');
+    document.body.style.overflow = '';
+    // Vider l'iframe après l'animation pour libérer les ressources
+    setTimeout(() => { if (previewFrame) previewFrame.src = ''; }, 300);
+};
+
+previewBtn?.addEventListener('click', ouvrirPreview);
+previewClose?.addEventListener('click', fermerPreview);
+
+// Clic sur le fond sombre pour fermer
+previewModal?.addEventListener('click', (e) => {
+    if (e.target === previewModal) fermerPreview();
+});
+
+// Touche Échap pour fermer
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && previewModal?.classList.contains('active')) fermerPreview();
+});
+
+// Recharger l'iframe avec les toutes dernières modifications non encore sauvegardées
+previewReload?.addEventListener('click', () => {
+    syncAvantPreview();
+    if (previewFrame) previewFrame.src = getBoutiqueUrl();
+});
+}
+
+// ==================== PALETTE DE COULEURS ====================
+window.appliquerPalette = function(couleurPrimaire, couleurSecondaire) {
+const setColor = (inputId, hexId, previewId, valeur, key) => {
+    const input   = document.getElementById(inputId);
+    const hex     = document.getElementById(hexId);
+    const preview = document.getElementById(previewId);
+    if (input)   { input.value = valeur; parametres.apparence[key] = valeur; }
+    if (hex)     hex.value = valeur.toUpperCase();
+    if (preview) preview.style.background = valeur;
+    document.documentElement.style.setProperty(
+        `--${key === 'couleurPrimaire' ? 'primary' : 'secondary'}-color`, valeur
+    );
+};
+setColor('primaryColor',   'primaryColorHex',   'primaryColorPreview',   couleurPrimaire,   'couleurPrimaire');
+setColor('secondaryColor', 'secondaryColorHex', 'secondaryColorPreview', couleurSecondaire, 'couleurSecondaire');
+afficherNotification('🎨 Palette appliquée !', 'success');
+};
+
+// ==================== UPLOAD IMAGES ====================
+async function traiterImageUpload(file, type) {
+if (file.size > 2 * 1024 * 1024) {
+    afficherNotification('❌ Fichier trop volumineux (max 2MB)', 'error');
+    return;
+}
+if (!file.type.startsWith('image/')) {
+    afficherNotification('❌ Le fichier doit être une image', 'error');
+    return;
+}
+
+try {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const b64 = e.target.result;
+
+        if (type === 'logo') {
+            parametres.apparence.logo = b64;
+            const prev = document.getElementById('logoPreview');
+            if (prev) prev.innerHTML = `<img src="${b64}" alt="Logo" style="max-width:200px;max-height:100px;object-fit:contain">`;
+            afficherNotification('✅ Logo chargé', 'success');
+
+        } else if (type === 'favicon') {
+            parametres.apparence.favicon = b64;
+            const prev = document.getElementById('faviconPreview');
+            if (prev) prev.innerHTML = `<img src="${b64}" alt="Favicon" style="width:32px;height:32px;object-fit:contain">`;
+            let link = document.querySelector("link[rel*='icon']");
+            if (!link) {
+                link = document.createElement('link');
+                link.rel = 'icon';
+                document.head.appendChild(link);
+            }
+            link.href = b64;
+            afficherNotification('✅ Favicon chargé', 'success');
+        }
+
+        await sauvegarderParametres();
+    };
+    reader.readAsDataURL(file);
+} catch (e) {
+    console.error('Erreur upload:', e);
+    afficherNotification('❌ Erreur lors du chargement de l\'image', 'error');
+}
+}
+
+// ==================== INITIALISATION PRINCIPALE ====================
+document.addEventListener('DOMContentLoaded', async () => {
+console.log('⚙️ Initialisation Paramètres...');
+
+await verifierAuthentification();
+initialiserMenuHamburger();
+await chargerParametres();
+initialiserNavigation();
+initialiserFormulaires();
+initialiserIdentifiant();
+initialiserPaiement();
+initialiserApparence();
+initialiserZonesLivraison();
+initialiserMobileMoney();
+initialiserMenuMobileAndroid();
+
+// Afficher la première section par défaut
+const first = document.querySelector('.settings-section');
+if (first) first.style.display = 'block';
+
+console.log('%c⚙️ Paramètres prêts', 'color:#007AFF;font-size:16px;font-weight:bold');
+console.log('%c✅ Toutes les fonctionnalités chargées', 'color:#34C759;font-size:13px');
+});
  </script>
-    
+   <!-- ==================== MODAL PREVIEW BOUTIQUE ==================== -->
+<div id="previewModal">
+    <div class="preview-modal-box">
+        <!-- Barre type navigateur -->
+        <div class="preview-modal-bar">
+            <div class="preview-modal-dots">
+                <span></span><span></span><span></span>
+            </div>
+            <div class="preview-modal-url" id="previewModalUrl">boutique.html</div>
+            <button class="preview-modal-close" id="previewModalClose" title="Fermer">✕</button>
+        </div>
+
+        <!-- iFrame boutique -->
+        <iframe class="preview-modal-iframe" id="previewIframe" src="" title="Aperçu boutique"></iframe>
+
+        <!-- Footer actions -->
+        <div class="preview-modal-footer">
+            <button class="preview-reload-btn" id="previewReloadBtn">
+                🔄 Recharger
+            </button>
+            <a class="preview-open-btn" id="previewOpenBtn" href="#" target="_blank">
+                🔗 Ouvrir dans un onglet
+            </a>
+        </div>
+    </div>
+</div> 
 </body>
 </html>
