@@ -9,10 +9,11 @@
     <link rel="icon" type="image/png" href="oda.jpg">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="notifications.js"></script>
+    <link rel="manifest" href="manifest.json">
 </head>
 <style>
     /* ==================== VARIABLES ==================== */
-:root {
+    :root {
     --primary-color: #FF6B00;
     --primary-dark: #E55D00;
     --secondary-color: #1A1A1A;
@@ -30,6 +31,7 @@
     --radius-md: 12px;
     --radius-lg: 16px;
     --transition: 0.3s ease;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* ==================== RESET ==================== */
@@ -41,7 +43,7 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--font-family);
     background: var(--bg-secondary);
     color: var(--text-primary);
     line-height: 1.6;
@@ -153,7 +155,7 @@ body {
     border: none;
     background: transparent;
     font-size: 0.95rem;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-family);
     color: var(--text-primary);
     outline: none;
 }
@@ -364,7 +366,7 @@ body {
     border-radius: var(--radius-md);
     font-size: 0.85rem;
     font-weight: 600;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-family);
     cursor: pointer;
     min-width: 140px;
 }
@@ -741,13 +743,23 @@ body {
     position: relative;
 }
 
-@keyframes slideUp {
-    from {
-        transform: translateY(100%);
-    }
-    to {
-        transform: translateY(0);
-    }
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-40px) translateY(20px) scale(0.95); }
+    to   { opacity: 1; transform: translateX(0)     translateY(0)    scale(1); }
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(40px)  translateY(20px) scale(0.95); }
+    to   { opacity: 1; transform: translateX(0)     translateY(0)    scale(1); }
+}
+
+.product-card {
+    will-change: transform, opacity;
 }
 
 .btn-close-modal {
@@ -2812,11 +2824,10 @@ textarea.form-input-new {
 <audio id="chat-notification-sound" preload="auto">
     <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBiqH0fPPgjMGHm7A7+OZSA0PVqzn77BdGQg+ltryy3osCSZ8zPLaizsGGGe47+SUSQwPU6bl8bViFQU7k9r0wmsrCCOBzfHWhTcIFmSz7OiwWhoIOZPY88t1LAYjfM3x3I0+CRZiturqsF0bCDmS2PPLdS0GI3vN8dyNPgoWYrbs6rBdGwg5k9jzy3UtBiN7zfHajT4KFmG26uiwXhoHOZPY88t1LAYjfM3y3I0+CRZiturqsF0bCDmS2PPLdS0GI3vN8dyNPgoWYrbs6rBdGwg5k9jzy3UtBiN7zfHajT4KFmG26uiwXhoHOZPY88t1LAYjfM3y3I0+CRZiturqsF0bCDmS2PPLdS0GI3vN8dyNPgoWYrbs6rBdGwg5k9jzy3UtBiN7zfHajT4KFmG26uiwXhoHOZPY88t1LAYjfM3y3I0+CRZiturqsF0bCDmS2PPLdS0GI3vN8dyNPgoWYrbs6rBdGwg5k9jzy3UtBiN7zfHajT4KFmG26uiwXhoHOZPY88t1LAYjfM3y3I0+CRZiturqsF0bCDmS2PPLdS0GI3vN8dyNPgoWYrbs6rBdGwg5k9jzy3UtBiN7zfHajT4KFmG26uiwXhoHOZPY88t1LAYjfM3y3I0+CRZiturqsF0bCDmS2PPLdS0GI3vN8dyNPgoWYrbs6rBdGwg5k9jzy3UtBiN7zfHajT4KFmG26uiwXhoHOZPY88t1LAYjfM3y3I0+CRZiturqsF0bCDmS2PPLdS0GI3vN8dyNPgoWYrbs6rBdGwg5k9jzy3UtBiN7zfHajT4KFmG26uiwXhoHOZPY88t1LAYjfM3y3I0+CRZiturqsF0bCDmS2PPLdS0GI3vN8dyNPgoWYrbs6rBdGwg5k9jzy3UtBiN7zfHajT4KFmG26uiwXhoHOZPY88t1LAYjfM3y3I0+CRZiturqsF0bCDmS2PPLdS0GI3vN8dyNPgoWYrbs6rBdGwg5k9jzy3UtBiN7zfHajT4KFmG26uiwXhoH" type="audio/wav">
 </audio>
-
+<script src="cache-manager.js"></script>
 <script type="module">
-    // ==================== PARTIE 1/5 : CONFIGURATION & CHARGEMENT ====================
-
-// ==================== CONFIGURATION SUPABASE ====================
+    
+  
 const SUPABASE_URL = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2ticWJxeGN3emNybG11dnpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MTk1MzMsImV4cCI6MjA3NjA5NTUzM30.AMzAUwtjFt7Rvof5r2enMyYIYToc1wNWWEjvZqK_YXM';
 
@@ -3410,8 +3421,13 @@ function appliquerTheme() {
         }
         
         if (parametres.apparence?.police) {
-            document.body.style.fontFamily = `'${parametres.apparence.police}', -apple-system, BlinkMacSystemFont, sans-serif`;
-            chargerGoogleFont(parametres.apparence.police);
+            const police = parametres.apparence.police;
+            chargerGoogleFont(police);
+            // Attendre que la police soit chargée avant de l'appliquer
+            document.fonts.ready.then(() => {
+                const famille = `'${police}', -apple-system, BlinkMacSystemFont, sans-serif`;
+                root.style.setProperty('--font-family', famille);
+            });
         }
         
         console.log('🎨 Thème appliqué avec succès');
@@ -3422,19 +3438,24 @@ function appliquerTheme() {
 }
 
 function chargerGoogleFont(police) {
-    const policesDisponibles = ['Inter', 'Poppins', 'Roboto', 'Montserrat', 'Open Sans', 'Lato', 'Raleway', 'Playfair Display'];
-    
-    if (policesDisponibles.includes(police)) {
-        const linkId = 'google-font-' + police.replace(/\s/g, '-');
-        
-        if (!document.getElementById(linkId)) {
-            const link = document.createElement('link');
-            link.id = linkId;
-            link.rel = 'stylesheet';
-            link.href = `https://fonts.googleapis.com/css2?family=${police.replace(/\s/g, '+')}:wght@300;400;500;600;700;800&display=swap`;
-            document.head.appendChild(link);
-        }
-    }
+    // Liste complète identique à parametres.html
+    const policesDisponibles = [
+        'Inter','Poppins','Nunito','DM Sans','Plus Jakarta Sans','Outfit',
+        'Montserrat','Raleway','Josefin Sans','Lato','Open Sans','Roboto',
+        'Playfair Display','Cormorant Garamond','Libre Baskerville','DM Serif Display',
+        'Pacifico','Righteous','Bebas Neue','Abril Fatface'
+    ];
+
+    if (!policesDisponibles.includes(police)) return;
+
+    const linkId = 'google-font-' + police.replace(/\s/g, '-');
+    if (document.getElementById(linkId)) return;
+
+    const link = document.createElement('link');
+    link.id   = linkId;
+    link.rel  = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(police)}:wght@300;400;500;600;700;800&display=swap`;
+    document.head.appendChild(link);
 }
 
 function hexToRgb(hex) {
@@ -3568,37 +3589,57 @@ function mettreAJourBadgePanier() {
 
 // ==================== AFFICHAGE DES PRODUITS ====================
 function afficherProduits() {
-    const grid = document.getElementById('productsGrid');
+    const grid       = document.getElementById('productsGrid');
     const emptyState = document.getElementById('emptyState');
-    
+
     if (!grid) return;
-    
+
     grid.innerHTML = '';
-    
+
     if (filteredProduits.length === 0) {
         grid.style.display = 'none';
         if (emptyState) emptyState.style.display = 'flex';
         return;
     }
-    
+
     grid.style.display = 'grid';
     if (emptyState) emptyState.style.display = 'none';
-    
+
+    // Observer scroll reveal — déclenche l'animation quand la carte entre dans le viewport
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animationPlayState = 'running';
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
+
     filteredProduits.forEach((produit, index) => {
         const card = document.createElement('div');
         card.className = 'product-card';
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        card.style.animation = `fadeInUp 0.4s ease ${index * 0.05}s forwards`;
-        
+
+        // Colonne gauche (index pair)  → glisse depuis la gauche
+        // Colonne droite (index impair) → glisse depuis la droite
+        const isLeft = index % 2 === 0;
+        const delay  = Math.floor(index / 2) * 0.09; // délai croissant par ligne
+        const anim   = isLeft ? 'slideInLeft' : 'slideInRight';
+
+        card.style.cssText = `
+            opacity: 0;
+            animation: ${anim} 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}s forwards;
+            animation-play-state: paused;
+            will-change: transform, opacity;
+        `;
+
         card.innerHTML = `
             <div class="product-image-container">
                 <img src="${produit.mainImage || 'https://via.placeholder.com/300'}" 
                      class="product-image" 
                      alt="${produit.nom}"
+                     loading="lazy"
                      onerror="this.src='https://via.placeholder.com/300?text=Produit'">
                 ${produit.stock < 5 ? `<span class="product-badge">Stock limité</span>` : ''}
-                
                 <button class="btn-mention-chat" 
                         onclick="mentionnerProduitDansChat(${produit.id})"
                         title="Discuter de ce produit">
@@ -3618,14 +3659,15 @@ function afficherProduits() {
                 </button>
             </div>
         `;
-        
+
         card.addEventListener('click', (e) => {
             if (!e.target.closest('.btn-add-cart') && !e.target.closest('.btn-mention-chat')) {
                 afficherDetailsProduit(produit.id);
             }
         });
-        
+
         grid.appendChild(card);
+        observer.observe(card); // active le scroll reveal sur chaque carte
     });
 }
 
