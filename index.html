@@ -1,1351 +1,2564 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#dc2626">
-    <meta name="description" content="L'application de vente conçue pour la mobilité">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="OdaMarket">
-    
-    <title>OdaMarket - Expérience Glissée</title>
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
-    
-    <!-- Icons -->
-    <link rel="icon" type="image/png" sizes="192x192" href="oda.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="oda.png">
-    <link rel="apple-touch-icon" href="oda.png">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="ODA Market — La marketplace N°1 au Cameroun. Achetez et vendez facilement à Douala, Yaoundé et partout au pays.">
+  <title>ODA Market | La Marketplace du Cameroun 🇨🇲</title>
+
+  <!-- FONTS -->
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS
+    ============================================================ */
+    :root {
+      --white:        #ffffff;
+      --off-white:    #F8F6F2;
+      --grey-50:      #F5F5F5;
+      --grey-100:     #EBEBEB;
+      --grey-200:     #D6D6D6;
+      --grey-400:     #9E9E9E;
+      --grey-700:     #444444;
+      --grey-900:     #1A1A1A;
+
+      --gold:         #D4920A;
+      --gold-light:   #F2B72B;
+      --gold-pale:    #FFF8E7;
+      --terra:        #C4622D;
+      --terra-pale:   #FFF1EB;
+      --green:        #007A5E;
+      --green-pale:   #E6F5F1;
+      --red-cm:       #CE1126;
+
+      --shadow-sm:    0 2px 8px rgba(0,0,0,0.06);
+      --shadow-md:    0 8px 32px rgba(0,0,0,0.10);
+      --shadow-lg:    0 20px 60px rgba(0,0,0,0.13);
+
+      --radius-xl:    24px;
+      --radius-lg:    16px;
+      --radius-md:    12px;
+      --radius-sm:    8px;
+
+      --font-head:    'Playfair Display', serif;
+      --font-body:    'Sora', sans-serif;
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after {
+      margin: 0; padding: 0; box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--white);
+      color: var(--grey-900);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      padding-bottom: 48px;
+    }
+    img { display: block; max-width: 100%; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ============================================================
+       SCROLL REVEAL ANIMATIONS
+    ============================================================ */
+    .sr   { opacity:0; transform:translateY(28px); transition: opacity .6s ease, transform .6s ease; }
+    .sr-l { opacity:0; transform:translateX(-36px); transition: opacity .65s ease, transform .65s ease; }
+    .sr-r { opacity:0; transform:translateX(36px);  transition: opacity .65s ease, transform .65s ease; }
+    .sr-z { opacity:0; transform:scale(.9);          transition: opacity .6s ease, transform .6s ease; }
+    .in   { opacity:1 !important; transform:none !important; }
+
+    /* ============================================================
+       LOADER
+    ============================================================ */
+    #loader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--white);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 18px;
+      transition: opacity 0.5s ease;
+    }
+    .loader-logo {
+      width: 70px; height: 70px;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      background: var(--gold-pale);
+      display: flex; align-items: center; justify-content: center;
+      animation: logoPulse 1.4s ease-in-out infinite alternate;
+    }
+    .loader-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .loader-bar {
+      width: 120px; height: 3px;
+      background: var(--grey-100);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .loader-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--terra));
+      border-radius: 2px;
+      animation: loadFill 1.4s ease-in-out infinite;
+    }
+    @keyframes logoPulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+    @keyframes loadFill {
+      0%   { width: 0%;   margin-left: 0; }
+      50%  { width: 100%; margin-left: 0; }
+      100% { width: 0%;   margin-left: 100%; }
+    }
+    .loader-label {
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--grey-400);
+    }
+
+    /* ============================================================
+       HEADER
+    ============================================================ */
+    header {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 200;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--grey-100);
+      padding: 0 20px;
+      height: 62px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .logo-wrap {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .logo-img {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--gold-pale);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-img img { width: 100%; height: 100%; object-fit: cover; }
+    .logo-text {
+      font-family: var(--font-head);
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: var(--grey-900);
+    }
+    .logo-text span { color: var(--gold); }
+    .logo-badge {
+      background: var(--green);
+      color: #fff;
+      font-size: 0.58rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+
+    .header-actions { display: flex; align-items: center; gap: 10px; }
+
+    .btn-install-header {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--terra) 100%);
+      color: #fff;
+      border: none;
+      border-radius: 30px;
+      padding: 9px 18px;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      box-shadow: 0 4px 16px rgba(212,146,10,0.3);
+      transition: all 0.3s;
+    }
+    .btn-install-header:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(212,146,10,0.45);
+    }
+
+    .cm-chip {
+      display: flex; align-items: center; gap: 5px;
+      background: var(--grey-50);
+      border: 1px solid var(--grey-100);
+      border-radius: 30px;
+      padding: 5px 11px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--grey-700);
+    }
+
+    /* ============================================================
+       HERO
+    ============================================================ */
+    .hero {
+      padding-top: 62px;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Fond décoratif wax pattern */
+    .hero-bg-pattern {
+      position: absolute;
+      inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 80% 20%, rgba(212,146,10,0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 50% at 10% 80%, rgba(196,98,45,0.06) 0%, transparent 70%);
+    }
+
+    .hero-top {
+      position: relative; z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 44px 22px 0;
+    }
+
+    .hero-pill {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--gold-pale);
+      border: 1px solid rgba(212,146,10,0.25);
+      border-radius: 30px;
+      padding: 6px 14px;
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .live-dot {
+      width: 7px; height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: blink 1.4s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+    .hero-title {
+      font-family: var(--font-head);
+      font-size: clamp(2.2rem, 9vw, 3.8rem);
+      font-weight: 900;
+      line-height: 1.1;
+      color: var(--grey-900);
+      margin-bottom: 16px;
+    }
+    .hero-title .accent { color: var(--gold); }
+    .hero-title .accent-terra { color: var(--terra); }
+
+    .hero-sub {
+      font-size: 0.98rem;
+      color: var(--grey-400);
+      max-width: 320px;
+      line-height: 1.75;
+      margin-bottom: 28px;
+      font-weight: 400;
+    }
+
+    /* Boutons hero */
+    .hero-cta-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 360px;
+      margin-bottom: 36px;
+    }
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--terra) 100%);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-xl);
+      padding: 18px 28px;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      box-shadow: 0 10px 36px rgba(212,146,10,0.35);
+      transition: all 0.35s ease;
+      position: relative; overflow: hidden;
+    }
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      top: -50%; left: -60%; width: 55%; height: 200%;
+      background: rgba(255,255,255,0.18);
+      transform: skewX(-20deg);
+      transition: left 0.5s ease;
+    }
+    .btn-primary:hover::after { left: 120%; }
+    .btn-primary:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 52px rgba(212,146,10,0.50);
+    }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-secondary {
+      width: 100%;
+      background: var(--white);
+      color: var(--grey-700);
+      border: 1.5px solid var(--grey-200);
+      border-radius: var(--radius-xl);
+      padding: 16px 28px;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      transition: all 0.3s;
+    }
+    .btn-secondary:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: var(--gold-pale);
+    }
+
+    /* Pulse indicator */
+    .pulse-dot {
+      position: absolute; top: -3px; right: -3px;
+      width: 12px; height: 12px;
+      background: var(--green);
+      border-radius: 50%;
+      border: 2px solid #fff;
+    }
+    .pulse-dot::after {
+      content: '';
+      position: absolute; inset: -4px;
+      border-radius: 50%;
+      background: var(--green);
+      opacity: 0;
+      animation: pulseWave 1.8s ease-out infinite;
+    }
+    @keyframes pulseWave {
+      0% { transform: scale(1); opacity: 0.6; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+
+    /* ============================================================
+       SECTION STORIES / VENDORS (avatars horizontal)
+    ============================================================ */
+    .stories-section {
+      width: 100%;
+      padding: 0 18px;
+      margin-bottom: 8px;
+      position: relative; z-index: 1;
+    }
+    .stories-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--grey-400);
+      margin-bottom: 12px;
+    }
+    .stories-track {
+      display: flex; gap: 16px;
+      overflow-x: auto;
+      padding: 6px 2px 12px;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+    .stories-track::-webkit-scrollbar { display: none; }
+
+    .story-item {
+      display: flex; flex-direction: column; align-items: center; gap: 7px;
+      scroll-snap-align: start; cursor: pointer; flex-shrink: 0;
+    }
+    .story-ring {
+      width: 66px; height: 66px;
+      border-radius: 50%;
+      padding: 2.5px;
+      background: conic-gradient(var(--gold) 0deg, var(--terra) 90deg, var(--green) 180deg, var(--gold) 360deg);
+      transition: transform 0.3s;
+    }
+    .story-ring:hover { transform: scale(1.08); }
+    .story-ring.g-green { background: conic-gradient(var(--green) 0deg, #00BFA5 180deg, var(--green) 360deg); }
+    .story-ring.g-terra { background: conic-gradient(var(--terra) 0deg, #FF8A65 180deg, var(--terra) 360deg); }
+    .story-ring.g-red   { background: conic-gradient(var(--red-cm) 0deg, #EF5350 180deg, var(--red-cm) 360deg); }
+
+    .story-avatar {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      background: var(--grey-100);
+      border: 2.5px solid var(--white);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.7rem;
+      overflow: hidden;
+    }
+    .story-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .story-name {
+      font-size: 0.64rem; font-weight: 600;
+      color: var(--grey-400);
+      max-width: 66px; text-align: center;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ============================================================
+       MARQUEE — VILLES
+    ============================================================ */
+    .marquee-wrap {
+      overflow: hidden;
+      background: var(--grey-900);
+      margin: 36px 0;
+      padding: 13px 0;
+    }
+    .marquee-track {
+      display: flex;
+      animation: marqueeAnim 22s linear infinite;
+      white-space: nowrap;
+    }
+    .marquee-item {
+      padding: 0 26px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gold);
+      display: flex; align-items: center; gap: 10px;
+      letter-spacing: 0.5px;
+    }
+    .marquee-item .sep { color: var(--terra); font-size: 1rem; }
+    @keyframes marqueeAnim {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ============================================================
+       SECTION : IMAGE HERO (femmes au marché)
+    ============================================================ */
+    .market-visual {
+      position: relative; z-index: 1;
+      margin: 0 18px 40px;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      height: 260px;
+      background: var(--grey-100);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-md);
+    }
+    .market-visual img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .market-visual-placeholder {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      color: var(--grey-400);
+    }
+    .market-visual-placeholder span { font-size: 3rem; }
+    .market-visual-placeholder p { font-size: 0.78rem; font-weight: 600; text-align: center; max-width: 180px; }
+
+    /* Badge flottant */
+    .market-badge {
+      position: absolute;
+      bottom: 18px; left: 18px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius-lg);
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 12px;
+      box-shadow: var(--shadow-md);
+    }
+    .market-badge-icon { font-size: 1.6rem; }
+    .market-badge-text {}
+    .market-badge-num {
+      font-family: var(--font-head);
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: var(--grey-900);
+    }
+    .market-badge-label {
+      font-size: 0.7rem;
+      color: var(--grey-400);
+      font-weight: 500;
+    }
+
+    /* ============================================================
+       SECTION : POURQUOI ODA — BENTO CARDS
+    ============================================================ */
+    .section-wrap { padding: 0 18px; margin-bottom: 44px; }
+
+    .section-head {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .section-overline {
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--terra); margin-bottom: 4px;
+    }
+    .section-title {
+      font-family: var(--font-head);
+      font-size: 1.65rem; font-weight: 700;
+      line-height: 1.2; color: var(--grey-900);
+    }
+    .section-link {
+      color: var(--gold);
+      font-size: 0.82rem; font-weight: 600;
+      border-bottom: 1px solid rgba(212,146,10,0.3);
+      padding-bottom: 2px;
+      transition: color 0.3s;
+    }
+    .section-link:hover { color: var(--terra); }
+
+    /* BENTO GRID */
+    .bento { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .bento-card {
+      background: var(--white);
+      border: 1.5px solid var(--grey-100);
+      border-radius: var(--radius-lg);
+      padding: 20px 16px;
+      display: flex; flex-direction: column; gap: 12px;
+      transition: all 0.3s;
+      position: relative; overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .bento-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+    .bento-card.span-2 {
+      grid-column: 1/-1;
+      flex-direction: row; align-items: center;
+    }
+
+    /* Barre colorée top */
+    .bento-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    .bento-card.c-gold::before   { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+    .bento-card.c-terra::before  { background: linear-gradient(90deg, var(--terra), #FF8A65); }
+    .bento-card.c-green::before  { background: linear-gradient(90deg, var(--green), #00BFA5); }
+    .bento-card.c-red::before    { background: linear-gradient(90deg, var(--red-cm), #FF7043); }
+
+    .bento-icon-wrap {
+      width: 48px; height: 48px;
+      border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    .bento-icon-wrap.bg-gold  { background: var(--gold-pale); }
+    .bento-icon-wrap.bg-terra { background: var(--terra-pale); }
+    .bento-icon-wrap.bg-green { background: var(--green-pale); }
+    .bento-icon-wrap.bg-red   { background: #FFF0F0; }
+
+    /* Remplacez par vos images :
+       <img src="icon-livraison.png" style="width:32px;height:32px;object-fit:contain"> */
+
+    .bento-label {
+      font-size: 0.63rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--grey-400); margin-bottom: 1px;
+    }
+    .bento-title { font-size: 0.97rem; font-weight: 700; color: var(--grey-900); margin-bottom: 3px; }
+    .bento-desc  { font-size: 0.81rem; color: var(--grey-400); line-height: 1.6; }
+
+    /* ============================================================
+       SECTION : IMAGES MARCHÉ (galerie 3 photos)
+    ============================================================ */
+    .gallery-section { margin-bottom: 44px; }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 180px 180px;
+      gap: 10px;
+      padding: 0 18px;
+    }
+    .gallery-cell {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--grey-100);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+    }
+    .gallery-cell img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.5s;
+    }
+    .gallery-cell:hover img { transform: scale(1.05); }
+    .gallery-cell.tall { grid-row: 1 / 3; }
+
+    .gallery-placeholder {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 6px; color: var(--grey-200);
+    }
+    .gallery-placeholder span { font-size: 2.2rem; }
+    .gallery-placeholder p { font-size: 0.68rem; font-weight: 600; text-align: center; max-width: 90px; }
+
+    .gallery-caption {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 30px 12px 12px;
+      background: linear-gradient(to top, rgba(0,0,0,0.55), transparent);
+      font-size: 0.72rem; font-weight: 700;
+      color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    }
+
+    /* ============================================================
+       BOUTIQUES HORIZONTALES
+    ============================================================ */
+    .shops-track {
+      display: flex; gap: 14px;
+      overflow-x: auto;
+      padding: 6px 18px 18px;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+    .shops-track::-webkit-scrollbar { display: none; }
+
+    .shop-card {
+      min-width: 220px;
+      border-radius: var(--radius-lg);
+      background: var(--white);
+      border: 1.5px solid var(--grey-100);
+      overflow: hidden;
+      scroll-snap-align: start;
+      flex-shrink: 0;
+      transition: all 0.35s;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+    }
+    .shop-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--gold);
+    }
+
+    .shop-img {
+      width: 100%; height: 150px;
+      background: var(--grey-100);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3.5rem; overflow: hidden; position: relative;
+    }
+    /* Remplacez par vos images de boutiques :
+       <img src="boutique1.jpg" style="width:100%;height:100%;object-fit:cover"> */
+    .shop-img img { width:100%; height:100%; object-fit:cover; transition: transform 0.5s; }
+    .shop-card:hover .shop-img img { transform: scale(1.06); }
+
+    .shop-badge {
+      position: absolute; top: 10px; left: 10px;
+      background: var(--white);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 0.62rem; font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.5px; text-transform: uppercase;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .shop-info { padding: 14px; }
+    .shop-name { font-size: 0.95rem; font-weight: 700; color: var(--grey-900); margin-bottom: 3px; }
+    .shop-meta { font-size: 0.77rem; color: var(--grey-400); font-weight: 500; }
+
+    .shop-rating {
+      display: inline-flex; align-items: center; gap: 4px;
+      margin-top: 8px;
+      background: var(--gold-pale);
+      border-radius: 20px;
+      padding: 3px 9px;
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--gold);
+    }
+
+    /* ============================================================
+       BANNER INSTALL PWA
+    ============================================================ */
+    .install-banner {
+      margin: 0 18px 44px;
+      background: var(--grey-900);
+      border-radius: var(--radius-xl);
+      padding: 32px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .install-banner::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 220px; height: 220px;
+      background: radial-gradient(circle, rgba(212,146,10,0.18) 0%, transparent 70%);
+    }
+    .install-banner::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; left: -40px;
+      width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(196,98,45,0.14) 0%, transparent 70%);
+    }
+
+    /* Remplacez par <img src="votre-image-femme.jpg" ...> */
+    .install-banner-img {
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold-pale), var(--terra-pale));
+      margin: 0 auto 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem;
+      border: 3px solid rgba(212,146,10,0.25);
+      position: relative; z-index: 1;
+      overflow: hidden;
+    }
+    .install-banner-img img { width:100%; height:100%; object-fit:cover; }
+
+    .install-banner h2 {
+      font-family: var(--font-head);
+      font-size: 1.5rem; font-weight: 700;
+      color: var(--white);
+      margin-bottom: 10px; line-height: 1.25;
+      position: relative; z-index: 1;
+    }
+    .install-banner p {
+      color: rgba(255,255,255,0.55);
+      font-size: 0.87rem; line-height: 1.65;
+      margin-bottom: 22px;
+      position: relative; z-index: 1;
+    }
+
+    .install-tags {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center;
+      margin-bottom: 24px;
+      position: relative; z-index: 1;
+    }
+    .install-tag {
+      background: rgba(212,146,10,0.12);
+      border: 1px solid rgba(212,146,10,0.22);
+      border-radius: 20px;
+      padding: 5px 13px;
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--gold-light);
+    }
+
+    .btn-install-big {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold), var(--terra));
+      color: #fff; border: none;
+      border-radius: var(--radius-lg);
+      padding: 17px;
+      font-family: var(--font-body);
+      font-size: 1rem; font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      box-shadow: 0 10px 36px rgba(212,146,10,0.4);
+      transition: all 0.3s;
+      position: relative; z-index: 1;
+    }
+    .btn-install-big:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 18px 50px rgba(212,146,10,0.55);
+    }
+
+    /* ============================================================
+       STATS
+    ============================================================ */
+    .stats-section {
+      padding: 0 18px;
+      margin-bottom: 44px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .stat-card {
+      background: var(--white);
+      border: 1.5px solid var(--grey-100);
+      border-radius: var(--radius-lg);
+      padding: 22px 16px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s;
+    }
+    .stat-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+    .stat-card.span-2 { grid-column: 1/-1; }
+
+    .stat-icon { font-size: 1.6rem; margin-bottom: 8px; }
+
+    .stat-num {
+      font-family: var(--font-head);
+      font-size: 2rem; font-weight: 900;
+      background: linear-gradient(135deg, var(--gold), var(--terra));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 4px;
+    }
+    .stat-label { font-size: 0.77rem; color: var(--grey-400); font-weight: 500; }
+
+    /* ============================================================
+       TÉMOIGNAGES
+    ============================================================ */
+    .testi-track {
+      display: flex; gap: 14px;
+      overflow-x: auto;
+      padding: 6px 18px 18px;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+    .testi-track::-webkit-scrollbar { display: none; }
+
+    .testi-card {
+      min-width: 270px; max-width: 290px;
+      background: var(--white);
+      border: 1.5px solid var(--grey-100);
+      border-radius: var(--radius-lg);
+      padding: 20px 18px;
+      flex-shrink: 0; scroll-snap-align: start;
+      display: flex; flex-direction: column; gap: 12px;
+      position: relative; overflow: hidden;
+      transition: all 0.3s;
+      box-shadow: var(--shadow-sm);
+    }
+    .testi-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--gold);
+    }
+
+    .testi-card::before {
+      content: '"';
+      position: absolute; top: -8px; right: 12px;
+      font-family: var(--font-head); font-size: 5.5rem;
+      color: var(--gold); opacity: 0.07;
+      line-height: 1; pointer-events: none;
+    }
+
+    /* Barre latérale colorée par ville */
+    .testi-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; bottom: 0; width: 3px;
+      border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    }
+    .testi-card.v-douala::after    { background: var(--gold); }
+    .testi-card.v-yaounde::after   { background: var(--green); }
+    .testi-card.v-bafoussam::after { background: var(--terra); }
+    .testi-card.v-kribi::after     { background: var(--red-cm); }
+
+    .testi-stars { display: flex; gap: 2px; }
+    .testi-star  { font-size: 0.82rem; }
+
+    .testi-text {
+      font-size: 0.85rem; color: var(--grey-700);
+      line-height: 1.7; font-style: italic; flex: 1;
+    }
+    .testi-text strong { color: var(--gold); font-style: normal; }
+
+    .testi-user {
+      display: flex; align-items: center; gap: 11px;
+      border-top: 1px solid var(--grey-100); padding-top: 12px;
+    }
+    .testi-avatar {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: var(--grey-100);
+      border: 2px solid var(--grey-100);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; flex-shrink: 0; overflow: hidden;
+    }
+    /* Remplacez par <img src="user1.jpg" style="..."> */
+    .testi-avatar img { width:100%; height:100%; object-fit:cover; }
+
+    .testi-name { font-size: 0.85rem; font-weight: 700; color: var(--grey-900); }
+    .testi-loc  { font-size: 0.72rem; color: var(--grey-400); font-weight: 500; }
+
+    /* ============================================================
+       NOTATION (barres)
+    ============================================================ */
+    .rating-section { padding: 0 18px; margin-bottom: 44px; }
+
+    .rating-box {
+      background: var(--white);
+      border: 1.5px solid var(--grey-100);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      display: flex; flex-direction: column; gap: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .rating-main {
+      display: flex; align-items: center; gap: 16px;
+    }
+    .rating-big {
+      font-family: var(--font-head);
+      font-size: 3.2rem; font-weight: 900;
+      color: var(--grey-900);
+    }
+    .rating-sub {
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .rating-stars { display: flex; gap: 4px; font-size: 1.1rem; }
+    .rating-total { font-size: 0.77rem; color: var(--grey-400); font-weight: 500; }
+
+    .rating-bars { display: flex; flex-direction: column; gap: 8px; }
+    .testi-bar-row {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .testi-bar-label { font-size: 0.75rem; font-weight: 600; color: var(--grey-700); width: 14px; }
+    .testi-bar-bg {
+      flex: 1; height: 6px;
+      background: var(--grey-100); border-radius: 3px; overflow: hidden;
+    }
+    .testi-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      border-radius: 3px;
+      width: 0;
+      transition: width 1.2s ease;
+    }
+    .testi-bar-pct { font-size: 0.7rem; font-weight: 600; color: var(--grey-400); width: 32px; text-align: right; }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    .footer {
+      background: var(--grey-900);
+      padding: 36px 22px 28px;
+      margin-bottom: 0;
+    }
+    .footer-logo {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 18px;
+    }
+    .footer-logo-img {
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .footer-logo-img img { width:100%; height:100%; object-fit:cover; }
+    .footer-logo-name {
+      font-family: var(--font-head);
+      font-size: 1.1rem; font-weight: 900; color: var(--white);
+    }
+    .footer-logo-name span { color: var(--gold); }
+
+    .footer-desc {
+      font-size: 0.83rem; color: rgba(255,255,255,0.45);
+      line-height: 1.65; margin-bottom: 24px;
+    }
+
+    .footer-links {
+      display: flex; flex-wrap: wrap; gap: 14px;
+      margin-bottom: 22px;
+    }
+    .footer-link {
+      color: rgba(255,255,255,0.55);
+      font-size: 0.8rem; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .footer-link:hover { color: var(--gold); }
+
+    .footer-flags { display: flex; gap: 10px; margin-bottom: 24px; }
+    .footer-flag-chip {
+      display: flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 20px; padding: 5px 11px;
+      font-size: 0.72rem; font-weight: 600;
+      color: rgba(255,255,255,0.55);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 18px;
+      font-size: 0.72rem; color: rgba(255,255,255,0.3);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    /* ============================================================
+       GROS BOUTON CTA → oda-achats.html
+       Effet de clic : ripple + pression + explosion émojis
+    ============================================================ */
+    .mega-cta-wrap {
+      padding: 0 18px;
+      margin: 44px 0;
+    }
+
+    /* ── Conteneur principal du bouton ── */
+    .mega-cta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: var(--grey-900);
+      border-radius: var(--radius-xl);
+      padding: 26px 28px;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(26,26,26,0.25);
+      /* Transition douce pour hover ET clic */
+      transition: transform 0.35s cubic-bezier(.16,1,.3,1),
+                  box-shadow 0.35s ease;
+      /* Empêche la sélection de texte au clic rapide */
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* ── Dégradé ambiance africaine en fond ── */
+    .mega-cta::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(212,146,10,0.18) 0%, rgba(196,98,45,0.12) 50%, transparent 100%);
+      pointer-events: none;
+    }
+
+    /* ── Halo doré en haut-droite ── */
+    .mega-cta::after {
+      content: '';
+      position: absolute;
+      top: -40%; right: -10%;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(212,146,10,0.14) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── Survol : monte légèrement ── */
+    .mega-cta:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 28px 64px rgba(26,26,26,0.35);
+    }
+
+    /* ── EFFET DE PRESSION AU CLIC ──
+       La classe .pressing est ajoutée par JS au mousedown/touchstart
+       et retirée après 220ms pour simuler une vraie pression physique  */
+    .mega-cta.pressing {
+      transform: scale(0.964) translateY(2px) !important;
+      box-shadow: 0 4px 18px rgba(26,26,26,0.22) !important;
+      transition: transform 0.12s ease, box-shadow 0.12s ease !important;
+    }
+
+    /* ── RIPPLE (onde circulaire au point de clic) ──
+       L'élément .ripple-wave est créé dynamiquement par JS
+       et supprimé automatiquement en fin d'animation             */
+    .ripple-wave {
+      position: absolute;
+      border-radius: 50%;
+      /* Couleur : blanc semi-transparent pour contraster sur fond sombre */
+      background: rgba(255, 255, 255, 0.18);
+      pointer-events: none;
+      transform: scale(0);
+      animation: rippleExpand 0.65s cubic-bezier(0, 0.55, 0.45, 1) forwards;
+      z-index: 10;
+    }
+    @keyframes rippleExpand {
+      0%   { transform: scale(0);   opacity: 1; }
+      60%  { transform: scale(4);   opacity: 0.5; }
+      100% { transform: scale(8);   opacity: 0; }
+    }
+
+    /* ── FLASH DORÉ : éclat bref couvrant tout le bouton ── */
+    .mega-cta-flash {
+      position: absolute; inset: 0; border-radius: inherit;
+      background: linear-gradient(135deg, rgba(212,146,10,0.35), rgba(196,98,45,0.2));
+      pointer-events: none;
+      opacity: 0;
+      animation: flashGold 0.5s ease forwards;
+      z-index: 9;
+    }
+    @keyframes flashGold {
+      0%   { opacity: 0.9; }
+      100% { opacity: 0; }
+    }
+
+    /* ── EXPLOSION D'ÉMOJIS au clic ── */
+    .emoji-burst {
+      position: absolute;
+      font-size: 1.4rem;
+      pointer-events: none;
+      z-index: 20;
+      animation: emojiPop 0.9s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    }
+    @keyframes emojiPop {
+      0%   { transform: translate(0, 0) scale(0.4) rotate(0deg); opacity: 1; }
+      60%  { opacity: 1; }
+      100% { transform: translate(var(--ex), var(--ey)) scale(1.1) rotate(var(--er)); opacity: 0; }
+    }
+
+    /* ── TEXTE DU CTA : côté gauche ── */
+    .mega-cta-left { position: relative; z-index: 1; }
+
+    .mega-cta-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(212,146,10,0.18);
+      border: 1px solid rgba(212,146,10,0.3);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.68rem; font-weight: 700;
+      color: var(--gold-light);
+      letter-spacing: 0.8px; text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .mega-cta-title {
+      font-family: var(--font-head);
+      font-size: 1.55rem; font-weight: 900;
+      color: var(--white);
+      line-height: 1.2; margin-bottom: 6px;
+    }
+
+    .mega-cta-sub {
+      font-size: 0.8rem; color: rgba(255,255,255,0.5); font-weight: 500;
+    }
+
+    /* ── CERCLE DORÉ avec icône : côté droit ── */
+    .mega-cta-arrow {
+      position: relative; z-index: 1;
+      width: 58px; height: 58px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--gold), var(--terra));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 8px 24px rgba(212,146,10,0.4);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    /* Rotation + agrandissement au survol */
+    .mega-cta:hover .mega-cta-arrow {
+      transform: scale(1.12) rotate(12deg);
+      box-shadow: 0 12px 32px rgba(212,146,10,0.55);
+    }
+    /* Rétrécissement de la flèche au clic (cohérent avec la pression) */
+    .mega-cta.pressing .mega-cta-arrow {
+      transform: scale(0.88) rotate(-5deg);
+      box-shadow: 0 3px 10px rgba(212,146,10,0.3);
+    }
+
+    /* ── COMPTEUR DE VISITEURS en temps réel sous le bouton ── */
+    .mega-cta-live-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 14px; margin-top: 12px;
+      padding: 0 4px;
+    }
+    .mega-cta-visitor {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 0.72rem; font-weight: 600; color: var(--grey-400);
+    }
+    .mega-cta-visitor .vdot {
+      width: 6px; height: 6px;
+      background: var(--green); border-radius: 50%;
+      animation: blink 1.4s ease-in-out infinite;
+    }
+    .mega-cta-sep { color: var(--grey-200); font-size: 0.7rem; }
+
+    /* ============================================================
+       SECTION COMMENTAIRES LIVE — BULLE FLOTTANTE + DÉFILEMENT
+    ============================================================ */
+
+    /* ── Conteneur de la section ── */
+    .comments-section {
+      padding: 0 18px;
+      margin-bottom: 44px;
+    }
+
+    /* ── En-tête de la section ── */
+    .comments-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .comments-title-group {}
+    .comments-overline {
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--terra); margin-bottom: 4px;
+    }
+    .comments-title {
+      font-family: var(--font-head);
+      font-size: 1.45rem; font-weight: 700; color: var(--grey-900);
+    }
+    .comments-live-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #FEF2F2;
+      border: 1px solid rgba(206,17,38,0.15);
+      border-radius: 20px;
+      padding: 5px 13px;
+      font-size: 0.7rem; font-weight: 700; color: var(--red-cm);
+    }
+
+    /* ── Fil de commentaires ── */
+    .comments-feed {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+
+    /* ── Bulle de commentaire individuelle ── */
+    .comment-bubble {
+      background: var(--white);
+      border: 1.5px solid var(--grey-100);
+      border-radius: 18px;
+      /* Coin plat en bas-gauche pour imiter les bulles de chat */
+      border-bottom-left-radius: 4px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow-sm);
+      /* Animation d'apparition depuis le bas */
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .comment-bubble.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Alignement à droite pour les commentaires "vendeur" */
+    .comment-bubble.right {
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 4px;
+      background: var(--gold-pale);
+      border-color: rgba(212,146,10,0.2);
+      align-self: flex-end;
+    }
+
+    .comment-header {
+      display: flex; align-items: center; gap: 9px;
+      margin-bottom: 8px;
+    }
+    .comment-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--grey-100);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0; overflow: hidden;
+    }
+    /* Remplacez par <img src="user.jpg" style="width:100%;height:100%;object-fit:cover"> */
+    .comment-avatar img { width:100%; height:100%; object-fit:cover; }
+
+    .comment-meta {}
+    .comment-author { font-size: 0.82rem; font-weight: 700; color: var(--grey-900); }
+    .comment-time   { font-size: 0.68rem; color: var(--grey-400); }
+
+    .comment-stars { font-size: 0.8rem; margin-bottom: 5px; }
+    .comment-text  {
+      font-size: 0.83rem; color: var(--grey-700); line-height: 1.6;
+    }
+    .comment-text strong { color: var(--gold); }
+
+    /* Badge produit dans un commentaire */
+    .comment-product-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--grey-50);
+      border: 1px solid var(--grey-100);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 0.7rem; font-weight: 600; color: var(--grey-700);
+      margin-top: 8px;
+    }
+
+    /* ── BULLE DE NOUVEAU COMMENTAIRE (entrée animée depuis le bas) ── */
+    .new-comment-notif {
+      position: fixed;
+      bottom: 20px; left: 16px; right: 16px;
+      z-index: 600;
+      background: var(--white);
+      border: 1.5px solid var(--grey-100);
+      border-radius: var(--radius-lg);
+      padding: 12px 15px;
+      display: flex; align-items: center; gap: 11px;
+      box-shadow: var(--shadow-lg);
+      /* Caché par défaut */
+      transform: translateY(130px);
+      opacity: 0;
+      transition: transform 0.45s cubic-bezier(.16,1,.3,1), opacity 0.45s ease;
+    }
+    .new-comment-notif.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    /* Point vert "live" dans la notif */
+    .new-comment-notif-dot {
+      width: 8px; height: 8px;
+      background: var(--green); border-radius: 50%;
+      flex-shrink: 0;
+      animation: blink 1.2s ease-in-out infinite;
+    }
+    .new-comment-notif-body { flex: 1; }
+    .new-comment-notif-title { font-size: 0.78rem; font-weight: 700; color: var(--grey-900); }
+    .new-comment-notif-sub   { font-size: 0.68rem; color: var(--grey-400); margin-top: 1px; }
+    .new-comment-notif-stars { font-size: 0.72rem; }
+
+    /* ── INDICATEUR DE FRAPPE (3 points qui rebondissent) ── */
+    .typing-indicator {
+      display: flex; align-items: center; gap: 4px;
+      padding: 12px 16px;
+      background: var(--grey-50);
+      border: 1.5px solid var(--grey-100);
+      border-radius: 18px; border-bottom-left-radius: 4px;
+      width: fit-content;
+    }
+    .typing-dot {
+      width: 7px; height: 7px;
+      background: var(--grey-400); border-radius: 50%;
+      animation: typingBounce 1.2s ease-in-out infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-6px); }
+    }
+
+    /* ============================================================
+       LIVE PRODUCT TICKER — DÉFILEMENT PRODUITS EN TEMPS RÉEL
+    ============================================================ */
+    .ticker-section {
+      margin-bottom: 44px;
+    }
+    .ticker-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 18px; margin-bottom: 14px;
+    }
+    .ticker-live-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #FEF2F2;
+      border: 1px solid rgba(206,17,38,0.2);
+      border-radius: 20px;
+      padding: 5px 13px;
+      font-size: 0.7rem; font-weight: 700;
+      color: var(--red-cm);
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+    .ticker-live-dot {
+      width: 7px; height: 7px;
+      background: var(--red-cm);
+      border-radius: 50%;
+      animation: blink 1s ease-in-out infinite;
+    }
+    .ticker-count {
+      font-size: 0.75rem; color: var(--grey-400); font-weight: 500;
+    }
+
+    /* Piste de défilement — 2 lignes */
+    .ticker-row {
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .ticker-track {
+      display: flex; gap: 12px;
+      animation: tickerSlide 28s linear infinite;
+    }
+    .ticker-track.reverse {
+      animation: tickerSlideReverse 32s linear infinite;
+    }
+    .ticker-track:hover { animation-play-state: paused; }
+
+    @keyframes tickerSlide {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    @keyframes tickerSlideReverse {
+      0%   { transform: translateX(-50%); }
+      100% { transform: translateX(0); }
+    }
+
+    /* Carte produit dans le ticker */
+    .ticker-card {
+      flex-shrink: 0;
+      width: 160px;
+      background: var(--white);
+      border: 1.5px solid var(--grey-100);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .ticker-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .ticker-card-img {
+      width: 100%; height: 110px;
+      background: var(--grey-50);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.8rem;
+      position: relative; overflow: hidden;
+    }
+    .ticker-card-img img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.4s;
+    }
+    .ticker-card:hover .ticker-card-img img { transform: scale(1.08); }
+
+    .ticker-sold-badge {
+      position: absolute; top: 6px; right: 6px;
+      background: rgba(0,122,94,0.9);
+      color: #fff;
+      font-size: 0.58rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 10px;
+      letter-spacing: 0.3px;
+    }
+    .ticker-hot-badge {
+      position: absolute; top: 6px; left: 6px;
+      background: var(--red-cm);
+      color: #fff;
+      font-size: 0.58rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 10px;
+    }
+
+    .ticker-card-body { padding: 10px 10px 12px; }
+    .ticker-card-name {
+      font-size: 0.78rem; font-weight: 700;
+      color: var(--grey-900); margin-bottom: 3px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ticker-card-shop {
+      font-size: 0.66rem; color: var(--grey-400);
+      margin-bottom: 6px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ticker-card-price {
+      font-family: var(--font-head);
+      font-size: 0.95rem; font-weight: 900;
+      color: var(--terra);
+    }
+    .ticker-card-stars { font-size: 0.62rem; color: var(--gold); margin-top: 3px; }
+
+    /* Notification live achat */
+    .live-notif-wrap {
+      position: fixed;
+      bottom: 20px; left: 16px; right: 16px;
+      z-index: 500;
+      pointer-events: none;
+    }
+    .live-notif {
+      background: var(--white);
+      border: 1.5px solid var(--grey-100);
+      border-radius: var(--radius-lg);
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 12px;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(120px);
+      transition: transform 0.45s cubic-bezier(.16,1,.3,1), opacity 0.45s ease;
+      opacity: 0;
+      pointer-events: all;
+    }
+    .live-notif.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    .live-notif-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: var(--gold-pale);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; flex-shrink: 0;
+    }
+    .live-notif-text { flex: 1; }
+    .live-notif-title {
+      font-size: 0.8rem; font-weight: 700; color: var(--grey-900);
+      margin-bottom: 2px;
+    }
+    .live-notif-sub {
+      font-size: 0.7rem; color: var(--grey-400);
+    }
+    .live-notif-price {
+      font-family: var(--font-head);
+      font-size: 0.9rem; font-weight: 900; color: var(--terra);
+      flex-shrink: 0;
+    }
+
+    /* ============================================================
+       MODAL PWA INSTALL
+    ============================================================ */
+    .pwa-overlay {
+      display: none; position: fixed; inset: 0; z-index: 9000;
+    }
+    .pwa-overlay.show { display: block; }
+
+    .pwa-backdrop {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(6px);
+      animation: bgFadeIn 0.3s ease;
+    }
+    @keyframes bgFadeIn { from { opacity:0; } to { opacity:1; } }
+
+    .pwa-sheet {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: var(--white);
+      border-radius: 28px 28px 0 0;
+      padding: 28px 22px calc(40px + env(safe-area-inset-bottom, 0px));
+      animation: sheetSlideUp 0.45s cubic-bezier(.16,1,.3,1);
+      max-height: 90vh; overflow-y: auto;
+    }
+    @keyframes sheetSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+    .pwa-handle {
+      width: 40px; height: 4px;
+      background: var(--grey-200);
+      border-radius: 2px;
+      margin: 0 auto 24px;
+    }
+
+    .pwa-header {
+      text-align: center; margin-bottom: 22px;
+    }
+
+    /* Remplacez par votre logo :
+       <img src="logo.png" style="width:80px;height:80px;object-fit:cover;border-radius:20px"> */
+    .pwa-logo-box {
+      width: 80px; height: 80px;
+      border-radius: 20px;
+      background: var(--gold-pale);
+      margin: 0 auto 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem;
+      border: 1.5px solid rgba(212,146,10,0.2);
+      overflow: hidden;
+    }
+    .pwa-logo-box img { width:100%; height:100%; object-fit:cover; }
+
+    .pwa-sheet h2 {
+      font-family: var(--font-head);
+      font-size: 1.5rem; font-weight: 700;
+      color: var(--grey-900); margin-bottom: 8px;
+    }
+    .pwa-sheet p {
+      color: var(--grey-400); font-size: 0.87rem;
+      line-height: 1.65; max-width: 300px; margin: 0 auto;
+    }
+
+    .pwa-steps { display: flex; flex-direction: column; gap: 12px; margin: 24px 0; }
+
+    .pwa-step {
+      display: flex; align-items: flex-start; gap: 14px;
+      background: var(--grey-50);
+      border: 1px solid var(--grey-100);
+      border-radius: var(--radius-md);
+      padding: 14px;
+    }
+    .pwa-step-num {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--terra));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.82rem; color: #fff; flex-shrink: 0;
+    }
+    .pwa-step-title { font-weight: 700; font-size: 0.9rem; color: var(--grey-900); margin-bottom: 3px; }
+    .pwa-step-desc  { font-size: 0.8rem; color: var(--grey-400); line-height: 1.5; }
+
+    .pwa-btn-ok {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold), var(--terra));
+      color: #fff; border: none;
+      border-radius: var(--radius-lg); padding: 16px;
+      font-family: var(--font-body); font-size: 1rem; font-weight: 700;
+      cursor: pointer; margin-bottom: 10px;
+      box-shadow: 0 8px 28px rgba(212,146,10,0.35);
+      transition: all 0.3s;
+    }
+    .pwa-btn-ok:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(212,146,10,0.45); }
+
+    .pwa-btn-skip {
+      width: 100%; background: transparent;
+      color: var(--grey-400); border: 1.5px solid var(--grey-100);
+      border-radius: var(--radius-lg); padding: 14px;
+      font-family: var(--font-body); font-size: 0.87rem; font-weight: 500;
+      cursor: pointer; transition: all 0.3s;
+    }
+    .pwa-btn-skip:hover { background: var(--grey-50); color: var(--grey-700); }
+
+  </style>
 </head>
-<style>
-    
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
-
-body, html {
-    margin: 0;
-    padding: 0;
-    font-family: 'Poppins', sans-serif;
-    background-color: #f8fafc;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-}
-
-/* Le conteneur qui permet le glissement horizontal */
-.horizontal-wrapper {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
-}
-
-/* Cache la barre de défilement */
-.horizontal-wrapper::-webkit-scrollbar {
-    display: none;
-}
-
-section {
-    flex: 0 0 100%;
-    width: 100%;
-    height: 100%;
-    scroll-snap-align: start;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow-y: auto;
-}
-
-/* Styles pour les points de navigation */
-.nav-dots {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 15px;
-    z-index: 50;
-}
-
-.dot {
-    width: 10px;
-    height: 10px;
-    background: rgba(0,0,0,0.2);
-    border-radius: 50%;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.dot.active {
-    background: #dc2626;
-    transform: scale(1.4);
-    box-shadow: 0 0 10px rgba(220, 38, 38, 0.4);
-}
-
-/* Animation de l'indicateur de glissement */
-@keyframes swipeHint {
-    0%, 100% { transform: translateX(0); opacity: 0.5; }
-    50% { transform: translateX(10px); opacity: 1; }
-}
-
-.swipe-indicator {
-    animation: swipeHint 2s infinite;
-}
-
-.chart-box {
-    position: relative;
-    height: 250px;
-    width: 100%;
-}
-
-/* Styles pour le popup d'installation PWA */
-.install-prompt {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 9999;
-    background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.7));
-    backdrop-filter: blur(10px);
-    padding: 20px;
-    transform: translateY(100%);
-    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    border-radius: 30px 30px 0 0;
-}
-
-.install-prompt.show {
-    transform: translateY(0);
-}
-
-.install-content {
-    max-width: 500px;
-    margin: 0 auto;
-    text-align: center;
-    color: white;
-}
-
-.install-icon {
-    font-size: 60px;
-    margin-bottom: 15px;
-    animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-}
-
-.install-title {
-    font-size: 24px;
-    font-weight: 800;
-    margin-bottom: 10px;
-    color: #fff;
-}
-
-.install-text {
-    font-size: 14px;
-    color: rgba(255,255,255,0.8);
-    margin-bottom: 20px;
-    line-height: 1.6;
-}
-
-.install-buttons {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.btn-install {
-    background: linear-gradient(135deg, #dc2626, #f59e0b);
-    color: white;
-    border: none;
-    padding: 15px 40px;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
-}
-
-.btn-install:hover {
-    transform: scale(1.05);
-    box-shadow: 0 12px 30px rgba(220, 38, 38, 0.6);
-}
-
-.btn-close {
-    background: rgba(255,255,255,0.1);
-    color: white;
-    border: 2px solid rgba(255,255,255,0.3);
-    padding: 15px 30px;
-    border-radius: 50px;
-    font-weight: 600;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.btn-close:hover {
-    background: rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.5);
-}
-
-/* Animation d'entrée pour le popup */
-@keyframes slideUp {
-    from {
-        transform: translateY(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-/* Responsive pour mobile */
-@media (max-width: 640px) {
-    .install-title {
-        font-size: 20px;
-    }
-    
-    .install-text {
-        font-size: 13px;
-    }
-    
-    .btn-install, .btn-close {
-        padding: 12px 25px;
-        font-size: 14px;
-    }
-}
-/* Styles pour le bouton de langue */
-#languageToggle {
-    position: relative;
-    overflow: visible;
-}
-
-#languageToggle:active {
-    transform: scale(0.95);
-}
-
-.flag {
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-    transition: transform 0.3s ease;
-}
-
-#languageToggle:hover .flag {
-    transform: scale(1.1) rotate(5deg);
-}
-
-/* Animation du texte */
-#currentLang {
-    font-weight: 800;
-    letter-spacing: 0.5px;
-}
-
-/* Menu déroulant de langue (optionnel) */
-.language-menu {
-    position: absolute;
-    top: calc(100% + 10px);
-    right: 0;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-    padding: 8px;
-    min-width: 140px;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    z-index: 100;
-}
-
-.language-menu.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-.language-option {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-weight: 600;
-    color: #334155;
-}
-
-.language-option:hover {
-    background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(245, 158, 11, 0.1));
-    color: #dc2626;
-}
-
-.language-option.active {
-    background: linear-gradient(135deg, #dc2626, #f59e0b);
-    color: white;
-}
-
-.language-option .flag {
-    font-size: 1.5rem;
-}
-
-/* Animation de pulsation pour attirer l'attention */
-@keyframes pulse-lang {
-    0%, 100% {
-        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
-    }
-    50% {
-        box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
-    }
-}
-
-#languageToggle.pulse {
-    animation: pulse-lang 2s infinite;
-}
-
-/* ===========================================
-   GUIDE D'INSTALLATION iOS - STYLES
-   =========================================== */
-
-.ios-install-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(10px);
-    padding: 20px;
-}
-
-.ios-install-modal.active {
-    display: flex;
-}
-
-.ios-phone {
-    background: #1f2937;
-    border-radius: 40px;
-    padding: 12px;
-    max-width: 340px;
-    width: 100%;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-}
-
-.ios-screen {
-    background: white;
-    border-radius: 32px;
-    overflow: hidden;
-    height: 680px;
-    position: relative;
-}
-
-.ios-notch {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 120px;
-    height: 30px;
-    background: #1f2937;
-    border-radius: 0 0 20px 20px;
-    z-index: 10;
-}
-
-.ios-step {
-    display: none;
-    height: 100%;
-    flex-direction: column;
-}
-
-.ios-step.active {
-    display: flex;
-}
-
-.ios-safari-bar {
-    background: #f5f5f7;
-    padding: 12px;
-    display: flex;
-    justify-content: space-around;
-}
-
-.ios-tap {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: rgba(220, 38, 38, 0.3);
-    border: 3px solid #dc2626;
-    animation: iosTap 2s infinite;
-    pointer-events: none;
-}
-
-@keyframes iosTap {
-    0%, 100% { transform: scale(1); opacity: 0.3; }
-    50% { transform: scale(1.5); opacity: 0.7; }
-}
-
-.ios-nav {
-    position: absolute;
-    bottom: -70px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: white;
-    border-radius: 50px;
-    padding: 12px 24px;
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-}
-
-.ios-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #d1d5db;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.ios-dot.active {
-    background: #dc2626;
-    transform: scale(1.5);
-}
-
-.ios-close {
-    position: absolute;
-    top: -50px;
-    right: 0;
-    background: white;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-}
-
-.ios-close:hover {
-    background: #dc2626;
-    color: white;
-    transform: scale(1.1);
-}
-
-.ios-help-btn {
-    position: fixed;
-    bottom: 90px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #dc2626, #f59e0b);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    cursor: pointer;
-    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
-    z-index: 100;
-    animation: iosHelpPulse 3s infinite;
-}
-
-@keyframes iosHelpPulse {
-    0%, 100% { 
-        transform: scale(1); 
-        box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4); 
-    }
-    50% { 
-        transform: scale(1.1); 
-        box-shadow: 0 12px 30px rgba(220, 38, 38, 0.6); 
-    }
-}
-
-.ios-help-btn:hover {
-    transform: scale(1.05);
-}
-
-@media (max-width: 640px) {
-    .ios-phone {
-        max-width: 300px;
-    }
-    
-    .ios-screen {
-        height: 600px;
-    }
-    
-    .ios-help-btn {
-        bottom: 80px;
-        right: 15px;
-        width: 50px;
-        height: 50px;
-        font-size: 24px;
-    }
-}
-</style>
 <body>
 
-    <!-- Popup d'installation PWA -->
-    <div id="installPrompt" class="install-prompt hidden">
-        <div class="install-content">
-            <div class="install-icon">📱</div>
-            <h3 class="install-title">Installer OdaMarket</h3>
-            <p class="install-text">Accédez à l'application directement depuis votre écran d'accueil, sans navigateur !</p>
-            <div class="install-buttons">
-                <button id="installBtn" class="btn-install">Installer</button>
-                <button id="closeInstallBtn" class="btn-close">Plus tard</button>
-            </div>
-        </div>
+
+  <div id="loader">
+    <div class="loader-logo">
+      <img src="oda1.png" alt="ODA Market" onerror="this.parentElement.innerHTML='🛍️'">
+    </div>
+    <div class="loader-bar">
+      <div class="loader-bar-fill"></div>
+    </div>
+    <p class="loader-label">Chargement…</p>
+  </div>
+
+
+
+  <header>
+    <div class="logo-wrap">
+      <div class="logo-img">
+        <img src="oda1.png" alt="ODA Market" onerror="this.style.display='none'">
+      </div>
+      <span class="logo-text">ODA <span>Market</span></span>
+      <span class="logo-badge">CM 🇨🇲</span>
     </div>
 
-    <!-- Logo Fixe -->
-    <header class="fixed top-0 left-0 w-full p-6 z-50 flex justify-between items-center pointer-events-none">
-        <div class="font-extrabold text-2xl text-red-600 pointer-events-auto">ODA<span class="text-amber-500">MARKET</span></div>
-        <div class="hidden md:block text-xs font-bold text-gray-400 uppercase tracking-widest pointer-events-auto">Glissez pour explorer &rarr;</div>
-        <!-- Header avec menu déroulant -->
-<header class="fixed top-0 left-0 w-full p-6 z-50 flex justify-between items-center pointer-events-none">
-    <div class="font-extrabold text-2xl text-red-600 pointer-events-auto">ODA<span class="text-amber-500">MARKET</span></div>
-    
-    <!-- Bouton de langue avec menu déroulant -->
-    <div class="pointer-events-auto relative">
-        <button id="languageToggle" class="bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg hover:shadow-xl px-4 py-2 rounded-full font-bold text-sm transition-all duration-300 flex items-center gap-2 border-2 border-slate-200 hover:border-red-600 group">
-            <span class="flag text-xl" id="currentFlag">🇫🇷</span>
-            <span id="currentLang" class="text-slate-700 group-hover:text-red-600">FR</span>
-            <svg class="w-4 h-4 text-slate-400 group-hover:text-red-600 transition-transform" id="dropdownIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
+    <div class="header-actions">
+      <div class="cm-chip">🇨🇲 Cameroun</div>
+      <button class="btn-install-header" onclick="handleInstall()">
+        ⬇️ Installer
+      </button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-bg-pattern"></div>
+
+    <div class="hero-top">
+      <div class="hero-pill sr">
+        <span class="live-dot"></span>
+        Marketplace active au Cameroun
+      </div>
+
+      <h1 class="hero-title sr">
+        Le marché <span class="accent">africain</span><br>
+        dans votre <span class="accent-terra">poche</span>
+      </h1>
+
+      <p class="hero-sub sr">
+        Achetez, vendez et découvrez les meilleures boutiques de Douala, Yaoundé et de tout le Cameroun — simplement, depuis votre téléphone.
+      </p>
+
+      <div class="hero-cta-group sr">
+        <button class="btn-primary" onclick="handleInstall()" style="position:relative;">
+          <span class="pulse-dot"></span>
+          ⬇️ Télécharger l'application
         </button>
-        
-        <!-- Menu déroulant -->
-        <div id="languageMenu" class="language-menu">
-            <div class="language-option" data-lang="fr">
-                <span class="flag">🇫🇷</span>
-                <span>Français</span>
+        <a href="oda-achats.html" class="btn-secondary">
+          🛍️ Explorer les produits
+        </a>
+      </div>
+
+      <!-- Stories vendeurs -->
+      <div class="stories-section sr">
+        <p class="stories-label">Vendeuses populaires</p>
+        <div class="stories-track">
+          <img src="v1.png"> 
+          <div class="story-item">
+            <div class="story-ring">
+              <div class="story-avatar">👩🏾</div>
             </div>
-            <div class="language-option" data-lang="en">
-                <span class="flag">🇬🇧</span>
-                <span>English</span>
+            <span class="story-name">Mama Béa</span>
+          </div>
+          <div class="story-item">
+            <div class="story-ring g-green">
+              <div class="story-avatar">👩🏿</div>
             </div>
+            <span class="story-name">Awa Style</span>
+          </div>
+          <div class="story-item">
+            <div class="story-ring g-terra">
+              <div class="story-avatar">👩🏾</div>
+            </div>
+            <span class="story-name">Fleur Wax</span>
+          </div>
+          <div class="story-item">
+            <div class="story-ring g-red">
+              <div class="story-avatar">👩🏿</div>
+            </div>
+            <span class="story-name">Mireille B.</span>
+          </div>
+          <div class="story-item">
+            <div class="story-ring">
+              <div class="story-avatar">👩🏾</div>
+            </div>
+            <span class="story-name">Solange K.</span>
+          </div>
+          <div class="story-item">
+            <div class="story-ring g-green">
+              <div class="story-avatar">👩🏿</div>
+            </div>
+            <span class="story-name">Henriette</span>
+          </div>
         </div>
+      </div>
     </div>
-    
-    <div class="hidden md:block text-xs font-bold text-gray-400 uppercase tracking-widest pointer-events-auto">Glissez pour explorer &rarr;</div>
-</header>
-    </header>
+  </section>
 
-    <!-- Points de navigation -->
-    <div class="nav-dots">
-        <div class="dot active" data-index="0"></div>
-        <div class="dot" data-index="1"></div>
-        <div class="dot" data-index="2"></div>
-        <div class="dot" data-index="3"></div>
+
+  <div class="marquee-wrap">
+    <div class="marquee-track">
+      <div class="marquee-item">📍 Douala <span class="sep">•</span></div>
+      <div class="marquee-item">📍 Yaoundé <span class="sep">•</span></div>
+      <div class="marquee-item">📍 Bafoussam <span class="sep">•</span></div>
+      <div class="marquee-item">📍 Garoua <span class="sep">•</span></div>
+      <div class="marquee-item">📍 Bamenda <span class="sep">•</span></div>
+      <div class="marquee-item">📍 Kribi <span class="sep">•</span></div>
+      <div class="marquee-item">📍 Limbé <span class="sep">•</span></div>
+      <div class="marquee-item">📍 Ngaoundéré <span class="sep">•</span></div>
+      <div class="marquee-item">📍 Edéa <span class="sep">•</span></div>
+      <div class="marquee-item">📍 Douala <span class="sep">•</span></div>
+      <div class="marquee-item">📍 Yaoundé <span class="sep">•</span></div>
+      <div class="marquee-item">📍 Bafoussam <span class="sep">•</span></div>
+      <div class="marquee-item">📍 Garoua <span class="sep">•</span></div>
+      <div class="marquee-item">📍 Bamenda <span class="sep">•</span></div>
+      <div class="marquee-item">📍 Kribi <span class="sep">•</span></div>
+      <div class="marquee-item">📍 Limbé <span class="sep">•</span></div>
+      <div class="marquee-item">📍 Ngaoundéré <span class="sep">•</span></div>
+      <div class="marquee-item">📍 Edéa <span class="sep">•</span></div>
+    </div>
+  </div>
+
+
+  <section class="ticker-section">
+    <div class="ticker-header">
+      <div class="ticker-live-badge">
+        <span class="ticker-live-dot"></span>
+        Ventes en direct
+      </div>
+      <span class="ticker-count" id="tickerCount">🔥 147 achats aujourd'hui</span>
     </div>
 
-    <!-- Conteneur Principal -->
-    <div class="horizontal-wrapper" id="scrollContainer">
-        
-        <!-- PAGE 1: L'ACCUEIL -->
-        <section id="hero" class="bg-slate-50">
-            <div class="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                <div class="text-center lg:text-left order-2 lg:order-1">
-                    <h1 class="text-4xl md:text-6xl font-black text-slate-900 leading-tight mb-4">
-                        Votre Boutique, <br>
-                        <span class="text-red-600">Partout avec vous.</span>
-                    </h1>
-                    <p class="text-gray-600 text-lg mb-8 max-w-md mx-auto lg:mx-0">
-                        L'application de vente conçue pour la mobilité. Gérez, vendez et encaissez en un glissement de doigt.
-                    </p>
-                    <div class="flex items-center justify-center lg:justify-start gap-4">
-                        <div class="swipe-indicator text-red-600 font-bold flex items-center gap-2">
-                            <span>Glissez vers la droite</span>
-                            <span class="text-2xl">&rarr;</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="order-1 lg:order-2 flex justify-center">
-                    <div class="relative">
-                        <div class="absolute inset-0 bg-amber-400 rounded-full blur-3xl opacity-20 -rotate-12"></div>
-                        <img src="oda.jpg" 
-                             onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22600%22%3E%3Crect fill=%22%23dc2626%22 width=%22300%22 height=%22600%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2224%22 fill=%22white%22 text-anchor=%22middle%22%3EOdaMarket%3C/text%3E%3C/svg%3E';" 
-                             alt="Application Oda" 
-                             class="w-64 md:w-80 rounded-[2.5rem] shadow-2xl border-8 border-white transform rotate-3">
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- PAGE 2: LES CHIFFRES -->
-        <section id="stats" class="bg-white">
-            <div class="container mx-auto px-6 w-full max-w-4xl">
-                <div class="text-center mb-10">
-                    <h2 class="text-3xl font-bold mb-2">Boostez vos <span class="text-amber-500">Revenus</span></h2>
-                    <p class="text-gray-500">Voyez la différence avec une interface optimisée.</p>
-                </div>
-                
-                <div class="bg-slate-50 p-6 md:p-10 rounded-3xl shadow-inner grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-                    <div class="space-y-6">
-                        <div class="p-4 bg-white rounded-2xl shadow-sm border-l-4 border-red-600">
-                            <span class="text-xs font-bold text-gray-400 uppercase">Conversion Mobile</span>
-                            <div class="text-3xl font-black text-red-600">+ 45%</div>
-                        </div>
-                        <div class="p-4 bg-white rounded-2xl shadow-sm border-l-4 border-amber-500">
-                            <span class="text-xs font-bold text-gray-400 uppercase">Temps de Gestion</span>
-                            <div class="text-3xl font-black text-amber-500">- 2h / jour</div>
-                        </div>
-                    </div>
-                    <div class="chart-box">
-                        <canvas id="performanceChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- PAGE 3: LES AVANTAGES -->
-        <section id="features" class="bg-slate-50">
-            <div class="container mx-auto px-6">
-                <h2 class="text-3xl font-black text-center mb-12">Pensé pour le <span class="text-red-600">Succès</span></h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 text-center group hover:bg-red-600 transition-colors duration-300">
-                        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">📱</div>
-                        <h3 class="font-bold text-xl mb-2 group-hover:text-white">Interface Intuitive</h3>
-                        <p class="text-gray-500 text-sm group-hover:text-red-100">Une prise en main en moins de 5 minutes, sans formation.</p>
-                    </div>
-                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 text-center group hover:bg-amber-500 transition-colors duration-300">
-                        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">⚡</div>
-                        <h3 class="font-bold text-xl mb-2 group-hover:text-white">Rapidité Extrême</h3>
-                        <p class="text-gray-500 text-sm group-hover:text-amber-100">Traitement des commandes instantané, même en 3G.</p>
-                    </div>
-                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 text-center group hover:bg-slate-800 transition-colors duration-300">
-                        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">💳</div>
-                        <h3 class="font-bold text-xl mb-2 group-hover:text-white">Paiement Mobile</h3>
-                        <p class="text-gray-500 text-sm group-hover:text-slate-300">Encaissez par Mobile Money ou carte bancaire partout.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- PAGE 4: L'APPEL À L'ACTION -->
-        <section id="cta" class="bg-slate-900 text-white overflow-hidden">
-            <div class="absolute top-0 right-0 w-96 h-96 bg-red-600 rounded-full blur-[120px] opacity-20"></div>
-            <div class="absolute bottom-0 left-0 w-96 h-96 bg-amber-500 rounded-full blur-[120px] opacity-20"></div>
-            
-            <div class="text-center px-6 relative z-10">
-                <h2 class="text-4xl md:text-6xl font-black mb-6">Rejoignez la <br><span class="text-red-500">Révolution.</span></h2>
-                <p class="text-slate-400 text-lg mb-10 max-w-xl mx-auto">
-                    Le commerce de demain est dans votre poche. Commencez votre essai gratuit dès aujourd'hui.
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="connexion.html" class="bg-red-600 hover:bg-red-700 text-white px-10 py-5 rounded-full font-bold text-xl shadow-2xl shadow-red-600/30 transform hover:scale-105 transition-all inline-block text-center no-underline">
-                        COMMENCER MAINTENANT
-                    </a>
-                    <button id="installAppBtn" class="bg-amber-500 hover:bg-amber-600 text-white px-10 py-5 rounded-full font-bold text-xl shadow-2xl shadow-amber-500/30 transform hover:scale-105 transition-all flex items-center justify-center gap-3">
-                        <span>📲</span>
-                        INSTALLER L'APP
-                    </button>
-                </div>
-                <div class="mt-16 pt-8 border-t border-slate-800 text-slate-500 text-xs uppercase tracking-widest">
-                    Disponible sur iOS et Android
-                </div>
-            </div>
-        </section>
-
+   
+    <div class="ticker-row">
+      <div class="ticker-track" id="tickerRow1">
+        <!-- Les cartes sont générées en JS ci-dessous et dupliquées pour boucle infinie -->
+      </div>
     </div>
-<script src="translate.js"></script>
-    <script>
-        
-// Variables globales
-let deferredPrompt;
-const installPrompt = document.getElementById('installPrompt');
-const installBtn = document.getElementById('installBtn');
-const closeInstallBtn = document.getElementById('closeInstallBtn');
-const installAppBtn = document.getElementById('installAppBtn');
-const container = document.getElementById('scrollContainer');
-const dots = document.querySelectorAll('.dot');
 
-// Enregistrement du Service Worker
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
-            .then(registration => {
-                console.log('Service Worker enregistré avec succès:', registration.scope);
-            })
-            .catch(error => {
-                console.log('Échec de l\'enregistrement du Service Worker:', error);
-            });
-    });
-}
+ 
+    <div class="ticker-row">
+      <div class="ticker-track reverse" id="tickerRow2">
+      </div>
+    </div>
+  </section>
 
-// Gestion de l'événement beforeinstallprompt
-window.addEventListener('beforeinstallprompt', (e) => {
-    // Empêche l'affichage automatique du prompt
-    e.preventDefault();
-    // Stocke l'événement pour l'utiliser plus tard
-    deferredPrompt = e;
-    
-    // Affiche notre popup personnalisé après 3 secondes
-    setTimeout(() => {
-        showInstallPrompt();
-    }, 3000);
-});
+ 
+       IMAGE MARCHÉ PRINCIPALE
+        <img src="marche-femmes.jpg">
+ 
+  <div class="market-visual sr">
+     <img src="marche-femmes.jpg" alt="Marché africain Cameroun"> 
+    <div class="market-visual-placeholder">
+      <span></span>
+      <p></p>
+    </div>
 
-// Fonction pour afficher le popup d'installation
-function showInstallPrompt() {
-    if (installPrompt && deferredPrompt) {
-        installPrompt.classList.remove('hidden');
-        installPrompt.classList.add('show');
-    }
-}
+    <div class="market-badge">
+      <div class="market-badge-icon">🛒</div>
+      <div class="market-badge-text">
+        <div class="market-badge-num">+32k</div>
+        <div class="market-badge-label">commandes livrées</div>
+      </div>
+    </div>
+  </div>
 
-// Gestion du clic sur le bouton "Installer"
-installBtn.addEventListener('click', async () => {
-    if (!deferredPrompt) {
-        alert('L\'installation n\'est pas disponible actuellement.');
-        return;
-    }
-    
-    // Affiche le prompt d'installation natif
-    deferredPrompt.prompt();
-    
-    // Attend la réponse de l'utilisateur
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log(`Choix de l'utilisateur: ${outcome}`);
-    
-    // Réinitialise deferredPrompt
-    deferredPrompt = null;
-    
-    // Cache le popup
-    hideInstallPrompt();
-});
+ 
+  <section class="section-wrap" id="pourquoi">
+    <div class="section-head">
+      <div>
+        <p class="section-overline">Nos avantages</p>
+        <h2 class="section-title">Pourquoi choisir<br>ODA Market ?</h2>
+      </div>
+      <a href="boutiques.html" class="section-link">Voir tout</a>
+    </div>
 
-// Gestion du clic sur "Plus tard"
-closeInstallBtn.addEventListener('click', () => {
-    hideInstallPrompt();
-});
-
-// Gestion du bouton "INSTALLER L'APP" sur la page CTA
-installAppBtn.addEventListener('click', () => {
-    if (deferredPrompt) {
-        showInstallPrompt();
-    } else {
-        // Si l'app est déjà installée ou le prompt n'est pas disponible
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            alert('L\'application est déjà installée ! 🎉');
-        } else {
-            alert('Pour installer l\'application, utilisez le menu de votre navigateur (partager > ajouter à l\'écran d\'accueil)');
-        }
-    }
-});
-
-// Fonction pour cacher le popup
-function hideInstallPrompt() {
-    if (installPrompt) {
-        installPrompt.classList.remove('show');
-        setTimeout(() => {
-            installPrompt.classList.add('hidden');
-        }, 400);
-    }
-}
-
-// Détection de l'installation réussie
-window.addEventListener('appinstalled', () => {
-    console.log('PWA installée avec succès');
-    hideInstallPrompt();
-    
-    // Optionnel: afficher un message de confirmation
-    alert('🎉 OdaMarket a été installé avec succès !');
-});
-
-// === Navigation par points ===
-let isScrolling = false;
-let currentPage = 0;
-const totalPages = 4;
-
-// Empêche le défilement rapide et force une page à la fois
-container.addEventListener('scroll', (e) => {
-    if (isScrolling) return;
-    
-    const scrollLeft = container.scrollLeft;
-    const width = container.offsetWidth;
-    const activeIndex = Math.round(scrollLeft / width);
-    
-    dots.forEach((dot, index) => {
-        if (index === activeIndex) {
-            dot.classList.add('active');
-        } else {
-            dot.classList.remove('active');
-        }
-    });
-    
-    currentPage = activeIndex;
-});
-
-// Gestion du glissement avec la souris/touch
-let startX = 0;
-let scrollStart = 0;
-let isDragging = false;
-
-container.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    startX = e.pageX;
-    scrollStart = container.scrollLeft;
-});
-
-container.addEventListener('touchstart', (e) => {
-    isDragging = true;
-    startX = e.touches[0].pageX;
-    scrollStart = container.scrollLeft;
-});
-
-container.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    e.preventDefault();
-});
-
-container.addEventListener('touchmove', (e) => {
-    if (!isDragging) return;
-});
-
-container.addEventListener('mouseup', handleDragEnd);
-container.addEventListener('touchend', handleDragEnd);
-container.addEventListener('mouseleave', () => {
-    if (isDragging) handleDragEnd();
-});
-
-function handleDragEnd(e) {
-    if (!isDragging) return;
-    isDragging = false;
-    
-    const endX = e.pageX || (e.changedTouches && e.changedTouches[0].pageX) || 0;
-    const diff = startX - endX;
-    const threshold = 50; // Distance minimale pour changer de page
-    
-    if (Math.abs(diff) > threshold) {
-        if (diff > 0 && currentPage < totalPages - 1) {
-            // Glissement vers la gauche -> page suivante
-            goToPage(currentPage + 1);
-        } else if (diff < 0 && currentPage > 0) {
-            // Glissement vers la droite -> page précédente
-            goToPage(currentPage - 1);
-        } else {
-            // Retour à la page actuelle
-            goToPage(currentPage);
-        }
-    } else {
-        // Si le glissement est trop court, retour à la page actuelle
-        goToPage(currentPage);
-    }
-}
-// Menu déroulant de langue
-const languageToggle = document.getElementById('languageToggle');
-const languageMenu = document.getElementById('languageMenu');
-const languageOptions = document.querySelectorAll('.language-option');
-const currentFlag = document.getElementById('currentFlag');
-const currentLang = document.getElementById('currentLang');
-const dropdownIcon = document.getElementById('dropdownIcon');
-
-let menuOpen = false;
-
-// Toggle du menu
-languageToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    menuOpen = !menuOpen;
-    languageMenu.classList.toggle('show', menuOpen);
-    dropdownIcon.style.transform = menuOpen ? 'rotate(180deg)' : 'rotate(0deg)';
-});
-
-// Fermer le menu en cliquant ailleurs
-document.addEventListener('click', () => {
-    if (menuOpen) {
-        menuOpen = false;
-        languageMenu.classList.remove('show');
-        dropdownIcon.style.transform = 'rotate(0deg)';
-    }
-});
-
-// Sélection de langue
-languageOptions.forEach(option => {
-    option.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const lang = option.dataset.lang;
-        
-        // Changer la langue
-        if (window.universalTranslationManager) {
-            window.universalTranslationManager.setLanguage(lang);
-            updateLanguageDisplay(lang);
-        }
-        
-        // Fermer le menu
-        menuOpen = false;
-        languageMenu.classList.remove('show');
-        dropdownIcon.style.transform = 'rotate(0deg)';
-        
-        // Notification
-        showLanguageNotification(lang);
-    });
-});
-
-// Mettre à jour l'affichage
-function updateLanguageDisplay(lang) {
-    const languages = {
-        fr: { flag: '🇫🇷', code: 'FR' },
-        en: { flag: '🇬🇧', code: 'EN' }
-    };
-    
-    currentFlag.textContent = languages[lang].flag;
-    currentLang.textContent = languages[lang].code;
-    
-    // Mettre à jour les options actives
-    languageOptions.forEach(opt => {
-        opt.classList.toggle('active', opt.dataset.lang === lang);
-    });
-}
-
-// Notification
-function showLanguageNotification(lang) {
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        background: linear-gradient(135deg, #dc2626, #f59e0b);
-        color: white;
-        padding: 16px 24px;
-        border-radius: 50px;
-        font-weight: 700;
-        font-size: 14px;
-        box-shadow: 0 10px 40px rgba(220, 38, 38, 0.3);
-        z-index: 10000;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    `;
-    
-    const messages = {
-        fr: '🇫🇷 Langue changée en Français',
-        en: '🇬🇧 Language changed to English'
-    };
-    
-    notification.textContent = messages[lang];
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.4s ease';
-        setTimeout(() => notification.remove(), 400);
-    }, 2500);
-}
-
-// Initialisation
-document.addEventListener('DOMContentLoaded', () => {
-    const currentLanguage = window.universalTranslationManager?.getCurrentLanguage() || 'fr';
-    updateLanguageDisplay(currentLanguage);
-});
-
-// Fonction pour aller à une page spécifique
-function goToPage(pageIndex) {
-    if (isScrolling) return;
-    isScrolling = true;
-    
-    const width = container.offsetWidth;
-    container.scrollTo({
-        left: width * pageIndex,
-        behavior: 'smooth'
-    });
-    
-    currentPage = pageIndex;
-    
-    setTimeout(() => {
-        isScrolling = false;
-    }, 600); // Temps de l'animation
-}
-
-// Navigation par clic sur les points
-dots.forEach(dot => {
-    dot.addEventListener('click', () => {
-        const index = parseInt(dot.getAttribute('data-index'));
-        goToPage(index);
-    });
-});
-
-// === Graphique de performance ===
-const initChart = () => {
-    const ctx = document.getElementById('performanceChart');
-    if (!ctx) return;
-    
-    new Chart(ctx.getContext('2d'), {
-        type: 'line',
-        data: {
-            labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
-            datasets: [{
-                label: 'Ventes avec OdaMarket',
-                data: [12, 19, 35, 62],
-                borderColor: '#dc2626',
-                backgroundColor: 'rgba(220, 38, 38, 0.1)',
-                fill: true,
-                tension: 0.4,
-                borderWidth: 4,
-                pointRadius: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { 
-                y: { display: false },
-                x: { grid: { display: false }, ticks: { font: { size: 10 } } }
-            }
-        }
-    });
-};
-
-// Initialisation au chargement
-window.onload = initChart;
-
-    </script>
-
-    <!-- ===========================================
-         GUIDE D'INSTALLATION iOS - MODAL
-         =========================================== -->
-    <div id="iosInstallModal" class="ios-install-modal">
-        <div style="position: relative;">
-            <div class="ios-close" onclick="closeIOSGuide()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </div>
-
-            <div class="ios-phone">
-                <div class="ios-screen">
-                    <div class="ios-notch"></div>
-                    
-                    <!-- Étape 1: Safari -->
-                    <div id="iosStep1" class="ios-step active">
-                        <div class="bg-white px-4 py-3 border-b" style="padding-top: 40px;">
-                            <div class="bg-gray-100 rounded-full px-4 py-2 text-sm text-gray-600">
-                                🔒 odamarket.com
-                            </div>
-                        </div>
-                        <div class="flex-1 bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-white">
-                            <div class="text-center">
-                                <div class="text-6xl mb-4">🛍️</div>
-                                <h1 class="text-3xl font-black">OdaMarket</h1>
-                                <p class="text-sm opacity-90 mt-2">Votre app de vente</p>
-                            </div>
-                        </div>
-                        <div class="ios-safari-bar">
-                            <div class="ios-tap" style="left: 50%; bottom: 8px; transform: translateX(-50%);"></div>
-                            <div class="text-blue-500 text-2xl">⬆️</div>
-                        </div>
-                    </div>
-
-                    <!-- Étape 2: Menu Partage -->
-                    <div id="iosStep2" class="ios-step">
-                        <div class="flex-1 bg-black bg-opacity-50 flex items-end">
-                            <div class="bg-white rounded-t-3xl w-full p-6">
-                                <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
-                                <div class="grid grid-cols-4 gap-3 mb-4">
-                                    <div class="text-center">
-                                        <div class="bg-blue-500 w-12 h-12 rounded-2xl mx-auto mb-1 flex items-center justify-center text-white">📧</div>
-                                        <span class="text-xs text-gray-600">Mail</span>
-                                    </div>
-                                    <div class="text-center">
-                                        <div class="bg-green-500 w-12 h-12 rounded-2xl mx-auto mb-1 flex items-center justify-center text-white">💬</div>
-                                        <span class="text-xs text-gray-600">Messages</span>
-                                    </div>
-                                </div>
-                                <div class="border-t pt-3">
-                                    <button onclick="nextIOSStep()" class="w-full text-left py-3 flex items-center gap-3 hover:bg-gray-50 rounded-lg px-2">
-                                        <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-xl">➕</div>
-                                        <div>
-                                            <div class="font-semibold">Ajouter à l'écran d'accueil</div>
-                                            <div class="text-xs text-gray-500">Installer l'application</div>
-                                        </div>
-                                    </button>
-                                    <div class="ios-tap" style="left: 20px; top: 64%;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Étape 3: Confirmation -->
-                    <div id="iosStep3" class="ios-step">
-                        <div class="flex-1 bg-black bg-opacity-50 flex items-end">
-                            <div class="bg-white rounded-t-3xl w-full p-6">
-                                <div class="text-center mb-6">
-                                    <div class="w-20 h-20 bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-4xl shadow-lg">🛍️</div>
-                                    <div class="text-xl font-semibold mb-1">OdaMarket</div>
-                                    <div class="text-sm text-gray-500">odamarket.com</div>
-                                </div>
-                                <div class="flex gap-3">
-                                    <button class="flex-1 bg-gray-100 py-3 rounded-full font-semibold text-gray-700">Annuler</button>
-                                    <button onclick="nextIOSStep()" class="flex-1 bg-blue-500 text-white py-3 rounded-full font-semibold">Ajouter</button>
-                                    <div class="ios-tap" style="right: 70px; bottom: 35px;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Étape 4: Succès -->
-                    <div id="iosStep4" class="ios-step">
-                        <div class="h-full bg-gradient-to-br from-purple-500 to-indigo-600 p-6 pt-16">
-                            <div class="grid grid-cols-4 gap-4 mb-8">
-                                <div class="text-center">
-                                    <div class="w-14 h-14 bg-blue-500 rounded-2xl mx-auto mb-2 flex items-center justify-center text-2xl shadow-lg">📱</div>
-                                    <div class="text-white text-xs">Téléphone</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="w-14 h-14 bg-blue-600 rounded-2xl mx-auto mb-2 flex items-center justify-center text-2xl shadow-lg">🧭</div>
-                                    <div class="text-white text-xs">Safari</div>
-                                </div>
-                                <div class="text-center pulse-icon">
-                                    <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl mx-auto mb-2 flex items-center justify-center text-2xl shadow-lg">🛍️</div>
-                                    <div class="text-white text-xs font-bold">OdaMarket</div>
-                                    <div class="ios-tap" style="left: 50%; top: 15px; transform: translateX(-50%);"></div>
-                                </div>
-                            </div>
-                            <div class="text-center mt-12">
-                                <div class="bg-white bg-opacity-20 backdrop-blur rounded-2xl p-6 inline-block">
-                                    <div class="text-5xl mb-3">🎉</div>
-                                    <p class="text-white font-bold text-lg">Installation réussie !</p>
-                                    <p class="text-white text-sm mt-2 opacity-90">L'app est maintenant accessible<br>depuis votre écran d'accueil</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Navigation -->
-            <div class="ios-nav">
-                <button onclick="prevIOSStep()" id="iosPrevBtn" style="cursor: pointer;">
-                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                    </svg>
-                </button>
-                <div class="ios-dot active" data-step="1"></div>
-                <div class="ios-dot" data-step="2"></div>
-                <div class="ios-dot" data-step="3"></div>
-                <div class="ios-dot" data-step="4"></div>
-                <button onclick="nextIOSStep()" id="iosNextBtn" style="cursor: pointer;">
-                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </button>
-            </div>
+    <div class="bento">
+      <div class="bento-card c-gold sr-l">
+        <div class="bento-icon-wrap bg-gold">
+           <img src="icon-livraison.png" style="width:32px;height:32px;object-fit:contain"> 
+          
         </div>
+        <div>
+          <p class="bento-label">Logistique</p>
+          <p class="bento-title">Livraison rapide</p>
+          <p class="bento-desc">Partout au Cameroun en moins de 48h.</p>
+        </div>
+      </div>
+
+      <div class="bento-card c-green sr-r">
+        <div class="bento-icon-wrap bg-green">
+          <img src="icon-paiement.png" style="width:32px;height:32px;object-fit:contain"> 
+          
+        </div>
+        <div>
+          <p class="bento-label">Paiement</p>
+          <p class="bento-title">MTN & Orange</p>
+          <p class="bento-desc">Mobile Money sécurisé, zéro frais cachés.</p>
+        </div>
+      </div>
+
+      <div class="bento-card c-terra sr-l">
+        <div class="bento-icon-wrap bg-terra">
+           <img src="icon-vendeuses.png" style="width:32px;height:32px;object-fit:contain"> 
+          
+        </div>
+        <div>
+          <p class="bento-label">Communauté</p>
+          <p class="bento-title">Vendeuses vérifiées</p>
+          <p class="bento-desc">820+ boutiques locales contrôlées.</p>
+        </div>
+      </div>
+
+      <div class="bento-card c-red sr-r">
+        <div class="bento-icon-wrap bg-red">
+           <img src="icon-secure.png" style="width:32px;height:32px;object-fit:contain"> 
+          
+        </div>
+        <div>
+          <p class="bento-label">Sécurité</p>
+          <p class="bento-title">Achat protégé</p>
+          <p class="bento-desc">Remboursement garanti si problème.</p>
+        </div>
+      </div>
+
+      <div class="bento-card c-gold span-2 sr">
+        <div class="bento-icon-wrap bg-gold">
+           <img src="oda1.png" style="width:32px;height:32px;object-fit:contain"> 
+          
+        </div>
+        <div>
+          <p class="bento-label">Application</p>
+          <p class="bento-title">Disponible hors connexion</p>
+          <p class="bento-desc">Installez ODA Market et utilisez-le même sans internet. Votre boutique toujours disponible.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="gallery-section">
+    <div class="section-wrap">
+      <div class="section-head">
+        <div>
+          <p class="section-overline">Activités</p>
+          <h2 class="section-title">Le marché camerounais<br>en images</h2>
+        </div>
+      </div>
     </div>
 
-    <!-- Bouton flottant d'aide -->
-    <div class="ios-help-btn" onclick="openIOSGuide()" title="Comment installer sur iPhone ?">
-        ℹ️
+    <div class="gallery-grid">
+     <img src="femme-marche-1.jpg"> 
+      <div class="gallery-cell tall sr-l">
+         <img src="femme-marche-1.jpg" alt="Femme au marché Douala"> 
+        <div class="gallery-placeholder">
+          <span></span>
+          <p>Photo femme marché (grande)</p>
+        </div>
+        <div class="gallery-caption">Marché de Douala</div>
+      </div>
+
+    <img src="femme-marche-2.jpg"> 
+      <div class="gallery-cell sr-r">
+         <img src="femme-marche-2.jpg" alt="Vendeuse tissu wax"> 
+        <div class="gallery-placeholder">
+          <span></span>
+          <p>Photo tissu wax</p>
+        </div>
+        <div class="gallery-caption">Pagnes & Wax</div>
+      </div>
+
+       <img src="femme-marche-3.jpg"> 
+      <div class="gallery-cell sr-r" style="transition-delay:.15s">
+         <img src="femme-marche-3.jpg" alt="Produits locaux camerounais"> 
+        <div class="gallery-placeholder">
+          <span></span>
+          <p>Photo produits locaux</p>
+        </div>
+        <div class="gallery-caption">Produits locaux</div>
+      </div>
+    </div>
+  </section>
+
+ 
+  <section class="section-wrap" style="padding-left:0;padding-right:0;">
+    <div style="padding:0 18px;">
+      <div class="section-head">
+        <div>
+          <p class="section-overline">Tendances</p>
+          <h2 class="section-title">Boutiques populaires</h2>
+        </div>
+        <a href="oda-achats.html" class="section-link">Tout voir</a>
+      </div>
     </div>
 
-    <script>
-    // ===========================================
-    // GUIDE D'INSTALLATION iOS - JAVASCRIPT
-    // ===========================================
-    let currentIOSStep = 1;
-    const totalIOSSteps = 4;
+    <div class="shops-track">
+      <img src="boutique1.jpg"> 
+      <div class="shop-card sr-z">
+        <div class="shop-img">
+           <img src="boutique-wax.jpg" alt="Mode Africaine"> 
+          
+          <div class="shop-badge">Mode</div>
+        </div>
+        <div class="shop-info">
+          <p class="shop-name">Wax & Style Douala</p>
+          <p class="shop-meta">Pagnes, robes, accessoires</p>
+          <div class="shop-rating">⭐ 4.9 · 240 avis</div>
+        </div>
+      </div>
 
-    function openIOSGuide() {
-        document.getElementById('iosInstallModal').classList.add('active');
-        showIOSStep(1);
-        
-        // Auto-play
-        setTimeout(() => {
-            if (document.getElementById('iosInstallModal').classList.contains('active')) {
-                startIOSAutoPlay();
-            }
-        }, 2000);
-    }
+      <!-- Boutique 2 -->
+      <div class="shop-card sr-z" style="transition-delay:.1s">
+        <div class="shop-img">
+           <img src="boutique-cosmetique.jpg" alt="Cosmétiques africains">
+          
+          <div class="shop-badge">Beauté</div>
+        </div>
+        <div class="shop-info">
+          <p class="shop-name">Beauté Naturelle CM</p>
+          <p class="shop-meta">Cosmétiques naturels bio</p>
+          <div class="shop-rating">⭐ 4.8 · 186 avis</div>
+        </div>
+      </div>
 
-    function closeIOSGuide() {
-        document.getElementById('iosInstallModal').classList.remove('active');
-        if (typeof iosAutoPlayInterval !== 'undefined') {
-            clearInterval(iosAutoPlayInterval);
-        }
-    }
+      <!-- Boutique 3 -->
+      <div class="shop-card sr-z" style="transition-delay:.2s">
+        <div class="shop-img">
+           <img src="boutique-alimentaire.jpg" alt="Produits alimentaires"> 
+          
+          <div class="shop-badge">Alimentation</div>
+        </div>
+        <div class="shop-info">
+          <p class="shop-name">Mama Koki Yaoundé</p>
+          <p class="shop-meta">Épices, légumes, condiments</p>
+          <div class="shop-rating">⭐ 4.9 · 312 avis</div>
+        </div>
+      </div>
 
-    function showIOSStep(stepNum) {
-        // Cache toutes les étapes
-        for (let i = 1; i <= totalIOSSteps; i++) {
-            const step = document.getElementById('iosStep' + i);
-            const dot = document.querySelector(`.ios-dot[data-step="${i}"]`);
-            
-            if (step) step.classList.remove('active');
-            if (dot) dot.classList.remove('active');
-        }
-        
-        // Affiche l'étape demandée
-        const activeStep = document.getElementById('iosStep' + stepNum);
-        const activeDot = document.querySelector(`.ios-dot[data-step="${stepNum}"]`);
-        
-        if (activeStep) activeStep.classList.add('active');
-        if (activeDot) activeDot.classList.add('active');
-        
-        currentIOSStep = stepNum;
-        updateIOSNavButtons();
-    }
+      <!-- Boutique 4 -->
+      <div class="shop-card sr-z" style="transition-delay:.3s">
+        <div class="shop-img">
+          <img src="boutique-artisanat.jpg" alt="Artisanat camerounais"> 
+          
+          <div class="shop-badge">Artisanat</div>
+        </div>
+        <div class="shop-info">
+          <p class="shop-name">Art du Cameroun</p>
+          <p class="shop-meta">Statues, bijoux, vannerie</p>
+          <div class="shop-rating">⭐ 4.7 · 95 avis</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    function nextIOSStep() {
-        if (currentIOSStep < totalIOSSteps) {
-            showIOSStep(currentIOSStep + 1);
-        } else {
-            showIOSStep(1); // Retour au début
-        }
-    }
+ 
+  <div class="mega-cta-wrap sr">
 
-    function prevIOSStep() {
-        if (currentIOSStep > 1) {
-            showIOSStep(currentIOSStep - 1);
-        }
-    }
+    <!-- Lien principal — id="mainCta" pour le JS -->
+    <a href="oda-achats.html" class="mega-cta" id="mainCta">
 
-    function updateIOSNavButtons() {
-        const prevBtn = document.getElementById('iosPrevBtn');
-        const nextBtn = document.getElementById('iosNextBtn');
-        
-        if (prevBtn) prevBtn.style.opacity = currentIOSStep === 1 ? '0.3' : '1';
-        if (nextBtn) nextBtn.style.opacity = currentIOSStep === totalIOSSteps ? '0.3' : '1';
-    }
+      <!-- Texte et badge côté gauche -->
+      <div class="mega-cta-left">
+        <!-- Pastille "live" -->
+        <div class="mega-cta-tag">
+          <span class="live-dot"></span>
+          Marketplace active
+        </div>
+        <!-- Titre principal -->
+        <div class="mega-cta-title">Parcourir tous<br>les produits</div>
+        <!-- Sous-titre catégories -->
+        <div class="mega-cta-sub">Mode · Beauté · Alimentation · Artisanat…</div>
+      </div>
 
-    // Auto-play
-    let iosAutoPlayInterval;
-    function startIOSAutoPlay() {
-        iosAutoPlayInterval = setInterval(() => {
-            nextIOSStep();
-        }, 4000);
-    }
+      <!-- Cercle doré flèche côté droit -->
+      <div class="mega-cta-arrow">🛍️</div>
 
-    // Clic sur les dots
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.ios-dot').forEach((dot, index) => {
-            dot.addEventListener('click', () => showIOSStep(index + 1));
+    </a><!-- /mega-cta -->
+
+    <!-- Ligne de stats live sous le bouton -->
+    <div class="mega-cta-live-row">
+      <div class="mega-cta-visitor">
+        <span class="vdot"></span>
+        <span id="visitorCount">214 visiteurs actifs</span>
+      </div>
+      <span class="mega-cta-sep">·</span>
+      <div class="mega-cta-visitor">🛒 <span id="cartCount">38 paniers en cours</span></div>
+    </div>
+
+  </div><!-- /mega-cta-wrap -->
+
+
+  <section class="stats-section">
+    <div class="section-head" style="padding:0 0 16px;">
+      <div>
+        <p class="section-overline">ODA en chiffres</p>
+        <h2 class="section-title">Une communauté<br>qui grandit</h2>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card sr-l">
+        <div class="stat-icon">👥</div>
+        <div class="stat-num" id="cntUsers">0</div>
+        <div class="stat-label">Utilisateurs actifs</div>
+      </div>
+      <div class="stat-card sr-r">
+        <div class="stat-icon">🏪</div>
+        <div class="stat-num" id="cntSellers">0</div>
+        <div class="stat-label">Boutiques ouvertes</div>
+      </div>
+      <div class="stat-card span-2 sr">
+        <div class="stat-icon">📦</div>
+        <div class="stat-num" id="cntOrders">0</div>
+        <div class="stat-label">Commandes livrées avec succès</div>
+      </div>
+    </div>
+  </section>
+
+  <img src="vendeuse-app.jpg">
+  <div class="install-banner sr">
+    <div class="install-banner-img">
+       <img src="oda1.png" alt="Vendeuse ODA Market">
+      
+    </div>
+    <h2>Votre boutique,<br>partout avec vous</h2>
+    <p>Téléchargez ODA Market et gérez vos ventes, suivez vos commandes, et développez votre commerce même hors connexion.</p>
+
+    <div class="install-tags">
+      <span class="install-tag">🚀 Gratuit</span>
+      <span class="install-tag">📶 Hors ligne</span>
+      <span class="install-tag">🔔 Notifications</span>
+      <span class="install-tag">💳 Mobile Money</span>
+    </div>
+
+    <button class="btn-install-big" onclick="handleInstall()">
+      ⬇️ Installer ODA Market gratuitement
+    </button>
+  </div>
+
+  <section class="section-wrap" style="padding-left:0;padding-right:0;margin-bottom:0;">
+    <div style="padding:0 18px 16px;">
+      <div class="section-head">
+        <div>
+          <p class="section-overline">Témoignages</p>
+          <h2 class="section-title">Ce que disent<br>nos utilisateurs</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="testi-track">
+      <div class="testi-card v-douala sr-z">
+        <div class="testi-stars">⭐⭐⭐⭐⭐</div>
+        <p class="testi-text">
+          Depuis que j'utilise <strong>ODA Market</strong>, mes ventes ont doublé. Je reçois mes commandes directement sur mon téléphone. C'est vraiment révolutionnaire !
+        </p>
+        <div class="testi-user">
+          <div class="testi-avatar">
+            <!-- <img src="user-marie.jpg"> -->
+            👩🏾
+          </div>
+          <div>
+            <p class="testi-name">Marie-Claire N.</p>
+            <p class="testi-loc">📍 Douala, Akwa</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi-card v-yaounde sr-z" style="transition-delay:.1s">
+        <div class="testi-stars">⭐⭐⭐⭐⭐</div>
+        <p class="testi-text">
+          La livraison était rapide et le produit exactement comme sur la photo. Le paiement MTN Money était simple et <strong>sécurisé</strong>. Je recommande.
+        </p>
+        <div class="testi-user">
+          <div class="testi-avatar">👨🏿</div>
+          <div>
+            <p class="testi-name">Patrick Awana</p>
+            <p class="testi-loc">📍 Yaoundé, Bastos</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi-card v-bafoussam sr-z" style="transition-delay:.2s">
+        <div class="testi-stars">⭐⭐⭐⭐⭐</div>
+        <p class="testi-text">
+          Je vends mes pagnes wax depuis Bafoussam et je livre dans tout le pays. <strong>ODA Market</strong> m'a ouvert des portes inimaginables. Merci !
+        </p>
+        <div class="testi-user">
+          <div class="testi-avatar">👩🏿</div>
+          <div>
+            <p class="testi-name">Awa Fongang</p>
+            <p class="testi-loc">📍 Bafoussam</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi-card v-kribi sr-z" style="transition-delay:.3s">
+        <div class="testi-stars">⭐⭐⭐⭐⭐</div>
+        <p class="testi-text">
+          Les produits de la mer que je vends à Kribi partent maintenant à Yaoundé et Douala grâce à <strong>ODA</strong>. Un vrai marché numérique camerounais.
+        </p>
+        <div class="testi-user">
+          <div class="testi-avatar">👩🏾</div>
+          <div>
+            <p class="testi-name">Solange Ebongue</p>
+            <p class="testi-loc">📍 Kribi</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+ 
+  <section class="rating-section" style="margin-top:24px;">
+    <div class="rating-box" id="ratingBars">
+      <div class="rating-main">
+        <div class="rating-big">4.9</div>
+        <div class="rating-sub">
+          <div class="rating-stars">⭐⭐⭐⭐⭐</div>
+          <p class="rating-total">Basé sur 2 847 avis</p>
+        </div>
+      </div>
+
+      <div class="rating-bars">
+        <div class="testi-bar-row">
+          <span class="testi-bar-label">5</span>
+          <div class="testi-bar-bg"><div class="testi-bar-fill" data-w="88%"></div></div>
+          <span class="testi-bar-pct">88%</span>
+        </div>
+        <div class="testi-bar-row">
+          <span class="testi-bar-label">4</span>
+          <div class="testi-bar-bg"><div class="testi-bar-fill" data-w="8%"></div></div>
+          <span class="testi-bar-pct">8%</span>
+        </div>
+        <div class="testi-bar-row">
+          <span class="testi-bar-label">3</span>
+          <div class="testi-bar-bg"><div class="testi-bar-fill" data-w="2%"></div></div>
+          <span class="testi-bar-pct">2%</span>
+        </div>
+        <div class="testi-bar-row">
+          <span class="testi-bar-label">2</span>
+          <div class="testi-bar-bg"><div class="testi-bar-fill" data-w="1%"></div></div>
+          <span class="testi-bar-pct">1%</span>
+        </div>
+        <div class="testi-bar-row">
+          <span class="testi-bar-label">1</span>
+          <div class="testi-bar-bg"><div class="testi-bar-fill" data-w="1%"></div></div>
+          <span class="testi-bar-pct">1%</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="comments-section">
+
+    <!-- En-tête section -->
+    <div class="comments-head">
+      <div class="comments-title-group">
+        <p class="comments-overline">Activité récente</p>
+        <h2 class="comments-title">Ce que les gens<br>disent en ce moment</h2>
+      </div>
+      <!-- Pastille "live" rouge -->
+      <div class="comments-live-pill">
+        <span class="ticker-live-dot"></span>
+        Live
+      </div>
+    </div>
+
+    <!-- Fil de bulles — peuplé partiellement en HTML, enrichi par JS -->
+    <div class="comments-feed" id="commentsFeed">
+
+      <!-- Commentaire 1 — utilisateur ordinaire (gauche) -->
+      <div class="comment-bubble">
+        <div class="comment-header">
+          <div class="comment-avatar">👩🏾</div>
+          <!-- Remplacez par : <div class="comment-avatar"><img src="user-marie.jpg"></div> -->
+          <div class="comment-meta">
+            <div class="comment-author">Marie-Claire N. · Douala</div>
+            <div class="comment-time">Il y a 3 minutes</div>
+          </div>
+        </div>
+        <div class="comment-stars">⭐⭐⭐⭐⭐</div>
+        <div class="comment-text">
+          J'ai reçu ma commande en moins de 24h ! <strong>Qualité impeccable</strong>, exactement comme sur les photos. Je recommande vivement !
+        </div>
+        <!-- Tag du produit commenté -->
+        <div class="comment-product-tag">👗 Robe Wax Kente · 8 500 F</div>
+      </div><!-- /comment-bubble -->
+
+      <!-- Indicateur de frappe — s'affiche brièvement avant le commentaire suivant -->
+      <div class="typing-indicator" id="typingIndicator" style="display:none;">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+
+      <!-- Commentaire 2 — vendeur (droite, fond doré pâle) -->
+      <div class="comment-bubble right">
+        <div class="comment-header">
+          <div class="comment-avatar">👩🏿</div>
+          <div class="comment-meta">
+            <div class="comment-author">Awa Fongang · Boutique Wax&Style</div>
+            <div class="comment-time">Il y a 5 minutes</div>
+          </div>
+        </div>
+        <div class="comment-text">
+          Merci Marie-Claire 🙏 Votre satisfaction est notre priorité ! Revenez quand vous voulez, <strong>de nouveaux pagnes arrivent cette semaine</strong> 🎁
+        </div>
+      </div>
+
+      <!-- Commentaire 3 (gauche) -->
+      <div class="comment-bubble">
+        <div class="comment-header">
+          <div class="comment-avatar">👨🏿</div>
+          <div class="comment-meta">
+            <div class="comment-author">Patrick A. · Yaoundé</div>
+            <div class="comment-time">Il y a 8 minutes</div>
+          </div>
+        </div>
+        <div class="comment-stars">⭐⭐⭐⭐⭐</div>
+        <div class="comment-text">
+          Le paiement <strong>MTN Mobile Money</strong> était ultra rapide. J'ai payé et 2 min après j'ai reçu la confirmation. Application top !
+        </div>
+        <div class="comment-product-tag">🌶️ Épices Yaoundé Mix · 1 800 F</div>
+      </div>
+
+      <!-- Zone où les nouveaux commentaires live seront injectés par JS -->
+      <div id="liveCommentsZone"></div>
+
+    </div><!-- /comments-feed -->
+
+  </section><!-- /comments-section -->
+
+
+  <div class="new-comment-notif" id="newCommentNotif">
+    <div class="new-comment-notif-dot"></div>
+    <div class="new-comment-notif-body">
+      <div class="new-comment-notif-title" id="ncTitle">Nouveau commentaire</div>
+      <div class="new-comment-notif-sub"   id="ncSub">il y a quelques secondes</div>
+      <div class="new-comment-notif-stars" id="ncStars">⭐⭐⭐⭐⭐</div>
+    </div>
+  </div>
+
+
+  <footer class="footer" style="margin-top:44px;">
+    <div class="footer-logo">
+      <div class="footer-logo-img">
+        <img src="oda1.png" alt="ODA Market" onerror="this.style.display='none'">
+      </div>
+      <span class="footer-logo-name">ODA <span>Market</span></span>
+    </div>
+
+    <p class="footer-desc">
+      La marketplace N°1 du Cameroun. Achetez et vendez facilement, partout au pays, en toute confiance.
+    </p>
+
+    <div class="footer-flags">
+      <div class="footer-flag-chip">🇨🇲 Cameroun</div>
+      <div class="footer-flag-chip">🌍 Made in Africa</div>
+    </div>
+
+    <div class="footer-links">
+      <a href="#" class="footer-link">À propos</a>
+      <a href="#" class="footer-link">Vendre sur ODA</a>
+      <a href="#" class="footer-link">Aide & Support</a>
+      <a href="#" class="footer-link">Politique de confidentialité</a>
+      <a href="#" class="footer-link">Conditions d'utilisation</a>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2025 ODA Market. Tous droits réservés.</span>
+      <span>🇨🇲 Douala, Cameroun</span>
+    </div>
+  </footer>
+
+  <div class="mega-cta-wrap sr">
+
+    <a href="oda-achats.html" class="mega-cta" id="mainCta2">
+      <div class="mega-cta-left">
+        <div class="mega-cta-tag">
+          <span class="live-dot"></span>
+          +820 boutiques disponibles
+        </div>
+        <div class="mega-cta-title">Voir tous<br>les produits</div>
+        <div class="mega-cta-sub">Livraison partout au Cameroun 🇨🇲</div>
+      </div>
+      <div class="mega-cta-arrow">→</div>
+    </a>
+
+    <div class="mega-cta-live-row">
+      <div class="mega-cta-visitor">
+        <span class="vdot"></span>
+        <span id="visitorCount2">214 visiteurs actifs</span>
+      </div>
+      <span class="mega-cta-sep">·</span>
+      <div class="mega-cta-visitor">🔥 <span>Dernière commande il y a 2 min</span></div>
+    </div>
+
+  </div>
+
+  <!-- Notification live achat (popup flottant) -->
+  <div class="live-notif-wrap">
+    <div class="live-notif" id="liveNotif">
+      <div class="live-notif-icon" id="notifIcon">🛍️</div>
+      <div class="live-notif-text">
+        <div class="live-notif-title" id="notifTitle">Quelqu'un vient d'acheter</div>
+        <div class="live-notif-sub" id="notifSub">Il y a quelques secondes · Douala</div>
+      </div>
+      <div class="live-notif-price" id="notifPrice">2 500 F</div>
+    </div>
+  </div>
+
+ 
+  <div class="pwa-overlay" id="pwaModal">
+    <div class="pwa-backdrop" onclick="closeInstallModal()"></div>
+    <div class="pwa-sheet">
+      <div class="pwa-handle"></div>
+
+      <div class="pwa-header">
+        <div class="pwa-logo-box">
+          <img src="logo-oda.png" alt="ODA Market" onerror="this.parentElement.innerHTML='🛍️'">
+        </div>
+        <h2>Installer ODA Market</h2>
+        <p>Ajoutez ODA sur votre écran d'accueil pour une expérience complète, même sans connexion internet.</p>
+      </div>
+
+      <div class="pwa-steps">
+        <div class="pwa-step">
+          <div class="pwa-step-num">1</div>
+          <div>
+            <p class="pwa-step-title">📤 Appuie sur "Partager"</p>
+            <p class="pwa-step-desc">Touche l'icône de partage en bas de Safari (carré avec flèche vers le haut)</p>
+          </div>
+        </div>
+        <div class="pwa-step">
+          <div class="pwa-step-num">2</div>
+          <div>
+            <p class="pwa-step-title">➕ "Sur l'écran d'accueil"</p>
+            <p class="pwa-step-desc">Fais défiler et sélectionne cette option dans la liste</p>
+          </div>
+        </div>
+        <div class="pwa-step">
+          <div class="pwa-step-num">3</div>
+          <div>
+            <p class="pwa-step-title">✅ Appuie sur "Ajouter"</p>
+            <p class="pwa-step-desc">Confirme en haut à droite. ODA est installé comme une vraie app !</p>
+          </div>
+        </div>
+      </div>
+
+      <button class="pwa-btn-ok" onclick="closeInstallModal()">J'ai compris ! 🎉</button>
+      <button class="pwa-btn-skip" onclick="neverShowModal()">Ne plus afficher</button>
+    </div>
+  </div>
+
+
+
+  <script>
+  // ==================== LOADER ====================
+  window.addEventListener('load', () => {
+    const loader = document.getElementById('loader');
+    loader.style.opacity = '0';
+    setTimeout(() => loader.style.display = 'none', 500);
+  });
+
+  // ==================== SCROLL ANIMATIONS ====================
+  const revealEls = document.querySelectorAll('.sr, .sr-l, .sr-r, .sr-z');
+  const onScroll = () => {
+    revealEls.forEach(el => {
+      if (el.getBoundingClientRect().top < window.innerHeight - 70) {
+        el.classList.add('in');
+      }
+    });
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  setTimeout(onScroll, 100);
+
+  // ==================== COMPTEURS STATS ====================
+  const counters = [
+    { id: 'cntUsers',   target: 15400, suffix: '+' },
+    { id: 'cntSellers', target: 820,   suffix: '+' },
+    { id: 'cntOrders',  target: 32000, suffix: '+' },
+  ];
+  const animateCounter = (el, target, suffix) => {
+    const duration = 2000;
+    const start = performance.now();
+    const step = ts => {
+      const progress = Math.min((ts - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const value = Math.floor(ease * target);
+      el.textContent = value >= 1000 ? (value / 1000).toFixed(1) + 'k' + suffix : value + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+  const statObs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        counters.forEach(({ id, target, suffix }) => {
+          const el = document.getElementById(id);
+          if (el) animateCounter(el, target, suffix);
         });
+        statObs.disconnect();
+      }
     });
+  }, { threshold: 0.3 });
+  const firstStat = document.getElementById('cntUsers');
+  if (firstStat) statObs.observe(firstStat.closest('.stats-grid'));
 
-    // Support clavier
-    document.addEventListener('keydown', (e) => {
-        if (!document.getElementById('iosInstallModal').classList.contains('active')) return;
-        
-        if (e.key === 'ArrowLeft') prevIOSStep();
-        if (e.key === 'ArrowRight') nextIOSStep();
-        if (e.key === 'Escape') closeIOSGuide();
-    });
-
-    // Détecter si l'utilisateur est sur iOS
-    function isIOS() {
-        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    }
-
-    // Afficher automatiquement le guide sur iOS si pas encore installé
-    window.addEventListener('load', () => {
-        if (isIOS() && !window.matchMedia('(display-mode: standalone)').matches) {
-            // Afficher après 5 secondes si c'est la première visite
-            const hasSeenGuide = localStorage.getItem('iosGuideShown');
-            if (!hasSeenGuide) {
-                setTimeout(() => {
-                    openIOSGuide();
-                    localStorage.setItem('iosGuideShown', 'true');
-                }, 5000);
-            }
+  // ==================== BARRES NOTATION ====================
+  const barsContainer = document.getElementById('ratingBars');
+  if (barsContainer) {
+    const barsObs = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.querySelectorAll('.testi-bar-fill').forEach(bar => {
+            setTimeout(() => { bar.style.width = bar.getAttribute('data-w'); }, 200);
+          });
+          barsObs.disconnect();
         }
-    });
-    // Gestion du modal d'installation PWA
-function showPWAModal() {
-    const modal = document.getElementById('pwaModal');
-    modal.classList.add('active');
-    localStorage.setItem('pwaModalShown', 'true');
-}
+      });
+    }, { threshold: 0.4 });
+    barsObs.observe(barsContainer);
+  }
 
-function closePWAModal() {
-    const modal = document.getElementById('pwaModal');
-    modal.classList.remove('active');
-}
+  // ==================== PWA INSTALL ====================
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; });
+  function isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream; }
+  function isStandalone() {
+    return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+  }
+  function handleInstall() {
+    if (isStandalone()) return;
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(c => { if (c.outcome === 'accepted') deferredPrompt = null; });
+    } else { openInstallModal(); }
+  }
+  function openInstallModal() {
+    if (localStorage.getItem('oda-modal-never')) return;
+    document.getElementById('pwaModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeInstallModal() {
+    document.getElementById('pwaModal').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  function neverShowModal() {
+    localStorage.setItem('oda-modal-never', '1');
+    closeInstallModal();
+  }
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      if (isIOS() && !isStandalone() && !localStorage.getItem('oda-modal-never') && !sessionStorage.getItem('oda-modal-shown')) {
+        openInstallModal();
+        sessionStorage.setItem('oda-modal-shown', '1');
+      }
+    }, 4000);
+  });
 
-// Fermer en cliquant sur l'overlay
-document.getElementById('pwaModal')?.addEventListener('click', (e) => {
-    if (e.target.classList.contains('pwa-modal-overlay')) {
-        closePWAModal();
-    }
-});
+ 
+  const PRODUCTS = [
+    { name: 'Robe Wax Kente',     shop: 'Wax & Style',      price: '8 500 F',  icon: '👗', hot: true,  sold: '42 vendus' },
+    { name: 'Huile de Coco Bio',  shop: 'Beauté Naturelle', price: '3 200 F',  icon: '🥥', hot: false, sold: '89 vendus' },
+    { name: 'Ndolé épicé 500g',   shop: 'Mama Koki',        price: '2 800 F',  icon: '🥗', hot: true,  sold: '127 vendus' },
+    { name: 'Bijoux Perles',      shop: 'Art du Cameroun',  price: '4 000 F',  icon: '📿', hot: false, sold: '31 vendus' },
+    { name: 'Pagne Traditionnel', shop: 'Fleur Wax Douala', price: '6 500 F',  icon: '🧵', hot: true,  sold: '56 vendus' },
+    { name: 'Savon Karité CM',    shop: 'Beauté Naturelle', price: '1 500 F',  icon: '🧼', hot: false, sold: '204 vendus' },
+    { name: 'Statue Bamiléké',    shop: 'Art du Cameroun',  price: '12 000 F', icon: '🗿', hot: false, sold: '18 vendus' },
+    { name: 'Épices Yaoundé Mix', shop: 'Mama Koki',        price: '1 800 F',  icon: '🌶️', hot: true,  sold: '93 vendus' },
+    { name: 'Tissu Bogolan',      shop: 'Wax & Style',      price: '5 500 F',  icon: '🎨', hot: true,  sold: '37 vendus' },
+    { name: 'Crème Cacao Pur',    shop: 'Beauté Naturelle', price: '2 500 F',  icon: '✨', hot: false, sold: '61 vendus' },
+    { name: 'Vannerie Artisanale',shop: 'Art du Cameroun',  price: '3 800 F',  icon: '🧺', hot: false, sold: '22 vendus' },
+    { name: 'Sauce Tomate CM',    shop: 'Mama Koki',        price: '900 F',    icon: '🍅', hot: true,  sold: '315 vendus' },
+  ];
 
-// Vérifier si l'utilisateur est sur iOS et si le modal n'a pas déjà été montré
-function checkPWAInstall() {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
-    const modalShown = localStorage.getItem('pwaModalShown');
-    
-    // Afficher le modal si :
-    // - L'utilisateur est sur iOS
-    // - L'app n'est pas déjà installée
-    // - Le modal n'a jamais été montré
-    if (isIOS && !isInStandaloneMode && !modalShown) {
-        // Attendre 3 secondes après le chargement de la page
-        setTimeout(() => {
-            showPWAModal();
-        }, 3000);
-    }
-}
+  function buildTickerCard(p) {
+    return `
+      <a href="oda-achats.html" class="ticker-card">
+        <div class="ticker-card-img">
+          ${p.icon}
+          ${p.hot ? '<div class="ticker-hot-badge">🔥 Tendance</div>' : ''}
+          <div class="ticker-sold-badge">${p.sold}</div>
+        </div>
+        <div class="ticker-card-body">
+          <div class="ticker-card-name">${p.name}</div>
+          <div class="ticker-card-shop">${p.shop}</div>
+          <div class="ticker-card-price">${p.price}</div>
+          <div class="ticker-card-stars">⭐⭐⭐⭐⭐</div>
+        </div>
+      </a>`;
+  }
 
-// Lancer la vérification au chargement de la page
-window.addEventListener('load', checkPWAInstall);
+  function initTicker() {
+    const row1 = document.getElementById('tickerRow1');
+    const row2 = document.getElementById('tickerRow2');
+    if (!row1 || !row2) return;
 
-// BONUS: Bouton pour rouvrir le modal manuellement
-// Vous pouvez l'ajouter n'importe où dans votre page
-function createPWAButton() {
-    const button = document.createElement('button');
-    button.innerHTML = '📱 Installer l\'app';
-    button.style.cssText = `
-        position: fixed;
-        bottom: 100px;
-        right: 20px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        border: none;
-        padding: 12px 20px;
-        border-radius: 50px;
-        font-weight: 600;
-        cursor: pointer;
-        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
-        z-index: 1000;
-        font-size: 0.9rem;
-    `;
-    button.onclick = showPWAModal;
-    
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
-    
-    // Afficher le bouton seulement si sur iOS et pas installé
-    if (isIOS && !isInStandaloneMode) {
-        document.body.appendChild(button);
-    }
-}
+    // Ligne 1 : produits 0–7 (dupliqués pour boucle infinie)
+    const set1 = PRODUCTS.slice(0, 8);
+    const html1 = [...set1, ...set1].map(buildTickerCard).join('');
+    row1.innerHTML = html1;
 
-// Créer le bouton après le chargement
-window.addEventListener('load', createPWAButton);
-    </script>
+    // Ligne 2 : produits 4–11 (dupliqués, sens inverse)
+    const set2 = PRODUCTS.slice(4);
+    const html2 = [...set2, ...set2].map(buildTickerCard).join('');
+    row2.innerHTML = html2;
+
+    // Compteur live (incrémente doucement)
+    let count = 147;
+    setInterval(() => {
+      count += Math.floor(Math.random() * 3);
+      const el = document.getElementById('tickerCount');
+      if (el) el.textContent = `🔥 ${count} achats aujourd'hui`;
+    }, 8000);
+  }
+
+  const NOTIF_DATA = [
+    { icon: '👗', title: 'Robe Wax Kente achetée', sub: 'Il y a 12s · Douala, Akwa',      price: '8 500 F' },
+    { icon: '🥥', title: 'Huile de Coco achetée',  sub: 'Il y a 28s · Yaoundé, Bastos',   price: '3 200 F' },
+    { icon: '🧵', title: 'Pagne Traditionnel',     sub: 'Il y a 45s · Bafoussam',          price: '6 500 F' },
+    { icon: '🌶️', title: 'Épices Yaoundé Mix',    sub: 'Il y a 1 min · Douala, Bali',     price: '1 800 F' },
+    { icon: '🧼', title: 'Savon Karité acheté',    sub: 'Il y a 2 min · Kribi',            price: '1 500 F' },
+    { icon: '📿', title: 'Bijoux Perles achetés',  sub: 'Il y a 3 min · Douala, Bonanjo',  price: '4 000 F' },
+    { icon: '🍅', title: 'Sauce Tomate CM',        sub: 'Il y a 4 min · Ngaoundéré',       price: '900 F'   },
+    { icon: '🎨', title: 'Tissu Bogolan acheté',   sub: 'Il y a 5 min · Bamenda',          price: '5 500 F' },
+  ];
+
+  let notifIdx = 0;
+  let notifTimer = null;
+
+  function showNextNotif() {
+    const el    = document.getElementById('liveNotif');
+    const icon  = document.getElementById('notifIcon');
+    const title = document.getElementById('notifTitle');
+    const sub   = document.getElementById('notifSub');
+    const price = document.getElementById('notifPrice');
+    if (!el) return;
+
+    const data = NOTIF_DATA[notifIdx % NOTIF_DATA.length];
+    notifIdx++;
+
+    icon.textContent  = data.icon;
+    title.textContent = data.title;
+    sub.textContent   = data.sub;
+    price.textContent = data.price;
+
+    el.classList.add('show');
+
+    setTimeout(() => { el.classList.remove('show'); }, 3800);
+  }
+
+  function startNotifLoop() {
+    // Première notif après 6s, puis toutes les 9s
+    setTimeout(() => {
+      showNextNotif();
+      notifTimer = setInterval(showNextNotif, 9000);
+    }, 6000);
+  }
+
+  // Init au chargement
+  document.addEventListener('DOMContentLoaded', () => {
+    initTicker();
+    startNotifLoop();
+  });
+  </script>
+
 </body>
 </html>
