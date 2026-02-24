@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="produits-styles.css">
     <script src="/notifications.js"></script>
+    <link rel="manifest" href="manifest.json">
 <style>
     :root {
     --primary-color: #007AFF;
@@ -1588,6 +1589,9 @@ body.menu-open {
                     <option value="outils">outils</option>
                     <option value="enfants">enfants</option>
                     <option value="bijoux">bijoux</option>
+                    <option value="site-web">site-web</option>
+                    <option value="voiture">voiture</option>
+                    <option value="formation">formation</option>
                     <option value="autre">autre</option>
                 </select>
 
@@ -1635,8 +1639,6 @@ body.menu-open {
     </div>
     <script src="cache-manager.js"></script>
 <script type="module">
-    // ==================== PARTIE 1: CONFIGURATION & AUTHENTIFICATION ====================
-
 // Configuration Supabase
 const SUPABASE_URL = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2ticWJxeGN3emNybG11dnpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MTk1MzMsImV4cCI6MjA3NjA5NTUzM30.AMzAUwtjFt7Rvof5r2enMyYIYToc1wNWWEjvZqK_YXM';
