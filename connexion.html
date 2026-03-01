@@ -302,8 +302,9 @@ form{
                     <i class="bx bxs-user"></i>
                 </div>
                 <div class="input-box">
-                    <input type="password" name="" id="loginPassword" placeholder="Password" required>
+                    <input type="password" id="loginPassword" placeholder="Password" required>
                     <i class="bx bxs-lock-alt"></i>
+                    <i class="bx bx-hide toggle-password" onclick="togglePassword('registerPassword', this)" style="cursor:pointer;right:50px;color:#888;position:absolute;top:50%;transform:translateY(-50%);font-size:20px;"></i>
                 </div>
                 <div class="forgot-link">
                     <a href="">Forgot password?</a>
@@ -331,8 +332,9 @@ form{
                     <i class="bx bxs-envelope"></i>
                 </div>
                 <div class="input-box">
-                    <input type="password" name="" id="registerPassword" placeholder="Password" required>
+                    <input type="password" id="registerPassword" placeholder="Password" required>
                     <i class="bx bxs-lock-alt"></i>
+                    <i class="bx bx-hide toggle-password" onclick="togglePassword('registerPassword', this)" style="cursor:pointer;right:50px;color:#888;position:absolute;top:50%;transform:translateY(-50%);font-size:20px;"></i>
                 </div>
                 <button type="submit" class="btn">Register</button>
                 <p>or register with</p>
@@ -424,7 +426,9 @@ form{
             if (error) throw error;
             
             console.log('✅ Connexion réussie:', data);
-            window.location.href = 'tableau.html';
+            const redirect = sessionStorage.getItem('oda_redirect_after_login') || 'tableau.html';
+sessionStorage.removeItem('oda_redirect_after_login');
+window.location.href = redirect;
             
         } catch (error) {
             console.error('Erreur de connexion:', error);
@@ -539,6 +543,16 @@ form{
     }
 
     console.log('🔐 Page de connexion initialisée avec Google Auth uniquement');
+    function togglePassword(inputId, icon) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('bx-hide', 'bx-show');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('bx-show', 'bx-hide');
+    }
+}
   </script>
 </body>
 </html>
