@@ -1468,15 +1468,14 @@ input:checked + .toggle-slider-small:before {
             </button>
             
             <div class="brand-section">
-                <div class="logo-image"></div>
+                <button onclick="history.back()" style="display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;color:var(--primary-color);font-family:'Poppins',sans-serif;font-size:0.95rem;font-weight:600;padding:6px 10px;border-radius:8px;transition:all 0.2s ease;" onmouseover="this.style.background='rgba(0,122,255,0.08)'" onmouseout="this.style.background='none'">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                    Retour
+                </button>
                 <h1 class="brand-name">Paramètres</h1>
             </div>
-
-            <div class="header-actions">
-                <button class="icon-btn notification-btn">
-                    <span>🔔</span>
-                    <span class="badge">3</span>
-                </button>
                 <div class="user-profile">
                     <div class="avatar-image"></div>
                     <span class="user-name">Admin</span>
@@ -2178,18 +2177,17 @@ input:checked + .toggle-slider-small:before {
     </div>
     <script src="cache-manager.js"></script>
  <script type="module">
-// ==================== PARTIE 1/4 : CONFIG, AUTH & SAUVEGARDE ====================
+    // ==================== PARTIE 1/5 : CONFIG, AUTH & SAUVEGARDE ====================
 
-// ✅ Corriger d'abord les credentials Supabase
-const SUPABASE_URL = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
+const SUPABASE_URL      = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2ticWJxeGN3emNybG11dnpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MTk1MzMsImV4cCI6MjA3NjA5NTUzM30.AMzAUwtjFt7Rvof5r2enMyYIYToc1wNWWEjvZqK_YXM';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ==================== ÉTAT GLOBAL ====================
 let currentUser = null;
 let parametres = {
-    general: { nom: '', description: '', email: '', telephone: '', adresse: '' },
-    identifiant: { slug: '', disponible: false },
+    general:      { nom: '', description: '', email: '', telephone: '', adresse: '' },
+    identifiant:  { slug: '', disponible: false },
     paiement: {
         carte:  { actif: false, cle: '', confirme: false },
         mobile: {
@@ -2201,19 +2199,14 @@ let parametres = {
         devise: 'FCFA'
     },
     livraison: {
-        fraisDouala: 1000,
-        fraisAutres: 2500,
-        delai: '2-5 jours ouvrables',
-        gratuit: false,
-        montantMin: 50000,
-        zonesPersonnalisees: []
+        fraisDouala: 1000, fraisAutres: 2500,
+        delai: '2-5 jours ouvrables', gratuit: false,
+        montantMin: 50000, zonesPersonnalisees: []
     },
     apparence: {
         couleurPrimaire:   '#FF6B00',
         couleurSecondaire: '#1A1A1A',
-        logo:    '',
-        favicon: '',
-        police:  'Inter'
+        logo: '', favicon: '', police: 'Inter'
     },
     notifications: { commandes: true, stock: true, clients: false, rapports: true }
 };
@@ -2221,10 +2214,7 @@ let parametres = {
 // ==================== AUTHENTIFICATION ====================
 async function verifierAuthentification() {
     try {
-        // Tentative 1 : session directe
         let { data: { session } } = await supabase.auth.getSession();
-
-        // Tentative 2 : si null, attendre onAuthStateChange (max 3 secondes)
         if (!session) {
             session = await new Promise((resolve) => {
                 const timeout = setTimeout(() => resolve(null), 3000);
@@ -2234,17 +2224,10 @@ async function verifierAuthentification() {
                 });
             });
         }
-
-        if (!session) {
-            console.warn('⚠️ Aucune session active');
-            window.location.href = 'connexion.html';
-            return;
-        }
-
+        if (!session) { window.location.href = 'connexion.html'; return; }
         currentUser = session.user;
         const el = document.querySelector('.user-name');
         if (el) el.textContent = currentUser.email.split('@')[0];
-
     } catch (e) {
         console.error('Erreur auth:', e);
         window.location.href = 'connexion.html';
@@ -2270,41 +2253,42 @@ async function chargerParametres() {
         }
     } catch (_) {}
 
+    // ✅ FIX #1 : Appliquer le favicon sauvegardé dès le chargement
+    // Cela garantit que l'onglet affiche toujours l'icône de la boutique
+    if (parametres.apparence?.favicon) {
+        _appliquerFaviconOnglet(parametres.apparence.favicon);
+    }
+
     await initialiserIdentifiantUnique();
     appliquerParametres();
 }
 
-
+// ==================== SAUVEGARDE ====================
 async function sauvegarderParametres() {
-    // 1. Sauvegarde locale immédiate (jamais bloquante)
     const _syncLocal = () => {
         if (!currentUser?.id) return;
         const json = JSON.stringify(parametres);
         localStorage.setItem(`parametres_${currentUser.id}`, json);
-        // Clé lue par boutique.html
         localStorage.setItem('parametres_boutique', json);
-        // Invalider le cache visiteur → boutique.html rechargera depuis Supabase
-        if (parametres.identifiant?.slug) {
+        if (parametres.identifiant?.slug)
             localStorage.removeItem(`boutique_cache_${parametres.identifiant.slug}`);
-        }
         _exposerConfigPaiement();
     };
 
     if (!currentUser?.id) { _syncLocal(); return false; }
 
     try {
-        // 2. Appel Supabase avec timeout de 5 secondes
         const timeout = new Promise((_, reject) =>
             setTimeout(() => reject(new Error('Timeout')), 5000)
         );
         const upsert = supabase
             .from('parametres_boutique')
-            .upsert({ user_id: currentUser.id, config: parametres, updated_at: new Date().toISOString() },
-                    { onConflict: 'user_id' });
-
+            .upsert(
+                { user_id: currentUser.id, config: parametres, updated_at: new Date().toISOString() },
+                { onConflict: 'user_id' }
+            );
         const { error } = await Promise.race([upsert, timeout]);
         if (error) throw error;
-
         _syncLocal();
         return true;
     } catch (e) {
@@ -2314,15 +2298,41 @@ async function sauvegarderParametres() {
     }
 }
 
-// Exposer la config paiement dans localStorage (pour boutique.html)
 function _exposerConfigPaiement() {
     try {
         if (!parametres.identifiant?.slug) return;
-        const json = JSON.stringify({ ...parametres });
-        localStorage.setItem('parametres_boutique', json);
+        localStorage.setItem('parametres_boutique', JSON.stringify({ ...parametres }));
     } catch (e) {
         console.error('❌ Erreur exposition config:', e);
     }
+}
+
+// ==================== FAVICON ONGLET (FIX PRINCIPAL) ====================
+// ✅ FIX #1 : Fonction centralisée pour appliquer le favicon dans l'onglet du navigateur.
+// Appelée lors du chargement ET après chaque upload de favicon.
+// Sans cela, copier le lien boutique ne montre pas l'icône de la boutique dans l'onglet.
+function _appliquerFaviconOnglet(src) {
+    if (!src) return;
+    // Chercher ou créer le tag <link rel="icon">
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+    }
+    link.type = src.startsWith('data:image/png') ? 'image/png' :
+                src.startsWith('data:image/svg') ? 'image/svg+xml' :
+                src.startsWith('data:image/ico') ? 'image/x-icon' : 'image/png';
+    link.href = src;
+
+    // Aussi mettre à jour apple-touch-icon pour iOS
+    let appleLink = document.querySelector("link[rel='apple-touch-icon']");
+    if (!appleLink) {
+        appleLink = document.createElement('link');
+        appleLink.rel = 'apple-touch-icon';
+        document.head.appendChild(appleLink);
+    }
+    appleLink.href = src;
 }
 
 // ==================== IDENTIFIANT BOUTIQUE ====================
@@ -2334,9 +2344,7 @@ async function initialiserIdentifiantUnique() {
     if (!parametres.identifiant?.slug) {
         const slug = genererIdentifiantAuto();
         parametres.identifiant = {
-            slug,
-            disponible: true,
-            auto: true,
+            slug, disponible: true, auto: true,
             dateCreation: new Date().toISOString()
         };
         parametres.slug = slug;
@@ -2353,10 +2361,11 @@ function afficherIdentifiantActuel() {
     const form  = document.getElementById('identifiantForm');
 
     if (parametres.identifiant?.slug) {
-        if (el)    el.style.display = 'block';
-        if (actif) actif.textContent = parametres.identifiant.slug;
-        if (lien)  lien.value = `${window.location.origin}/boutique.html?shop=${parametres.identifiant.slug}`;
-        if (form)  form.style.display = 'none';
+        const url = `${window.location.origin}/boutique.html?shop=${parametres.identifiant.slug}`;
+        if (el)    el.style.display     = 'block';
+        if (actif) actif.textContent    = parametres.identifiant.slug;
+        if (lien)  lien.value           = url;
+        if (form)  form.style.display   = 'none';
     }
 }
 
@@ -2391,24 +2400,35 @@ function afficherNotification(message, type = 'info') {
     if (!conteneur) {
         conteneur = document.createElement('div');
         conteneur.id = 'notification-container';
-        conteneur.style.cssText = 'position:fixed;top:100px;right:20px;z-index:10000;display:flex;flex-direction:column;gap:12px';
+        conteneur.style.cssText =
+            'position:fixed;top:100px;right:20px;z-index:10000;display:flex;flex-direction:column;gap:12px;pointer-events:none;';
         document.body.appendChild(conteneur);
     }
     const couleurs = { success: '#34C759', error: '#FF3B30', info: '#007AFF', warning: '#FF9500' };
     const notif = document.createElement('div');
-    notif.style.cssText = `background:white;padding:16px 24px;border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,0.15);border-left:4px solid ${couleurs[type]};animation:slideIn 0.5s ease;max-width:350px;font-family:'Poppins',sans-serif;font-weight:500;color:#1D1D1F`;
+    notif.style.cssText = `
+        background:white;padding:14px 20px;border-radius:12px;
+        box-shadow:0 8px 25px rgba(0,0,0,0.15);border-left:4px solid ${couleurs[type]};
+        animation:slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        max-width:340px;font-family:'Poppins',sans-serif;font-weight:500;
+        color:#1D1D1F;pointer-events:all;cursor:pointer;
+        display:flex;align-items:center;gap:8px;`;
     notif.textContent = message;
+    notif.addEventListener('click', () => notif.remove());
     conteneur.appendChild(notif);
     setTimeout(() => {
-        notif.style.animation = 'fadeOut 0.5s ease';
-        setTimeout(() => notif.remove(), 500);
-    }, 3000);
+        notif.style.animation = 'fadeOut 0.4s ease forwards';
+        setTimeout(() => notif.remove(), 400);
+    }, 3500);
 }
 
 // ==================== APPLIQUER PARAMÈTRES AUX FORMULAIRES ====================
 function appliquerParametres() {
     if (parametres.general) {
-        const map = { shopName: 'nom', shopDescription: 'description', shopEmail: 'email', shopPhone: 'telephone', shopAddress: 'adresse' };
+        const map = {
+            shopName: 'nom', shopDescription: 'description',
+            shopEmail: 'email', shopPhone: 'telephone', shopAddress: 'adresse'
+        };
         Object.entries(map).forEach(([id, key]) => {
             const el = document.getElementById(id);
             if (el) el.value = parametres.general[key] || '';
@@ -2418,8 +2438,8 @@ function appliquerParametres() {
     if (parametres.identifiant) {
         const slugInput   = document.getElementById('shopSlug');
         const slugPreview = document.getElementById('slugPreview');
-        if (slugInput)   slugInput.value     = parametres.identifiant.slug || '';
-        if (slugPreview) slugPreview.textContent = parametres.identifiant.slug || 'votre-identifiant';
+        if (slugInput)   slugInput.value          = parametres.identifiant.slug || '';
+        if (slugPreview) slugPreview.textContent  = parametres.identifiant.slug || 'votre-identifiant';
     }
 
     if (parametres.paiement) {
@@ -2427,78 +2447,148 @@ function appliquerParametres() {
         Object.entries(map).forEach(([id, key]) => {
             const el = document.getElementById(id);
             if (el) {
-                el.checked = parametres.paiement[key].actif;
+                el.checked = parametres.paiement[key]?.actif || false;
                 if (el.checked) {
-                    const details = document.getElementById(id === 'paymentCard' ? 'cardDetails' : id === 'paymentMobile' ? 'mobileDetails' : 'cashDetails');
-                    if (details) details.style.display = 'block';
+                    const detailsMap = { paymentCard: 'cardDetails', paymentMobile: 'mobileDetails', paymentCash: 'cashDetails' };
+                    const d = document.getElementById(detailsMap[id]);
+                    if (d) d.style.display = 'block';
                 }
             }
         });
         const currency = document.getElementById('currency');
-        if (currency) currency.value = parametres.paiement.devise;
+        if (currency) currency.value = parametres.paiement.devise || 'FCFA';
     }
 
     if (parametres.livraison) {
-        const map = { fraisDouala: 'fraisDouala', fraisAutres: 'fraisAutres', delaiLivraison: 'delai', montantMinimum: 'montantMin' };
+        const map = {
+            fraisDouala: 'fraisDouala', fraisAutres: 'fraisAutres',
+            delaiLivraison: 'delai', montantMinimum: 'montantMin'
+        };
         Object.entries(map).forEach(([id, key]) => {
             const el = document.getElementById(id);
-            if (el) el.value = parametres.livraison[key];
+            if (el) el.value = parametres.livraison[key] || '';
         });
         const fs = document.getElementById('freeShipping');
-        if (fs) fs.checked = parametres.livraison.gratuit;
+        if (fs) fs.checked = parametres.livraison.gratuit || false;
     }
 
     if (parametres.notifications) {
-        const map = { notifOrders: 'commandes', notifStock: 'stock', notifClients: 'clients', notifReports: 'rapports' };
+        const map = {
+            notifOrders: 'commandes', notifStock: 'stock',
+            notifClients: 'clients', notifReports: 'rapports'
+        };
         Object.entries(map).forEach(([id, key]) => {
             const el = document.getElementById(id);
-            if (el) el.checked = parametres.notifications[key];
+            if (el) el.checked = parametres.notifications[key] || false;
+        });
+    }
+
+    // ✅ FIX #1 (suite) : Appliquer le logo et favicon sauvegardés dans les previews
+    if (parametres.apparence?.logo) {
+        const prev = document.getElementById('logoPreview');
+        if (prev) {
+            prev.innerHTML = `
+                <div class="upload-preview-image">
+                    <img src="${parametres.apparence.logo}" alt="Logo" style="max-width:200px;max-height:100px;object-fit:contain;border-radius:8px;">
+                    <div class="upload-overlay-label">Logo actuel</div>
+                </div>`;
+        }
+    }
+    if (parametres.apparence?.favicon) {
+        const prev = document.getElementById('faviconPreview');
+        if (prev) {
+            prev.innerHTML = `
+                <div class="upload-preview-image">
+                    <img src="${parametres.apparence.favicon}" alt="Favicon" style="width:64px;height:64px;object-fit:contain;border-radius:8px;image-rendering:pixelated;">
+                    <div class="upload-overlay-label">Favicon actuel</div>
+                </div>`;
+        }
+        _appliquerFaviconOnglet(parametres.apparence.favicon);
+    }
+
+    // Couleurs et police
+    if (parametres.apparence) {
+        const cp = parametres.apparence.couleurPrimaire   || '#FF6B00';
+        const cs = parametres.apparence.couleurSecondaire || '#1A1A1A';
+        document.documentElement.style.setProperty('--primary-color',   cp);
+        document.documentElement.style.setProperty('--secondary-color', cs);
+        ['primaryColor',   'primaryColorPreview',   'primaryColorHex'  ].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (el.tagName === 'INPUT' && el.type === 'color') el.value = cp;
+            else if (el.tagName === 'INPUT') el.value = cp.toUpperCase();
+            else el.style.background = cp;
+        });
+        ['secondaryColor', 'secondaryColorPreview', 'secondaryColorHex'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (el.tagName === 'INPUT' && el.type === 'color') el.value = cs;
+            else if (el.tagName === 'INPUT') el.value = cs.toUpperCase();
+            else el.style.background = cs;
         });
     }
 }
 
-// ==================== FONCTIONS GLOBALES ====================
+// ==================== FONCTIONS GLOBALES EXPOSÉES ====================
 window.afficherFormulaireModification = function() {
     const form = document.getElementById('identifiantForm');
     const slug = document.getElementById('shopSlug');
     if (form) form.style.display = 'block';
-    if (parametres.identifiant?.slug && !parametres.identifiant.auto && slug) {
+    if (parametres.identifiant?.slug && !parametres.identifiant.auto && slug)
         slug.value = parametres.identifiant.slug;
-    }
     if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 
 window.copierLienBoutique = function() {
     const input = document.getElementById('lienBoutique');
-    if (input) {
+    if (!input) return;
+    // Utiliser l'API Clipboard moderne, avec fallback execCommand
+    const text = input.value;
+    if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+            _feedbackCopie(input);
+        }).catch(() => {
+            input.select();
+            document.execCommand('copy');
+            _feedbackCopie(input);
+        });
+    } else {
         input.select();
         document.execCommand('copy');
-        afficherNotification('✅ Lien copié dans le presse-papiers !', 'success');
-        input.style.background = 'rgba(52,199,89,0.1)';
-        setTimeout(() => { input.style.background = 'white'; }, 500);
+        _feedbackCopie(input);
     }
 };
 
+function _feedbackCopie(input) {
+    afficherNotification('✅ Lien copié dans le presse-papiers !', 'success');
+    input.style.background = 'rgba(52,199,89,0.12)';
+    input.style.borderColor = '#34C759';
+    setTimeout(() => {
+        input.style.background = '';
+        input.style.borderColor = '';
+    }, 1200);
+}
+
 window.getShopSettings = function() {
     return {
-        nom: parametres.general.nom,
-        description: parametres.general.description,
-        email: parametres.general.email,
-        telephone: parametres.general.telephone,
-        adresse: parametres.general.adresse,
-        slug: parametres.identifiant.slug,
+        nom:               parametres.general.nom,
+        description:       parametres.general.description,
+        email:             parametres.general.email,
+        telephone:         parametres.general.telephone,
+        adresse:           parametres.general.adresse,
+        slug:              parametres.identifiant.slug,
         couleurPrimaire:   parametres.apparence.couleurPrimaire,
         couleurSecondaire: parametres.apparence.couleurSecondaire,
-        logo:    parametres.apparence.logo,
-        favicon: parametres.apparence.favicon,
-        police:  parametres.apparence.police,
+        logo:              parametres.apparence.logo,
+        favicon:           parametres.apparence.favicon,
+        police:            parametres.apparence.police,
         paiement: {
-            carte:   parametres.paiement.carte.actif,
-            mobile:  parametres.paiement.mobile.actif,
-            mtn:     parametres.paiement.mobile.mtn,
-            orange:  parametres.paiement.mobile.orange,
-            cash:    parametres.paiement.cash.actif,
-            devise:  parametres.paiement.devise
+            carte:  parametres.paiement.carte.actif,
+            mobile: parametres.paiement.mobile.actif,
+            mtn:    parametres.paiement.mobile.mtn,
+            orange: parametres.paiement.mobile.orange,
+            cash:   parametres.paiement.cash.actif,
+            devise: parametres.paiement.devise
         },
         livraison: parametres.livraison
     };
@@ -2506,12 +2596,11 @@ window.getShopSettings = function() {
 
 window.getZonesLivraison = function() {
     const zones = [
-        { nom: 'Douala',       frais: parametres.livraison?.fraisDouala || 1000 },
+        { nom: 'Douala',        frais: parametres.livraison?.fraisDouala || 1000 },
         { nom: 'Autres villes', frais: parametres.livraison?.fraisAutres || 2500 }
     ];
-    if (parametres.livraison?.zonesPersonnalisees) {
+    if (parametres.livraison?.zonesPersonnalisees)
         zones.push(...parametres.livraison.zonesPersonnalisees);
-    }
     return zones;
 };
 
@@ -2523,7 +2612,10 @@ window.exporterDonnees = async function() {
         const donnees = { parametres, produits: produits || [], commandes: commandes || [], date: new Date().toISOString() };
         const blob = new Blob([JSON.stringify(donnees, null, 2)], { type: 'application/json' });
         const url  = URL.createObjectURL(blob);
-        const a = Object.assign(document.createElement('a'), { href: url, download: `export_boutique_${new Date().toISOString().split('T')[0]}.json` });
+        const a = Object.assign(document.createElement('a'), {
+            href: url,
+            download: `export_boutique_${new Date().toISOString().split('T')[0]}.json`
+        });
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
         URL.revokeObjectURL(url);
         afficherNotification('📥 Données exportées avec succès', 'success');
@@ -2547,7 +2639,7 @@ window.supprimerCompte = async function() {
         afficherNotification('❌ Erreur lors de la suppression', 'error');
     }
 };
-// ==================== PARTIE 2/4 : NAVIGATION & MENUS ====================
+// ==================== PARTIE 2/5 : NAVIGATION, MENUS & BOUTON RETOUR MOBILE ====================
 
 function initialiserMenuHamburger() {
     const btn     = document.getElementById('hamburgerBtn');
@@ -2572,7 +2664,9 @@ function initialiserMenuHamburger() {
 
     close?.addEventListener('click', fermer);
     overlay?.addEventListener('click', fermer);
-    document.querySelectorAll('.hamburger-link').forEach(l => l.addEventListener('click', () => setTimeout(fermer, 300)));
+    document.querySelectorAll('.hamburger-link').forEach(l =>
+        l.addEventListener('click', () => setTimeout(fermer, 300))
+    );
 }
 
 function initialiserNavigation() {
@@ -2616,21 +2710,21 @@ function creerMenuMobileAndroid() {
         { icon: '🔖', label: 'Identifiant',   section: 'identifiant' },
         { icon: '💳', label: 'Paiement',      section: 'payment' },
         { icon: '📦', label: 'Livraison',     section: 'shipping' },
-        { icon: '🔔', label: 'Notifications', section: 'notifications' },
+        { icon: '🔔', label: 'Notifs',        section: 'notifications' },
         { icon: '🔒', label: 'Sécurité',      section: 'security' },
         { icon: '🎨', label: 'Apparence',     section: 'apparence' }
     ];
 
     items.forEach(item => {
         const btn = document.createElement('button');
-        btn.className = 'menu-mobile-btn';
+        btn.className   = 'menu-mobile-btn';
         btn.dataset.section = item.section;
         const sectionEl = document.getElementById(item.section);
         const isActive  = sectionEl && sectionEl.style.display !== 'none';
         if (isActive) btn.classList.add('active');
 
         const iconSpan  = document.createElement('span');
-        iconSpan.className = 'link-icon';
+        iconSpan.className  = 'link-icon';
         iconSpan.textContent = item.icon;
 
         const labelSpan = document.createElement('span');
@@ -2699,6 +2793,132 @@ function initialiserMenuMobileAndroid() {
     });
 }
 
+// ==================== ✅ FIX #2 : BOUTON RETOUR MOBILE ====================
+// En mode responsive (≤768px), affiche un bouton "‹ Retour" dans le header
+// pour revenir à la liste des sections, UX typique des apps mobiles.
+
+function initialiserBoutonRetourMobile() {
+    // Injecter le CSS du bouton retour une seule fois
+    if (!document.getElementById('style-back-btn')) {
+        const style = document.createElement('style');
+        style.id = 'style-back-btn';
+        style.textContent = `
+            #btn-retour-mobile {
+                display: none;
+                align-items: center;
+                gap: 6px;
+                background: none;
+                border: none;
+                color: var(--primary-color);
+                font-family: 'Poppins', sans-serif;
+                font-size: 0.95rem;
+                font-weight: 600;
+                cursor: pointer;
+                padding: 6px 10px;
+                border-radius: 8px;
+                transition: all 0.2s ease;
+            }
+            #btn-retour-mobile:hover {
+                background: rgba(0,122,255,0.08);
+            }
+            #btn-retour-mobile svg {
+                width: 18px; height: 18px; flex-shrink: 0;
+            }
+            @media (max-width: 768px) {
+                #btn-retour-mobile.visible {
+                    display: flex !important;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // Créer le bouton et l'insérer dans le header (avant le titre)
+    const headerContainer = document.querySelector('.header-container');
+    if (!headerContainer || document.getElementById('btn-retour-mobile')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'btn-retour-mobile';
+    btn.setAttribute('aria-label', 'Retour');
+    btn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 18l-6-6 6-6"/>
+        </svg>
+        Retour
+    `;
+
+    // Insérer avant la brand-section ou en premier enfant
+    const brandSection = headerContainer.querySelector('.brand-section');
+    if (brandSection) {
+        headerContainer.insertBefore(btn, brandSection);
+    } else {
+        headerContainer.prepend(btn);
+    }
+
+    // Clic → revenir au menu mobile (première section)
+    btn.addEventListener('click', () => {
+        // Sur mobile, cacher le contenu actif et remettre la navigation en avant
+        // En pratique : naviguer vers la section "general" par défaut (ou aucune)
+        _cacherToutesLessections();
+        _masquerBoutonRetour();
+        _afficherMenuMobile();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Surveiller les changements de section pour afficher/masquer le bouton
+    document.querySelectorAll('.settings-menu-link, .menu-mobile-btn').forEach(el => {
+        el.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                setTimeout(_afficherBoutonRetour, 100);
+            }
+        });
+    });
+
+    // Gestion resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            _masquerBoutonRetour();
+        }
+    });
+}
+
+function _afficherBoutonRetour() {
+    document.getElementById('btn-retour-mobile')?.classList.add('visible');
+    // Mettre à jour le titre avec la section active
+    const activeSection = document.querySelector('.settings-section[style*="block"]');
+    const activeMenuBtn = document.querySelector('.menu-mobile-btn.active');
+    if (activeMenuBtn && activeSection) {
+        const brandName = document.querySelector('.brand-name');
+        if (brandName) {
+            const label = activeMenuBtn.querySelector('span:last-of-type')?.textContent || 'Paramètres';
+            brandName.textContent = label;
+        }
+    }
+}
+
+function _masquerBoutonRetour() {
+    document.getElementById('btn-retour-mobile')?.classList.remove('visible');
+    const brandName = document.querySelector('.brand-name');
+    if (brandName) brandName.textContent = 'Paramètres';
+}
+
+function _cacherToutesLessections() {
+    document.querySelectorAll('.settings-section').forEach(s => s.style.display = 'none');
+    document.querySelectorAll('.settings-menu-link').forEach(l => l.classList.remove('active'));
+    document.querySelectorAll('.menu-mobile-btn').forEach(b => {
+        b.classList.remove('active');
+        b.querySelector('.active-indicator')?.remove();
+    });
+}
+
+function _afficherMenuMobile() {
+    // Ré-afficher la première section (général) comme état par défaut
+    const firstSection = document.getElementById('general');
+    const firstBtn     = document.querySelector('.menu-mobile-btn[data-section="general"]');
+    if (firstSection) { firstSection.style.display = 'block'; }
+    if (firstBtn)     { mettreAJourMenuActif(firstBtn); }
+}
+
 // ==================== BOUTON NOTIFICATIONS ====================
 function ajouterBoutonNotifications() {
     const container = document.querySelector('.header-actions');
@@ -2709,7 +2929,10 @@ function ajouterBoutonNotifications() {
     btn.className = 'icon-btn';
     btn.innerHTML = '🔔';
     btn.title = 'Activer les notifications';
-    btn.style.cssText = 'position:relative;background:linear-gradient(135deg,#FFD700,#FFA500);color:white;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.3s ease;border:none;font-size:1.2rem';
+    btn.style.cssText =
+        'position:relative;background:linear-gradient(135deg,#FFD700,#FFA500);color:white;border-radius:50%;' +
+        'width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;' +
+        'transition:all 0.3s ease;border:none;font-size:1.2rem';
 
     btn.addEventListener('click', async () => {
         if (!window.notificationManager) return;
@@ -2726,12 +2949,16 @@ function ajouterBoutonNotifications() {
         }
     });
 
-    if (Notification.permission === 'granted') btn.style.background = 'linear-gradient(135deg,#34C759,#4CAF50)';
-    else if (Notification.permission === 'denied') btn.style.background = 'linear-gradient(135deg,#FF3B30,#CC2F26)';
+    if (Notification.permission === 'granted')
+        btn.style.background = 'linear-gradient(135deg,#34C759,#4CAF50)';
+    else if (Notification.permission === 'denied')
+        btn.style.background = 'linear-gradient(135deg,#FF3B30,#CC2F26)';
 
     container.appendChild(btn);
 }
+
 document.addEventListener('DOMContentLoaded', ajouterBoutonNotifications);
+// ==================== PARTIE 3/5 : FORMULAIRES, IDENTIFIANT, PAIEMENT & LIVRAISON ====================
 
 // ==================== FORMULAIRES GÉNÉRAUX ====================
 function initialiserFormulaires() {
@@ -2746,7 +2973,10 @@ function initialiserFormulaires() {
             adresse:     document.getElementById('shopAddress')?.value     || ''
         };
         const ok = await sauvegarderParametres();
-        afficherNotification(ok ? '✅ Paramètres généraux enregistrés' : '⚠️ Sauvegardé localement', ok ? 'success' : 'warning');
+        afficherNotification(
+            ok ? '✅ Paramètres généraux enregistrés' : '⚠️ Sauvegardé localement',
+            ok ? 'success' : 'warning'
+        );
     });
 
     // Formulaire livraison
@@ -2754,32 +2984,48 @@ function initialiserFormulaires() {
         e.preventDefault();
         sauvegarderZonesLivraison();
         parametres.livraison = {
-            fraisDouala:      parseInt(document.getElementById('fraisDouala')?.value)  || 0,
-            fraisAutres:      parseInt(document.getElementById('fraisAutres')?.value)  || 0,
-            delai:            document.getElementById('delaiLivraison')?.value         || '',
-            livraisonGratuite: document.getElementById('freeShipping')?.checked        || false,
-            montantMinimum:   parseInt(document.getElementById('montantMinimum')?.value) || 0,
+            fraisDouala:         parseInt(document.getElementById('fraisDouala')?.value)    || 0,
+            fraisAutres:         parseInt(document.getElementById('fraisAutres')?.value)    || 0,
+            delai:               document.getElementById('delaiLivraison')?.value           || '',
+            livraisonGratuite:   document.getElementById('freeShipping')?.checked           || false,
+            montantMinimum:      parseInt(document.getElementById('montantMinimum')?.value) || 0,
             zonesPersonnalisees: parametres.livraison.zonesPersonnalisees || []
         };
         const ok = await sauvegarderParametres();
-        afficherNotification(ok ? '📦 Options de livraison sauvegardées' : '⚠️ Sauvegardé localement', ok ? 'success' : 'warning');
+        afficherNotification(
+            ok ? '📦 Options de livraison sauvegardées' : '⚠️ Sauvegardé localement',
+            ok ? 'success' : 'warning'
+        );
     });
 
-    // Formulaire sécurité
+    // Formulaire sécurité avec indicateur de force du mot de passe
+    const newPassInput = document.getElementById('newPassword');
+    if (newPassInput) {
+        newPassInput.addEventListener('input', () => {
+            _afficherForceMotDePasse(newPassInput.value);
+        });
+    }
+
     document.getElementById('securityForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const current = document.getElementById('currentPassword')?.value;
         const nouveau = document.getElementById('newPassword')?.value;
         const confirm = document.getElementById('confirmPassword')?.value;
 
-        if (!current || !nouveau || !confirm) { afficherNotification('⚠️ Veuillez remplir tous les champs', 'warning'); return; }
-        if (nouveau !== confirm)              { afficherNotification('❌ Les mots de passe ne correspondent pas', 'error'); return; }
-        if (nouveau.length < 8)              { afficherNotification('⚠️ Mot de passe trop court (min 8 caractères)', 'warning'); return; }
-
+        if (!current || !nouveau || !confirm) {
+            afficherNotification('⚠️ Veuillez remplir tous les champs', 'warning'); return;
+        }
+        if (nouveau !== confirm) {
+            afficherNotification('❌ Les mots de passe ne correspondent pas', 'error'); return;
+        }
+        if (nouveau.length < 8) {
+            afficherNotification('⚠️ Mot de passe trop court (min 8 caractères)', 'warning'); return;
+        }
         try {
             const { error } = await supabase.auth.updateUser({ password: nouveau });
             if (error) throw error;
             document.getElementById('securityForm').reset();
+            _resetForceMotDePasse();
             afficherNotification('🔒 Mot de passe modifié avec succès', 'success');
         } catch (_) {
             afficherNotification('❌ Erreur lors du changement de mot de passe', 'error');
@@ -2809,6 +3055,49 @@ function initialiserFormulaires() {
     });
 }
 
+// Indicateur de force du mot de passe
+function _afficherForceMotDePasse(mdp) {
+    let barEl = document.getElementById('password-strength-bar');
+    if (!barEl) {
+        const parent = document.getElementById('newPassword')?.parentNode;
+        if (!parent) return;
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'margin-top:8px;';
+        wrapper.innerHTML = `
+            <div id="password-strength-bar" style="height:4px;border-radius:4px;transition:all 0.4s ease;width:0%;background:#ccc;"></div>
+            <small id="password-strength-label" style="font-size:0.8rem;margin-top:4px;display:block;"></small>
+        `;
+        parent.appendChild(wrapper);
+        barEl = document.getElementById('password-strength-bar');
+    }
+    const label = document.getElementById('password-strength-label');
+    if (!mdp) { barEl.style.width = '0%'; if (label) label.textContent = ''; return; }
+    let score = 0;
+    if (mdp.length >= 8)  score++;
+    if (mdp.length >= 12) score++;
+    if (/[A-Z]/.test(mdp))  score++;
+    if (/[0-9]/.test(mdp))  score++;
+    if (/[^A-Za-z0-9]/.test(mdp)) score++;
+    const levels = [
+        { pct: '20%',  color: '#FF3B30', text: 'Très faible' },
+        { pct: '40%',  color: '#FF9500', text: 'Faible' },
+        { pct: '60%',  color: '#FFCC00', text: 'Moyen' },
+        { pct: '80%',  color: '#34C759', text: 'Fort' },
+        { pct: '100%', color: '#007AFF', text: 'Très fort 💪' }
+    ];
+    const lvl = levels[Math.min(score, 4)];
+    barEl.style.width      = lvl.pct;
+    barEl.style.background = lvl.color;
+    if (label) { label.textContent = lvl.text; label.style.color = lvl.color; }
+}
+
+function _resetForceMotDePasse() {
+    const bar   = document.getElementById('password-strength-bar');
+    const label = document.getElementById('password-strength-label');
+    if (bar)   { bar.style.width = '0%'; bar.style.background = '#ccc'; }
+    if (label) label.textContent = '';
+}
+
 // ==================== IDENTIFIANT ====================
 function initialiserIdentifiant() {
     const slugInput   = document.getElementById('shopSlug');
@@ -2819,7 +3108,11 @@ function initialiserIdentifiant() {
     if (urlBase) urlBase.textContent = `${window.location.origin}/boutique.html`;
 
     slugInput?.addEventListener('input', (e) => {
-        const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/--+/g, '-').substring(0, 50);
+        const val = e.target.value
+            .toLowerCase()
+            .replace(/[^a-z0-9-]/g, '')
+            .replace(/--+/g, '-')
+            .substring(0, 50);
         e.target.value = val;
         if (slugPreview) slugPreview.textContent = val || 'votre-identifiant';
         clearTimeout(timeout);
@@ -2830,7 +3123,7 @@ function initialiserIdentifiant() {
     document.getElementById('identifiantForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const slug = slugInput?.value.trim();
-        if (!slug)         { afficherNotification('⚠️ Veuillez entrer un identifiant', 'warning'); return; }
+        if (!slug)           { afficherNotification('⚠️ Veuillez entrer un identifiant', 'warning'); return; }
         if (slug.length < 3) { afficherNotification('⚠️ L\'identifiant doit contenir au moins 3 caractères', 'warning'); return; }
 
         const dispo = await verifierDisponibiliteSlug(slug);
@@ -2840,9 +3133,7 @@ function initialiserIdentifiant() {
         }
 
         parametres.identifiant = {
-            slug,
-            disponible: true,
-            auto: false,
+            slug, disponible: true, auto: false,
             dateCreation:     parametres.identifiant?.dateCreation || new Date().toISOString(),
             dateModification: new Date().toISOString()
         };
@@ -2857,7 +3148,6 @@ function initialiserIdentifiant() {
         }
     });
 }
-// ==================== PARTIE 3/4 : PAIEMENT, LIVRAISON & MOBILE MONEY ====================
 
 // ==================== PAIEMENT ====================
 function initialiserPaiement() {
@@ -2890,18 +3180,16 @@ window.confirmerPaiement = async function(type) {
         parametres.paiement.cash.confirme = true;
     }
     const ok = await sauvegarderParametres();
-    afficherNotification(ok
-        ? `✅ ${type === 'card' ? 'Carte bancaire' : 'Paiement à la livraison'} configuré`
-        : '⚠️ Sauvegardé localement',
-        ok ? 'success' : 'warning');
+    afficherNotification(
+        ok ? `✅ ${type === 'card' ? 'Carte bancaire' : 'Paiement à la livraison'} configuré` : '⚠️ Sauvegardé localement',
+        ok ? 'success' : 'warning'
+    );
 };
 
 // ==================== MOBILE MONEY ====================
 function initialiserMobileMoney() {
     const paymentMobile = document.getElementById('paymentMobile');
     const mobileDetails = document.getElementById('mobileDetails');
-
-    // Éviter double-listener avec initialiserPaiement — on écoute juste l'affichage ici
     if (paymentMobile?.checked && mobileDetails) mobileDetails.style.display = 'block';
 
     // MTN
@@ -2963,7 +3251,7 @@ function initialiserMobileMoney() {
             if (!nom) erreurs.push('Nom du compte MTN Money manquant');
             if (!num) erreurs.push('Numéro MTN Money manquant');
             else if (!RE_TEL.test(num)) erreurs.push('Format numéro MTN Money invalide (+237XXXXXXXXX)');
-            if (erreurs.length === 0) {
+            if (!erreurs.some(e => e.includes('MTN'))) {
                 parametres.paiement.mobile.mtn = { actif: true, nomCompte: nom, numero: num, confirme: true };
             }
         } else {
@@ -2976,7 +3264,7 @@ function initialiserMobileMoney() {
             if (!nom) erreurs.push('Nom du compte Orange Money manquant');
             if (!num) erreurs.push('Numéro Orange Money manquant');
             else if (!RE_TEL.test(num)) erreurs.push('Format numéro Orange Money invalide (+237XXXXXXXXX)');
-            if (erreurs.filter(e => e.includes('Orange')).length === 0) {
+            if (!erreurs.some(e => e.includes('Orange'))) {
                 parametres.paiement.mobile.orange = { actif: true, nomCompte: nom, numero: num, confirme: true };
             }
         } else {
@@ -2990,7 +3278,10 @@ function initialiserMobileMoney() {
 
         parametres.paiement.mobile.confirme = true;
         const ok = await sauvegarderParametres();
-        afficherNotification(ok ? '✅ Mobile Money configuré avec succès !' : '⚠️ Sauvegardé localement', ok ? 'success' : 'warning');
+        afficherNotification(
+            ok ? '✅ Mobile Money configuré avec succès !' : '⚠️ Sauvegardé localement',
+            ok ? 'success' : 'warning'
+        );
     });
 }
 
@@ -3009,24 +3300,28 @@ function ajouterZoneLivraison(zoneExistante = null) {
     const container = document.getElementById('zonesContainer');
     if (!container) return;
 
-    const zoneId  = Date.now();
+    const zoneId   = Date.now();
     const zoneCard = document.createElement('div');
     zoneCard.className      = 'zone-card';
     zoneCard.dataset.zoneId = zoneId;
-    zoneCard.style.cssText  = 'background:var(--bg-primary);padding:16px;border-radius:12px;margin-bottom:12px;opacity:0;transform:translateY(10px);transition:all 0.3s ease';
+    zoneCard.style.cssText  =
+        'background:var(--bg-primary);padding:16px;border-radius:12px;margin-bottom:12px;opacity:0;transform:translateY(10px);transition:all 0.3s ease';
 
     zoneCard.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
             <span style="font-weight:600">📍 Zone ${container.children.length + 1}</span>
-            <button type="button" onclick="supprimerZone(${zoneId})" style="padding:6px 12px;background:var(--danger-color);color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem">🗑️ Supprimer</button>
+            <button type="button" onclick="supprimerZone(${zoneId})"
+                style="padding:6px 12px;background:var(--danger-color);color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem">
+                🗑️ Supprimer
+            </button>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <div>
-                <label style="font-size:0.85rem">Nom du lieu</label>
+                <label style="font-size:0.85rem;font-weight:500;margin-bottom:4px;display:block;">Nom du lieu</label>
                 <input type="text" class="form-input zone-nom" placeholder="Ex: Yaoundé" value="${zoneExistante?.nom || ''}" style="font-size:0.9rem">
             </div>
             <div>
-                <label style="font-size:0.85rem">Frais (FCFA)</label>
+                <label style="font-size:0.85rem;font-weight:500;margin-bottom:4px;display:block;">Frais (FCFA)</label>
                 <input type="number" class="form-input zone-frais" placeholder="0" value="${zoneExistante?.frais || ''}" min="0" style="font-size:0.9rem">
             </div>
         </div>
@@ -3034,7 +3329,6 @@ function ajouterZoneLivraison(zoneExistante = null) {
 
     container.appendChild(zoneCard);
     document.getElementById('emptyZonesMessage')?.style.setProperty('display', 'none');
-
     setTimeout(() => { zoneCard.style.opacity = '1'; zoneCard.style.transform = 'translateY(0)'; }, 10);
     zoneCard.querySelectorAll('input').forEach(inp => inp.addEventListener('change', sauvegarderZonesLivraison));
 }
@@ -3062,38 +3356,422 @@ function sauvegarderZonesLivraison() {
     });
     parametres.livraison.zonesPersonnalisees = zones;
 }
-// ==================== PARTIE 4/4 : APPARENCE & INITIALISATION ====================
+// ==================== PARTIE 4/5 : APPARENCE (UPLOAD MODERNE, PALETTE, TYPOGRAPHIE) ====================
 
-// ==================== APPARENCE ====================
-function initialiserApparence() {
+// ==================== ✅ FIX #3 : UPLOAD ZONES MODERNES ====================
+// Injecte les styles CSS pour les zones d'upload modernes et professionnelles.
+// Ces styles remplacent les styles inline basiques existants.
+function injecterStylesUpload() {
+    if (document.getElementById('styles-upload-moderne')) return;
+    const style = document.createElement('style');
+    style.id = 'styles-upload-moderne';
+    style.textContent = `
+        /* ---- Zone d'upload moderne ---- */
+        .upload-zone-moderne {
+            position: relative;
+            border: 2px dashed var(--border-color);
+            border-radius: 16px;
+            padding: 32px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: linear-gradient(135deg, #fafafa 0%, #f5f5f7 100%);
+            overflow: hidden;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .upload-zone-moderne::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 14px;
+        }
+        .upload-zone-moderne:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,122,255,0.12);
+        }
+        .upload-zone-moderne:hover::before { opacity: 0.04; }
+        .upload-zone-moderne.drag-over {
+            border-color: var(--primary-color);
+            background: rgba(0,122,255,0.06);
+            transform: scale(1.02);
+            box-shadow: 0 12px 32px rgba(0,122,255,0.15);
+        }
+        .upload-zone-moderne.has-image {
+            border-color: var(--success-color);
+            background: rgba(52,199,89,0.04);
+        }
+        .upload-zone-icone {
+            font-size: 2.5rem;
+            line-height: 1;
+            transition: transform 0.3s ease;
+        }
+        .upload-zone-moderne:hover .upload-zone-icone { transform: scale(1.1) rotate(-5deg); }
+        .upload-zone-titre {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            position: relative;
+        }
+        .upload-zone-sous-titre {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            position: relative;
+        }
+        .upload-zone-badge {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: var(--success-color);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 20px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+        }
+        .upload-zone-moderne.has-image .upload-zone-badge { opacity: 1; transform: scale(1); }
+        /* Image preview dans la zone */
+        .upload-preview-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        .upload-preview-img {
+            max-width: 100%;
+            max-height: 120px;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .upload-preview-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: white;
+            gap: 6px;
+        }
+        .upload-zone-moderne:hover .upload-preview-overlay { opacity: 1; }
+        /* ---- Palette de couleurs améliorée ---- */
+        .palette-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .palette-card {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            background: white;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+            position: relative;
+        }
+        .palette-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        .palette-card.active-palette {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.2);
+        }
+        .palette-swatches {
+            display: flex;
+            height: 36px;
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+        }
+        .palette-swatch { flex: 1; }
+        .palette-label {
+            padding: 6px 10px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+        .palette-checkmark {
+            position: absolute;
+            top: 5px; right: 5px;
+            width: 18px; height: 18px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+        }
+        .palette-card.active-palette .palette-checkmark { display: flex; }
+        /* ---- Color picker stylé ---- */
+        .color-picker-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+            transition: border-color 0.2s;
+        }
+        .color-picker-group:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+        }
+        .color-picker-swatch {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .color-picker-swatch input[type="color"] {
+            position: absolute;
+            inset: -4px;
+            width: calc(100% + 8px);
+            height: calc(100% + 8px);
+            opacity: 0;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+        }
+        .color-picker-hex {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            outline: none;
+            text-transform: uppercase;
+        }
+    `;
+    document.head.appendChild(style);
+}
 
-// --- Couleur Primaire ---
-const primaryInput   = document.getElementById('primaryColor');
-const primaryHex     = document.getElementById('primaryColorHex');
-const primaryPreview = document.getElementById('primaryColorPreview');
+// ==================== UPLOAD IMAGES MODERNE ====================
+function configurerZoneUploadModerne(containerId, inputId, type, icone, titre, sousTitre) {
+    const container = document.getElementById(containerId);
+    const input     = document.getElementById(inputId);
+    if (!container || !input) return;
 
-primaryInput?.addEventListener('input', (e) => {
-    const c = e.target.value;
-    parametres.apparence.couleurPrimaire = c;
-    if (primaryPreview) primaryPreview.style.background = c;
-    if (primaryHex)     primaryHex.value = c.toUpperCase();
-    document.documentElement.style.setProperty('--primary-color', c);
-});
+    // Réécrire le HTML de la zone avec le nouveau design
+    container.className = 'upload-zone-moderne';
+    container.innerHTML = `
+        <span class="upload-zone-badge">✓ Chargé</span>
+        <div id="${type}PreviewInner" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:8px;">
+            <div class="upload-zone-icone">${icone}</div>
+            <p class="upload-zone-titre">${titre}</p>
+            <p class="upload-zone-sous-titre">${sousTitre}</p>
+        </div>
+    `;
 
-// --- Couleur Secondaire ---
-const secondaryInput   = document.getElementById('secondaryColor');
-const secondaryHex     = document.getElementById('secondaryColorHex');
-const secondaryPreview = document.getElementById('secondaryColorPreview');
+    // Clic → ouvrir le sélecteur de fichier
+    container.addEventListener('click', () => input.click());
 
-secondaryInput?.addEventListener('input', (e) => {
-    const c = e.target.value;
-    parametres.apparence.couleurSecondaire = c;
-    if (secondaryPreview) secondaryPreview.style.background = c;
-    if (secondaryHex)     secondaryHex.value = c.toUpperCase();
-    document.documentElement.style.setProperty('--secondary-color', c);
-});
+    // Drag & Drop
+    container.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        container.classList.add('drag-over');
+    });
+    container.addEventListener('dragleave', () => container.classList.remove('drag-over'));
+    container.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        container.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file) await traiterImageUpload(file, type, containerId);
+    });
 
-// --- TYPOGRAPHIE ---
+    // Sélection via input
+    input.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (file) await traiterImageUpload(file, type, containerId);
+        e.target.value = ''; // Reset pour permettre re-upload du même fichier
+    });
+}
+
+// ==================== TRAITEMENT UPLOAD (✅ FIX #1 intégré) ====================
+async function traiterImageUpload(file, type, containerId) {
+    if (file.size > 2 * 1024 * 1024) {
+        afficherNotification('❌ Fichier trop volumineux (max 2MB)', 'error'); return;
+    }
+    if (!file.type.startsWith('image/')) {
+        afficherNotification('❌ Le fichier doit être une image', 'error'); return;
+    }
+
+    // Afficher un spinner de chargement
+    const container = document.getElementById(containerId);
+    if (container) {
+        const inner = container.querySelector(`#${type}PreviewInner`);
+        if (inner) inner.innerHTML = `<div style="font-size:2rem;animation:spin 0.8s linear infinite">⏳</div><p class="upload-zone-sous-titre">Chargement...</p>`;
+    }
+
+    try {
+        const b64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload  = (e) => resolve(e.target.result);
+            reader.onerror = () => reject(new Error('Lecture échouée'));
+            reader.readAsDataURL(file);
+        });
+
+        if (type === 'logo') {
+            parametres.apparence.logo = b64;
+            _afficherPreviewUpload(containerId, type, b64, 'max-width:200px;max-height:100px;');
+            afficherNotification('✅ Logo chargé', 'success');
+
+        } else if (type === 'favicon') {
+            parametres.apparence.favicon = b64;
+            _afficherPreviewUpload(containerId, type, b64, 'width:64px;height:64px;image-rendering:pixelated;');
+
+            // ✅ FIX #1 : Appliquer immédiatement le favicon dans l'onglet
+            // Dès l'upload, l'onglet du navigateur affiche la nouvelle icône.
+            // Ainsi, quand le visiteur partage le lien, l'icône est déjà active.
+            _appliquerFaviconOnglet(b64);
+            afficherNotification('✅ Favicon chargé — onglet mis à jour !', 'success');
+        }
+
+        await sauvegarderParametres();
+
+    } catch (e) {
+        console.error('Erreur upload:', e);
+        afficherNotification('❌ Erreur lors du chargement de l\'image', 'error');
+        // Remettre l'état vide
+        const inner = container?.querySelector(`#${type}PreviewInner`);
+        if (inner) inner.innerHTML = `<div class="upload-zone-icone">${type === 'logo' ? '🖼️' : '🔖'}</div>
+            <p class="upload-zone-titre">Cliquez pour charger</p>`;
+    }
+}
+
+function _afficherPreviewUpload(containerId, type, b64, imgStyle) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const inner = container.querySelector(`#${type}PreviewInner`);
+    if (inner) {
+        inner.innerHTML = `
+            <div class="upload-preview-wrapper">
+                <img src="${b64}" alt="${type}" class="upload-preview-img" style="${imgStyle}">
+                <div class="upload-preview-overlay">🔄 Changer l'image</div>
+            </div>`;
+    }
+    container.classList.add('has-image');
+}
+
+// ==================== ✅ FIX #4 : PALETTE DE COULEURS AMÉLIORÉE ====================
+// Palette avec plus de presets professionnels, design en cartes avec checkmark actif.
+const PALETTES_PREDEFINIES = [
+    { nom: 'Orange Feu',    primaire: '#FF6B00', secondaire: '#1A1A1A' },
+    { nom: 'Bleu Apple',    primaire: '#007AFF', secondaire: '#1D1D1F' },
+    { nom: 'Émeraude',      primaire: '#34C759', secondaire: '#2C3E50' },
+    { nom: 'Rouge Vif',     primaire: '#FF3B30', secondaire: '#1A1A1A' },
+    { nom: 'Violet Royal',  primaire: '#9C27B0', secondaire: '#212121' },
+    { nom: 'Or & Nuit',     primaire: '#FF9500', secondaire: '#2C2C2E' },
+    { nom: 'Rose Mode',     primaire: '#FF2D78', secondaire: '#1A1A1A' },
+    { nom: 'Cyan Tech',     primaire: '#00BCD4', secondaire: '#263238' },
+    { nom: 'Indigo',        primaire: '#3F51B5', secondaire: '#212121' },
+    { nom: 'Terre Brûlée',  primaire: '#8B4513', secondaire: '#2C1810' },
+    { nom: 'Minimaliste',   primaire: '#000000', secondaire: '#555555' },
+    { nom: 'Luxe Champagne',primaire: '#C5A028', secondaire: '#1A1A1A' },
+];
+
+function creerPaletteUI() {
+    const container = document.getElementById('palette-presets-container');
+    if (!container) return;
+
+    container.className = 'palette-grid';
+    container.innerHTML = '';
+
+    PALETTES_PREDEFINIES.forEach(({ nom, primaire, secondaire }) => {
+        const card = document.createElement('div');
+        card.className = 'palette-card';
+        card.dataset.primaire   = primaire;
+        card.dataset.secondaire = secondaire;
+        card.innerHTML = `
+            <div class="palette-swatches">
+                <div class="palette-swatch" style="background:${primaire};"></div>
+                <div class="palette-swatch" style="background:${secondaire};"></div>
+            </div>
+            <div class="palette-label">${nom}</div>
+            <div class="palette-checkmark">✓</div>
+        `;
+        card.addEventListener('click', () => {
+            appliquerPalette(primaire, secondaire);
+            _marquerPaletteActive(card);
+        });
+        container.appendChild(card);
+    });
+
+    // Marquer la palette active au chargement
+    _marquerPaletteActiveParValeur(
+        parametres.apparence?.couleurPrimaire   || '#FF6B00',
+        parametres.apparence?.couleurSecondaire || '#1A1A1A'
+    );
+}
+
+function _marquerPaletteActive(cardActif) {
+    document.querySelectorAll('.palette-card').forEach(c => c.classList.remove('active-palette'));
+    cardActif?.classList.add('active-palette');
+}
+
+function _marquerPaletteActiveParValeur(cp, cs) {
+    document.querySelectorAll('.palette-card').forEach(card => {
+        const match = card.dataset.primaire?.toUpperCase() === cp.toUpperCase() &&
+                      card.dataset.secondaire?.toUpperCase() === cs.toUpperCase();
+        card.classList.toggle('active-palette', match);
+    });
+}
+
+window.appliquerPalette = function(couleurPrimaire, couleurSecondaire) {
+    const setColor = (inputId, swatch, hexId, valeur, key) => {
+        const input  = document.getElementById(inputId);
+        const hex    = document.getElementById(hexId);
+        // Chercher le swatch dans le nouveau design ou l'ancien
+        const swatchEl = document.getElementById(swatch) ||
+                         document.querySelector(`#${inputId}`)?.closest('.color-picker-group')?.querySelector('.color-picker-swatch > div');
+        if (input && input.type === 'color')  input.value = valeur;
+        if (hex)    hex.value = valeur.toUpperCase();
+        if (swatchEl) swatchEl.style.background = valeur;
+        // Ancien design fallback
+        const preview = document.getElementById(`${inputId}Preview`) ||
+                        document.getElementById(swatch === 'primaryColorPreview' ? 'primaryColorPreview' : 'secondaryColorPreview');
+        if (preview)  preview.style.background = valeur;
+        parametres.apparence[key] = valeur;
+        document.documentElement.style.setProperty(
+            `--${key === 'couleurPrimaire' ? 'primary' : 'secondary'}-color`, valeur
+        );
+    };
+    setColor('primaryColor',   'primaryColorPreview',   'primaryColorHex',   couleurPrimaire,   'couleurPrimaire');
+    setColor('secondaryColor', 'secondaryColorPreview', 'secondaryColorHex', couleurSecondaire, 'couleurSecondaire');
+    _marquerPaletteActiveParValeur(couleurPrimaire, couleurSecondaire);
+    afficherNotification('🎨 Palette appliquée !', 'success');
+};
+
+// ==================== TYPOGRAPHIE ====================
 const POLICES = [
     'Inter','Poppins','Nunito','DM Sans','Plus Jakarta Sans','Outfit',
     'Montserrat','Raleway','Josefin Sans','Lato','Open Sans','Roboto',
@@ -3101,20 +3779,18 @@ const POLICES = [
     'Pacifico','Righteous','Bebas Neue','Abril Fatface'
 ];
 
-// Précharger toutes les polices pour les cartes d'aperçu
-POLICES.forEach(p => {
-    const id = 'gf-' + p.replace(/\s/g, '-');
-    if (!document.getElementById(id)) {
+function prechargerPolices() {
+    POLICES.forEach(p => {
+        const id = 'gf-' + p.replace(/\s/g, '-');
+        if (document.getElementById(id)) return;
         const link = document.createElement('link');
         link.id   = id;
         link.rel  = 'stylesheet';
         link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(p)}:wght@300;400;500;600;700;800&display=swap`;
         document.head.appendChild(link);
-    }
-});
+    });
+}
 
-// appliquerPolice : uniquement sur les éléments preview — PAS sur document.body
-// La police s'appliquera sur boutique.html via appliquerTheme() au chargement
 function appliquerPolice(police) {
     parametres.apparence.police = police;
     const ids = [
@@ -3147,13 +3823,16 @@ function genererCartesPolice(policeActive) {
         const isActive = policeActive === police;
         const card = document.createElement('div');
         card.style.cssText = `
-            padding:14px 16px;border-radius:10px;cursor:pointer;transition:all 0.2s ease;
+            padding:14px 16px;border-radius:12px;cursor:pointer;
+            transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);
             border:2px solid ${isActive ? 'var(--primary-color)' : 'var(--border-color)'};
             background:${isActive ? 'rgba(0,122,255,0.05)' : '#fff'};
+            ${isActive ? 'box-shadow:0 4px 12px rgba(0,122,255,0.12);' : ''}
         `;
         card.innerHTML = `
             <p style="font-family:'${police}',serif;font-size:1rem;font-style:${style};margin-bottom:4px;color:var(--text-primary)">${texte}</p>
             <small style="font-size:0.75rem;color:var(--text-secondary);font-family:'Poppins',sans-serif">${police}</small>
+            ${isActive ? '<div style="margin-top:4px;width:20px;height:3px;background:var(--primary-color);border-radius:2px;"></div>' : ''}
         `;
         card.addEventListener('click', () => {
             const sel = document.getElementById('fontFamily');
@@ -3165,244 +3844,313 @@ function genererCartesPolice(policeActive) {
     });
 }
 
-// Init police sauvegardée
-const fontSelect = document.getElementById('fontFamily');
-if (fontSelect) {
-    const saved = parametres.apparence?.police || 'Inter';
-    fontSelect.value = saved;
-    appliquerPolice(saved);
-    genererCartesPolice(saved);
-    fontSelect.addEventListener('change', (e) => {
-        appliquerPolice(e.target.value);
-        genererCartesPolice(e.target.value);
+// ==================== APPARENCE : INIT PRINCIPALE ====================
+function initialiserApparence() {
+    injecterStylesUpload();
+
+    // Couleur Primaire
+    const primaryInput   = document.getElementById('primaryColor');
+    const primaryHex     = document.getElementById('primaryColorHex');
+    const primaryPreview = document.getElementById('primaryColorPreview');
+
+    primaryInput?.addEventListener('input', (e) => {
+        const c = e.target.value;
+        parametres.apparence.couleurPrimaire = c;
+        if (primaryPreview) primaryPreview.style.background = c;
+        if (primaryHex)     primaryHex.value = c.toUpperCase();
+        document.documentElement.style.setProperty('--primary-color', c);
+        _marquerPaletteActiveParValeur(c, parametres.apparence.couleurSecondaire || '#1A1A1A');
     });
-}
 
-// --- BOUTON SAUVEGARDER avec effet visuel ---
-const saveBtn = document.getElementById('saveAppearance');
-if (saveBtn) {
-    saveBtn.addEventListener('click', async () => {
-        const originalHTML = saveBtn.innerHTML;
-        saveBtn.disabled   = true;
-        saveBtn.innerHTML  = `
-            <span style="display:inline-flex;align-items:center;gap:8px">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                     style="animation:spin 0.8s linear infinite;flex-shrink:0">
-                    <path d="M12 2a10 10 0 1 0 10 10" stroke-linecap="round"/>
-                </svg>
-                Sauvegarde en cours...
-            </span>`;
+    // Couleur Secondaire
+    const secondaryInput   = document.getElementById('secondaryColor');
+    const secondaryHex     = document.getElementById('secondaryColorHex');
+    const secondaryPreview = document.getElementById('secondaryColorPreview');
 
-        const ok = await sauvegarderParametres();
-
-        saveBtn.innerHTML         = ok
-            ? `<span style="display:inline-flex;align-items:center;gap:6px">✅ Sauvegardé !</span>`
-            : `<span style="display:inline-flex;align-items:center;gap:6px">⚠️ Sauvegardé localement</span>`;
-        saveBtn.style.background  = ok ? '#34C759' : '#FF9500';
-        saveBtn.style.borderColor = ok ? '#34C759' : '#FF9500';
-        saveBtn.style.transform   = 'scale(1.03)';
-
-        setTimeout(() => {
-            saveBtn.innerHTML         = originalHTML;
-            saveBtn.style.background  = '';
-            saveBtn.style.borderColor = '';
-            saveBtn.style.transform   = '';
-            saveBtn.disabled          = false;
-        }, 2200);
-
-        afficherNotification(
-            ok ? '✅ Apparence sauvegardée — votre boutique mise à jour !' : '⚠️ Sauvegardé localement uniquement',
-            ok ? 'success' : 'warning'
-        );
+    secondaryInput?.addEventListener('input', (e) => {
+        const c = e.target.value;
+        parametres.apparence.couleurSecondaire = c;
+        if (secondaryPreview) secondaryPreview.style.background = c;
+        if (secondaryHex)     secondaryHex.value = c.toUpperCase();
+        document.documentElement.style.setProperty('--secondary-color', c);
+        _marquerPaletteActiveParValeur(parametres.apparence.couleurPrimaire || '#FF6B00', c);
     });
-}
 
-// --- BOUTON RÉINITIALISER ---
-document.getElementById('resetAppearance')?.addEventListener('click', async () => {
-    if (!confirm('Voulez-vous vraiment réinitialiser l\'apparence par défaut ?')) return;
-    parametres.apparence = {
-        couleurPrimaire:   '#FF6B00',
-        couleurSecondaire: '#1A1A1A',
-        logo:    '',
-        favicon: '',
-        police:  'Inter'
-    };
-    appliquerParametres();
-    if (fontSelect) {
-        fontSelect.value = 'Inter';
-        appliquerPolice('Inter');
-        genererCartesPolice('Inter');
-    }
-    await sauvegarderParametres();
-    afficherNotification('✅ Apparence réinitialisée', 'success');
-});
-
-// --- UPLOAD LOGO ---
-document.getElementById('logoUpload')?.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (file) await traiterImageUpload(file, 'logo');
-});
-
-// --- UPLOAD FAVICON ---
-document.getElementById('faviconUpload')?.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (file) await traiterImageUpload(file, 'favicon');
-});
-
-// ==================== BOUTON PRÉVISUALISER SUR LA BOUTIQUE ====================
-const previewBtn    = document.getElementById('previewEcommerce');
-const previewModal  = document.getElementById('previewModal');
-const previewClose  = document.getElementById('previewModalClose');
-const previewFrame  = document.getElementById('previewIframe');
-const previewUrlEl  = document.getElementById('previewModalUrl');
-const previewOpen   = document.getElementById('previewOpenBtn');
-const previewReload = document.getElementById('previewReloadBtn');
-
-
-    const getBoutiqueUrl = () => {
-        // Priorité 1 : l'input #lienBoutique (déjà construit et fiable)
-        const lienInput = document.getElementById('lienBoutique');
-        if (lienInput?.value?.trim()) return lienInput.value.trim();
-
-        // Priorité 2 : reconstruire depuis le slug en mémoire
-        const slug = parametres.identifiant?.slug;
-        const base = `${window.location.origin}/boutique.html`;
-        if (slug) return `${base}?shop=${slug}`;
-
-  
-        return base;
-    };
-
-
-const syncAvantPreview = () => {
-    localStorage.setItem('parametres_boutique', JSON.stringify(parametres));
-    if (parametres.identifiant?.slug) {
-        localStorage.removeItem(`boutique_cache_${parametres.identifiant.slug}`);
-    }
-};
-
-const ouvrirPreview = () => {
-    syncAvantPreview();
-    const url = getBoutiqueUrl();
-    if (previewFrame)  previewFrame.src        = url;
-    if (previewUrlEl)  previewUrlEl.textContent = url;
-    if (previewOpen)   previewOpen.href         = url;
-    previewModal?.classList.add('active');
-    document.body.style.overflow = 'hidden';
-};
-
-const fermerPreview = () => {
-    previewModal?.classList.remove('active');
-    document.body.style.overflow = '';
-    // Vider l'iframe après l'animation pour libérer les ressources
-    setTimeout(() => { if (previewFrame) previewFrame.src = ''; }, 300);
-};
-
-previewBtn?.addEventListener('click', ouvrirPreview);
-previewClose?.addEventListener('click', fermerPreview);
-
-// Clic sur le fond sombre pour fermer
-previewModal?.addEventListener('click', (e) => {
-    if (e.target === previewModal) fermerPreview();
-});
-
-// Touche Échap pour fermer
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && previewModal?.classList.contains('active')) fermerPreview();
-});
-
-// Recharger l'iframe avec les toutes dernières modifications non encore sauvegardées
-previewReload?.addEventListener('click', () => {
-    syncAvantPreview();
-    if (previewFrame) previewFrame.src = getBoutiqueUrl();
-});
-}
-
-// ==================== PALETTE DE COULEURS ====================
-window.appliquerPalette = function(couleurPrimaire, couleurSecondaire) {
-const setColor = (inputId, hexId, previewId, valeur, key) => {
-    const input   = document.getElementById(inputId);
-    const hex     = document.getElementById(hexId);
-    const preview = document.getElementById(previewId);
-    if (input)   { input.value = valeur; parametres.apparence[key] = valeur; }
-    if (hex)     hex.value = valeur.toUpperCase();
-    if (preview) preview.style.background = valeur;
-    document.documentElement.style.setProperty(
-        `--${key === 'couleurPrimaire' ? 'primary' : 'secondary'}-color`, valeur
-    );
-};
-setColor('primaryColor',   'primaryColorHex',   'primaryColorPreview',   couleurPrimaire,   'couleurPrimaire');
-setColor('secondaryColor', 'secondaryColorHex', 'secondaryColorPreview', couleurSecondaire, 'couleurSecondaire');
-afficherNotification('🎨 Palette appliquée !', 'success');
-};
-
-// ==================== UPLOAD IMAGES ====================
-async function traiterImageUpload(file, type) {
-if (file.size > 2 * 1024 * 1024) {
-    afficherNotification('❌ Fichier trop volumineux (max 2MB)', 'error');
-    return;
-}
-if (!file.type.startsWith('image/')) {
-    afficherNotification('❌ Le fichier doit être une image', 'error');
-    return;
-}
-
-try {
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        const b64 = e.target.result;
-
-        if (type === 'logo') {
-            parametres.apparence.logo = b64;
-            const prev = document.getElementById('logoPreview');
-            if (prev) prev.innerHTML = `<img src="${b64}" alt="Logo" style="max-width:200px;max-height:100px;object-fit:contain">`;
-            afficherNotification('✅ Logo chargé', 'success');
-
-        } else if (type === 'favicon') {
-            parametres.apparence.favicon = b64;
-            const prev = document.getElementById('faviconPreview');
-            if (prev) prev.innerHTML = `<img src="${b64}" alt="Favicon" style="width:32px;height:32px;object-fit:contain">`;
-            let link = document.querySelector("link[rel*='icon']");
-            if (!link) {
-                link = document.createElement('link');
-                link.rel = 'icon';
-                document.head.appendChild(link);
-            }
-            link.href = b64;
-            afficherNotification('✅ Favicon chargé', 'success');
+    // Hex input (permettre la saisie manuelle)
+    primaryHex?.addEventListener('change', (e) => {
+        const val = e.target.value.trim();
+        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+            if (primaryInput)   primaryInput.value = val;
+            if (primaryPreview) primaryPreview.style.background = val;
+            parametres.apparence.couleurPrimaire = val;
+            document.documentElement.style.setProperty('--primary-color', val);
         }
+    });
+    secondaryHex?.addEventListener('change', (e) => {
+        const val = e.target.value.trim();
+        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+            if (secondaryInput)   secondaryInput.value = val;
+            if (secondaryPreview) secondaryPreview.style.background = val;
+            parametres.apparence.couleurSecondaire = val;
+            document.documentElement.style.setProperty('--secondary-color', val);
+        }
+    });
+
+    // Palette UI
+    creerPaletteUI();
+
+    // Polices
+    prechargerPolices();
+    const fontSelect = document.getElementById('fontFamily');
+    if (fontSelect) {
+        const saved = parametres.apparence?.police || 'Inter';
+        fontSelect.value = saved;
+        appliquerPolice(saved);
+        genererCartesPolice(saved);
+        fontSelect.addEventListener('change', (e) => {
+            appliquerPolice(e.target.value);
+            genererCartesPolice(e.target.value);
+        });
+    }
+
+    // ✅ Configurer les zones d'upload modernes
+    // Remplace les zones upload basiques par le nouveau design
+    configurerZoneUploadModerne(
+        'logoUploadZone', 'logoUpload', 'logo',
+        '🖼️', 'Glissez-déposez ou cliquez', 'PNG, JPG, SVG — max 2MB — 200×80px recommandé'
+    );
+    configurerZoneUploadModerne(
+        'faviconUploadZone', 'faviconUpload', 'favicon',
+        '🔖', 'Glissez-déposez ou cliquez', 'PNG, ICO — max 2MB — 32×32px recommandé'
+    );
+
+    // Bouton Sauvegarder
+    const saveBtn = document.getElementById('saveAppearance');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', async () => {
+            const originalHTML = saveBtn.innerHTML;
+            saveBtn.disabled  = true;
+            saveBtn.innerHTML = `
+                <span style="display:inline-flex;align-items:center;gap:8px">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                         style="animation:spin 0.8s linear infinite;flex-shrink:0">
+                        <path d="M12 2a10 10 0 1 0 10 10" stroke-linecap="round"/>
+                    </svg>
+                    Sauvegarde en cours...
+                </span>`;
+
+            const ok = await sauvegarderParametres();
+
+            saveBtn.innerHTML        = ok
+                ? `<span style="display:inline-flex;align-items:center;gap:6px">✅ Sauvegardé !</span>`
+                : `<span style="display:inline-flex;align-items:center;gap:6px">⚠️ Sauvegardé localement</span>`;
+            saveBtn.style.background  = ok ? '#34C759' : '#FF9500';
+            saveBtn.style.borderColor = ok ? '#34C759' : '#FF9500';
+            saveBtn.style.transform   = 'scale(1.03)';
+
+            setTimeout(() => {
+                saveBtn.innerHTML         = originalHTML;
+                saveBtn.style.background  = '';
+                saveBtn.style.borderColor = '';
+                saveBtn.style.transform   = '';
+                saveBtn.disabled          = false;
+            }, 2200);
+
+            afficherNotification(
+                ok ? '✅ Apparence sauvegardée — boutique.html mise à jour !' : '⚠️ Sauvegardé localement uniquement',
+                ok ? 'success' : 'warning'
+            );
+        });
+    }
+
+    // Bouton Réinitialiser
+    document.getElementById('resetAppearance')?.addEventListener('click', async () => {
+        if (!confirm('Voulez-vous vraiment réinitialiser l\'apparence par défaut ?')) return;
+        parametres.apparence = {
+            couleurPrimaire:   '#FF6B00',
+            couleurSecondaire: '#1A1A1A',
+            logo: '', favicon: '', police: 'Inter'
+        };
+        appliquerParametres();
+        creerPaletteUI();
+        if (fontSelect) {
+            fontSelect.value = 'Inter';
+            appliquerPolice('Inter');
+            genererCartesPolice('Inter');
+        }
+        // Remettre les zones d'upload vides
+        _resetUploadZone('logoUploadZone',    'logo',    '🖼️', 'Glissez-déposez ou cliquez');
+        _resetUploadZone('faviconUploadZone', 'favicon', '🔖', 'Glissez-déposez ou cliquez');
 
         await sauvegarderParametres();
-    };
-    reader.readAsDataURL(file);
-} catch (e) {
-    console.error('Erreur upload:', e);
-    afficherNotification('❌ Erreur lors du chargement de l\'image', 'error');
+        afficherNotification('✅ Apparence réinitialisée', 'success');
+    });
+
+    // Upload listeners de secours (si les zones n'existent pas encore au DOM)
+    document.getElementById('logoUpload')?.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (file) await traiterImageUpload(file, 'logo', 'logoUploadZone');
+    });
+    document.getElementById('faviconUpload')?.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (file) await traiterImageUpload(file, 'favicon', 'faviconUploadZone');
+    });
 }
+
+function _resetUploadZone(containerId, type, icone, titre) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.classList.remove('has-image');
+    const inner = container.querySelector(`#${type}PreviewInner`);
+    if (inner) inner.innerHTML = `
+        <div class="upload-zone-icone">${icone}</div>
+        <p class="upload-zone-titre">${titre}</p>
+        <p class="upload-zone-sous-titre">PNG, JPG, SVG — max 2MB</p>
+    `;
+}
+// ==================== PARTIE 5/5 : PREVIEW BOUTIQUE & INITIALISATION ====================
+
+// ==================== PREVIEW MODAL ====================
+function initialiserPreviewBoutique() {
+    const previewBtn    = document.getElementById('previewEcommerce');
+    const previewModal  = document.getElementById('previewModal');
+    const previewClose  = document.getElementById('previewModalClose');
+    const previewFrame  = document.getElementById('previewIframe');
+    const previewUrlEl  = document.getElementById('previewModalUrl');
+    const previewOpen   = document.getElementById('previewOpenBtn');
+    const previewReload = document.getElementById('previewReloadBtn');
+
+    if (!previewBtn || !previewModal) return;
+
+    const getBoutiqueUrl = () => {
+        const lienInput = document.getElementById('lienBoutique');
+        if (lienInput?.value?.trim()) return lienInput.value.trim();
+        const slug = parametres.identifiant?.slug;
+        const base = `${window.location.origin}/boutique.html`;
+        return slug ? `${base}?shop=${slug}` : base;
+    };
+
+    const syncAvantPreview = () => {
+        localStorage.setItem('parametres_boutique', JSON.stringify(parametres));
+        if (parametres.identifiant?.slug)
+            localStorage.removeItem(`boutique_cache_${parametres.identifiant.slug}`);
+    };
+
+    const ouvrirPreview = () => {
+        syncAvantPreview();
+        const url = getBoutiqueUrl();
+        if (previewFrame)  previewFrame.src        = url;
+        if (previewUrlEl)  previewUrlEl.textContent = url;
+        if (previewOpen)   previewOpen.href         = url;
+        previewModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    const fermerPreview = () => {
+        previewModal.classList.remove('active');
+        document.body.style.overflow = '';
+        setTimeout(() => { if (previewFrame) previewFrame.src = ''; }, 300);
+    };
+
+    previewBtn.addEventListener('click', ouvrirPreview);
+    previewClose?.addEventListener('click', fermerPreview);
+    previewModal.addEventListener('click', (e) => { if (e.target === previewModal) fermerPreview(); });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && previewModal.classList.contains('active')) fermerPreview();
+    });
+    previewReload?.addEventListener('click', () => {
+        syncAvantPreview();
+        if (previewFrame) previewFrame.src = getBoutiqueUrl();
+    });
+}
+
+// ==================== ANIMATION CSS GLOBALE ====================
+// Injecte les keyframes nécessaires si non présents (slideIn, fadeOut, spin, fadeOut)
+function injecterAnimationsGlobales() {
+    if (document.getElementById('global-animations')) return;
+    const style = document.createElement('style');
+    style.id = 'global-animations';
+    style.textContent = `
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(30px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateX(0); }
+            to   { opacity: 0; transform: translateX(30px); }
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes popIn {
+            0%   { opacity: 0; transform: scale(0.85); }
+            70%  { transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* ---- Amélioration scroll mobile ---- */
+        @media (max-width: 768px) {
+            .settings-section {
+                animation: fadeIn 0.35s ease;
+            }
+            /* Header en mode mobile : réduire padding quand bouton retour visible */
+            .header-container:has(#btn-retour-mobile.visible) .brand-name {
+                font-size: 1rem;
+            }
+        }
+
+        /* ---- Toast notification amélioré ---- */
+        #notification-container {
+            max-width: 360px;
+        }
+    `;
+    document.head.appendChild(style);
 }
 
 // ==================== INITIALISATION PRINCIPALE ====================
 document.addEventListener('DOMContentLoaded', async () => {
-console.log('⚙️ Initialisation Paramètres...');
+    console.log('%c⚙️ Initialisation Paramètres...', 'color:#007AFF;font-size:14px;font-weight:bold');
 
-await verifierAuthentification();
-initialiserMenuHamburger();
-await chargerParametres();
-initialiserNavigation();
-initialiserFormulaires();
-initialiserIdentifiant();
-initialiserPaiement();
-initialiserApparence();
-initialiserZonesLivraison();
-initialiserMobileMoney();
-initialiserMenuMobileAndroid();
+    injecterAnimationsGlobales();
 
-// Afficher la première section par défaut
-const first = document.querySelector('.settings-section');
-if (first) first.style.display = 'block';
+    await verifierAuthentification();
+    initialiserMenuHamburger();
+    await chargerParametres();
+    initialiserNavigation();
+    initialiserFormulaires();
+    initialiserIdentifiant();
+    initialiserPaiement();
+    initialiserApparence();
+    initialiserZonesLivraison();
+    initialiserMobileMoney();
+    initialiserMenuMobileAndroid();
+    initialiserBoutonRetourMobile();   // ✅ FIX #2 : Bouton retour mobile
+    initialiserPreviewBoutique();
 
-console.log('%c⚙️ Paramètres prêts', 'color:#007AFF;font-size:16px;font-weight:bold');
-console.log('%c✅ Toutes les fonctionnalités chargées', 'color:#34C759;font-size:13px');
+    // Afficher la section général par défaut
+    const first = document.getElementById('general');
+    if (first) first.style.display = 'block';
+
+    // Sync header logo avec le logo de la boutique sauvegardé
+    if (parametres.apparence?.logo) {
+        const logoImg = document.querySelector('.logo-image');
+        if (logoImg) {
+            logoImg.style.background = 'none';
+            logoImg.innerHTML = `<img src="${parametres.apparence.logo}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" alt="Logo">`;
+        }
+    }
+
+    console.log('%c✅ Paramètres prêts', 'color:#34C759;font-size:14px;font-weight:bold');
+    console.log('%c📋 Modules chargés : Auth, Navigation, Formulaires, Paiement, Apparence, Mobile', 'color:#8E8E93;font-size:11px');
 });
  </script>
    <!-- ==================== MODAL PREVIEW BOUTIQUE ==================== -->
