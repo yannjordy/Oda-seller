@@ -1,5 +1,3 @@
-
-
 (function (global) {
   'use strict';
 
@@ -26,87 +24,239 @@
   let _initialized     = false;
 
   /* ─────────────────────────────────────────
-     INJECTION DU DOM (bannière + badge)
+     INJECTION DU DOM (modal + badge)
   ───────────────────────────────────────── */
   function _injectDOM() {
     if (document.getElementById('oda-notif-root')) return;
 
     const style = document.createElement('style');
     style.textContent = `
-      /* ── Root banner ── */
+      @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+      /* ── Root ── */
       #oda-notif-root {
-        position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 99999;
         pointer-events: none;
       }
 
-      /* ── Bannière principale ── */
-      #oda-notif-banner {
-        display: flex; align-items: center; gap: 12px;
-        padding: 14px 20px;
-        font-family: 'DM Sans', system-ui, sans-serif;
-        font-size: 0.9rem; font-weight: 500;
-        color: white; line-height: 1.4;
-        transform: translateY(-110%);
-        transition: transform 0.45s cubic-bezier(.25,.8,.25,1);
+      /* ── Overlay sombre (backdrop) ── */
+      #oda-notif-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
+        z-index: 99999;
         pointer-events: all;
-        box-shadow: 0 4px 30px rgba(0,0,0,0.35);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.35s ease, visibility 0.35s ease;
       }
-      #oda-notif-banner.visible {
-        transform: translateY(0);
-      }
-      #oda-notif-banner.type-info    { background: linear-gradient(135deg,#0e7490,#0891b2); }
-      #oda-notif-banner.type-warning { background: linear-gradient(135deg,#b45309,#d97706); }
-      #oda-notif-banner.type-success { background: linear-gradient(135deg,#065f46,#059669); }
-      #oda-notif-banner.type-urgent  { background: linear-gradient(135deg,#991b1b,#dc2626);
-                                       animation: oda-pulse-bg 1.5s infinite alternate; }
-      @keyframes oda-pulse-bg {
-        from { filter: brightness(1); }
-        to   { filter: brightness(1.15); }
+      #oda-notif-overlay.visible {
+        opacity: 1;
+        visibility: visible;
       }
 
-      /* ── Icône ── */
-      #oda-notif-icon {
-        font-size: 1.5rem; flex-shrink: 0;
-        animation: oda-bounce 0.6s ease both;
+      /* ── Modal principal ── */
+      #oda-notif-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.88);
+        z-index: 100000;
+        pointer-events: all;
+        width: min(420px, calc(100vw - 32px));
+
+        /* Glassmorphism */
+        background: rgba(15, 15, 30, 0.72);
+        backdrop-filter: blur(28px) saturate(160%);
+        -webkit-backdrop-filter: blur(28px) saturate(160%);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 24px;
+        box-shadow:
+          0 32px 80px rgba(0, 0, 0, 0.55),
+          0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+          0 2px 0 rgba(255, 255, 255, 0.08) inset;
+
+        font-family: 'DM Sans', system-ui, sans-serif;
+        overflow: hidden;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          opacity 0.4s cubic-bezier(.25,.8,.25,1),
+          transform 0.4s cubic-bezier(.25,.8,.25,1),
+          visibility 0.4s ease;
       }
-      @keyframes oda-bounce {
-        0%   { transform: scale(0.3) rotate(-20deg); opacity: 0; }
-        60%  { transform: scale(1.15) rotate(5deg); }
+      #oda-notif-modal.visible {
+        opacity: 1;
+        visibility: visible;
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      /* ── Bande colorée en haut selon le type ── */
+      #oda-notif-modal-stripe {
+        height: 4px;
+        width: 100%;
+        transition: background 0.3s ease;
+      }
+      #oda-notif-modal.type-info    #oda-notif-modal-stripe { background: linear-gradient(90deg, #06B6D4, #3B82F6); }
+      #oda-notif-modal.type-warning #oda-notif-modal-stripe { background: linear-gradient(90deg, #F59E0B, #EF4444); }
+      #oda-notif-modal.type-success #oda-notif-modal-stripe { background: linear-gradient(90deg, #10B981, #06B6D4); }
+      #oda-notif-modal.type-urgent  #oda-notif-modal-stripe {
+        background: linear-gradient(90deg, #EF4444, #7C3AED);
+        animation: oda-stripe-pulse 1.4s infinite alternate;
+      }
+      @keyframes oda-stripe-pulse {
+        from { filter: brightness(1); }
+        to   { filter: brightness(1.4); }
+      }
+
+      /* ── Corps du modal ── */
+      #oda-notif-modal-body {
+        padding: 24px 24px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      /* ── En-tête : icône + titre + bouton fermer ── */
+      .oda-modal-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+      }
+
+      /* ── Icône dans un cercle lumineux ── */
+      .oda-modal-icon-wrap {
+        flex-shrink: 0;
+        width: 48px; height: 48px;
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.55rem;
+        animation: oda-icon-pop 0.5s cubic-bezier(.25,.8,.25,1) both;
+      }
+      @keyframes oda-icon-pop {
+        0%   { transform: scale(0.3) rotate(-15deg); opacity: 0; }
+        65%  { transform: scale(1.15) rotate(4deg); }
         100% { transform: scale(1) rotate(0); opacity: 1; }
       }
+      #oda-notif-modal.type-info    .oda-modal-icon-wrap { background: rgba(6,182,212,0.18); }
+      #oda-notif-modal.type-warning .oda-modal-icon-wrap { background: rgba(245,158,11,0.18); }
+      #oda-notif-modal.type-success .oda-modal-icon-wrap { background: rgba(16,185,129,0.18); }
+      #oda-notif-modal.type-urgent  .oda-modal-icon-wrap { background: rgba(239,68,68,0.18); }
 
-      /* ── Texte ── */
-      #oda-notif-text { flex: 1; }
-      #oda-notif-title {
-        font-weight: 700; font-size: 0.95rem;
-        display: block; margin-bottom: 2px;
+      .oda-modal-title-area {
+        flex: 1;
+        min-width: 0;
       }
-      #oda-notif-msg {
-        font-size: 0.85rem; opacity: 0.88;
-        display: block;
+      #oda-modal-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #F0EEF9;
+        line-height: 1.3;
+        margin: 0 0 4px;
       }
-
-      /* ── Actions ── */
-      .oda-notif-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
-
-      #oda-notif-history-btn {
-        background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
-        border-radius: 8px; color: white; padding: 5px 12px; cursor: pointer;
-        font-size: 0.78rem; font-weight: 600; transition: background 0.2s;
-        font-family: inherit;
+      #oda-modal-type-badge {
+        display: inline-block;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        padding: 2px 8px;
+        border-radius: 99px;
       }
-      #oda-notif-history-btn:hover { background: rgba(255,255,255,0.3); }
+      #oda-notif-modal.type-info    #oda-modal-type-badge { background:rgba(6,182,212,0.2);  color:#67E8F9; border:1px solid rgba(6,182,212,0.3); }
+      #oda-notif-modal.type-warning #oda-modal-type-badge { background:rgba(245,158,11,0.2); color:#FDE68A; border:1px solid rgba(245,158,11,0.3); }
+      #oda-notif-modal.type-success #oda-modal-type-badge { background:rgba(16,185,129,0.2); color:#34D399; border:1px solid rgba(16,185,129,0.3); }
+      #oda-notif-modal.type-urgent  #oda-modal-type-badge { background:rgba(239,68,68,0.2);  color:#FCA5A5; border:1px solid rgba(239,68,68,0.3); }
 
-      #oda-notif-close {
-        background: rgba(255,255,255,0.15); border: none;
-        border-radius: 50%; width: 28px; height: 28px;
-        cursor: pointer; color: white; font-size: 14px; line-height: 1;
+      /* ── Bouton fermer ── */
+      #oda-modal-close {
+        flex-shrink: 0;
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.10);
+        color: rgba(240,238,249,0.55);
+        font-size: 14px;
+        cursor: pointer;
         display: flex; align-items: center; justify-content: center;
-        transition: background 0.2s; font-family: inherit;
+        transition: background 0.2s, color 0.2s, transform 0.2s;
+        font-family: inherit;
+        line-height: 1;
       }
-      #oda-notif-close:hover { background: rgba(255,255,255,0.35); }
+      #oda-modal-close:hover {
+        background: rgba(239,68,68,0.22);
+        color: #FCA5A5;
+        transform: rotate(90deg);
+      }
 
-      /* ── Badge flottant (hors bannière) ── */
+      /* ── Message ── */
+      #oda-modal-msg {
+        font-size: 0.88rem;
+        color: rgba(240,238,249,0.72);
+        line-height: 1.6;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin: 0;
+      }
+
+      /* ── Footer : heure + bouton historique ── */
+      .oda-modal-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      #oda-modal-time {
+        font-size: 0.73rem;
+        color: rgba(240,238,249,0.28);
+        letter-spacing: 0.2px;
+      }
+      #oda-modal-history-btn {
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 10px;
+        color: rgba(240,238,249,0.65);
+        padding: 6px 14px;
+        cursor: pointer;
+        font-size: 0.78rem;
+        font-weight: 600;
+        transition: background 0.2s, color 0.2s;
+        font-family: inherit;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      #oda-modal-history-btn:hover {
+        background: rgba(255,255,255,0.14);
+        color: #F0EEF9;
+      }
+
+      /* ── Barre de progression auto-dismiss ── */
+      #oda-modal-progress {
+        height: 3px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 0 0 24px 24px;
+        overflow: hidden;
+        display: none;
+      }
+      #oda-modal-progress-bar {
+        height: 100%;
+        width: 100%;
+        transform-origin: left;
+        transition: transform linear;
+      }
+      #oda-notif-modal.type-info    #oda-modal-progress-bar { background: linear-gradient(90deg,#06B6D4,#3B82F6); }
+      #oda-notif-modal.type-warning #oda-modal-progress-bar { background: linear-gradient(90deg,#F59E0B,#EF4444); }
+      #oda-notif-modal.type-success #oda-modal-progress-bar { background: linear-gradient(90deg,#10B981,#06B6D4); }
+      #oda-notif-modal.type-urgent  #oda-modal-progress-bar { background: linear-gradient(90deg,#EF4444,#7C3AED); }
+
+      /* ── FAB flottant ── */
       #oda-notif-fab {
         position: fixed; bottom: 24px; right: 24px; z-index: 99998;
         width: 52px; height: 52px; border-radius: 50%;
@@ -136,7 +286,10 @@
       #oda-notif-history-panel {
         position: fixed; bottom: 84px; right: 24px; z-index: 99998;
         width: 340px; max-height: 420px; overflow-y: auto;
-        background: #111130; border: 1px solid rgba(255,255,255,0.14);
+        background: rgba(15,15,30,0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.10);
         border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         font-family: 'DM Sans', system-ui, sans-serif;
         display: none;
@@ -150,7 +303,9 @@
         display: flex; align-items: center; justify-content: space-between;
         padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);
         font-weight: 700; font-size: 0.88rem; color: #F0EEF9;
-        position: sticky; top: 0; background: #111130;
+        position: sticky; top: 0;
+        background: rgba(15,15,30,0.95);
+        backdrop-filter: blur(10px);
       }
       .oda-panel-header button {
         background: none; border: none; color: rgba(240,238,249,0.4);
@@ -172,67 +327,124 @@
       .oda-hist-body { flex: 1; min-width: 0; }
       .oda-hist-title { font-weight: 600; font-size: 0.85rem; color: #F0EEF9;
                         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .oda-hist-msg   { font-size: 0.78rem; color: rgba(240,238,249,0.55);
-                        margin-top: 2px; }
-      .oda-hist-time  { font-size: 0.7rem; color: rgba(240,238,249,0.3);
-                        margin-top: 3px; }
+      .oda-hist-msg   { font-size: 0.78rem; color: rgba(240,238,249,0.55); margin-top: 2px; }
+      .oda-hist-time  { font-size: 0.7rem; color: rgba(240,238,249,0.3); margin-top: 3px; }
       .oda-hist-badge {
         flex-shrink: 0; font-size: 0.65rem; font-weight: 700;
-        padding: 2px 7px; border-radius: 99px;
-        align-self: flex-start;
+        padding: 2px 7px; border-radius: 99px; align-self: flex-start;
       }
       .oda-badge-info    { background:rgba(6,182,212,0.2);  color:#67E8F9; border:1px solid rgba(6,182,212,0.3); }
       .oda-badge-warning { background:rgba(245,158,11,0.2); color:#FDE68A; border:1px solid rgba(245,158,11,0.3); }
       .oda-badge-success { background:rgba(16,185,129,0.2); color:#34D399; border:1px solid rgba(16,185,129,0.3); }
       .oda-badge-urgent  { background:rgba(239,68,68,0.2);  color:#FCA5A5; border:1px solid rgba(239,68,68,0.3); }
 
-      /* ── Bouton activation notifications OS ── */
-      #oda-notif-permission-bar {
-        display: none; align-items: center; justify-content: space-between;
-        padding: 10px 16px;
-        background: rgba(124,58,237,0.12);
-        border-bottom: 1px solid rgba(124,58,237,0.25);
-        font-size: 0.82rem; color: rgba(240,238,249,0.75);
-        font-family: 'DM Sans', system-ui, sans-serif;
+      /* ── Bloc permission intégré dans le modal ── */
+      #oda-modal-permission-row {
+        display: none;
+        align-items: center;
+        gap: 12px;
+        background: rgba(124, 58, 237, 0.10);
+        border: 1px solid rgba(124, 58, 237, 0.22);
+        border-radius: 12px;
+        padding: 11px 14px;
       }
-      #oda-notif-permission-bar.visible { display: flex; }
-      #oda-notif-permission-bar button {
-        background: linear-gradient(135deg,#7C3AED,#06B6D4);
+      #oda-modal-permission-row.visible { display: flex; }
+      #oda-modal-permission-row .oda-perm-icon {
+        font-size: 1.15rem; flex-shrink: 0;
+      }
+      #oda-modal-permission-row .oda-perm-text {
+        flex: 1;
+        font-size: 0.78rem;
+        color: rgba(240,238,249,0.65);
+        line-height: 1.4;
+      }
+      #oda-modal-permission-row .oda-perm-btn {
+        flex-shrink: 0;
+        background: linear-gradient(135deg, #7C3AED, #06B6D4);
         border: none; border-radius: 8px; color: white;
-        padding: 5px 14px; cursor: pointer; font-size: 0.8rem;
-        font-weight: 600; font-family: inherit;
+        padding: 6px 14px; cursor: pointer;
+        font-size: 0.78rem; font-weight: 700;
+        font-family: inherit;
+        white-space: nowrap;
+        transition: opacity 0.2s, transform 0.2s;
+      }
+      #oda-modal-permission-row .oda-perm-btn:hover {
+        opacity: 0.88; transform: scale(1.03);
+      }
+      #oda-modal-permission-row .oda-perm-dismiss {
+        flex-shrink: 0;
+        background: none; border: none;
+        color: rgba(240,238,249,0.3);
+        cursor: pointer; font-size: 0.7rem;
+        font-family: inherit; padding: 2px 4px;
+        transition: color 0.2s;
+      }
+      #oda-modal-permission-row .oda-perm-dismiss:hover { color: #FCA5A5; }
+
+      /* ── Responsive ── */
+      @media (max-width: 480px) {
+        #oda-notif-modal {
+          width: calc(100vw - 24px);
+          border-radius: 20px;
+        }
       }
     `;
     document.head.appendChild(style);
 
-    // Root container
-    const root = document.createElement('div');
-    root.id = 'oda-notif-root';
-    root.innerHTML = `
-      <!-- Barre de demande permission -->
-      <div id="oda-notif-permission-bar">
-        <span>🔔 Activez les notifications pour recevoir les annonces admin en temps réel</span>
-        <button onclick="window.odaNotifications.requestPermission()">Activer</button>
-      </div>
+    // ── Overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'oda-notif-overlay';
+    overlay.addEventListener('click', () => _api.dismissBanner());
+    document.body.appendChild(overlay);
 
-      <!-- Bannière principale -->
-      <div id="oda-notif-banner" class="type-info">
-        <span id="oda-notif-icon">📢</span>
-        <div id="oda-notif-text">
-          <span id="oda-notif-title">Annonce</span>
-          <span id="oda-notif-msg"></span>
+    // ── Modal
+    const modal = document.createElement('div');
+    modal.id = 'oda-notif-modal';
+    modal.className = 'type-info';
+    modal.innerHTML = `
+      <div id="oda-notif-modal-stripe"></div>
+      <div id="oda-notif-modal-body">
+
+        <div class="oda-modal-header">
+          <div class="oda-modal-icon-wrap">
+            <span id="oda-modal-icon">📢</span>
+          </div>
+          <div class="oda-modal-title-area">
+            <p id="oda-modal-title">Annonce</p>
+            <span id="oda-modal-type-badge">Info</span>
+          </div>
+          <button id="oda-modal-close" title="Fermer" onclick="window.odaNotifications.dismissBanner()">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/>
+            </svg>
+          </button>
         </div>
-        <div class="oda-notif-actions">
-          <button id="oda-notif-history-btn" onclick="window.odaNotifications.toggleHistory()">
+
+        <p id="oda-modal-msg"></p>
+
+        <div class="oda-modal-footer">
+          <span id="oda-modal-time">À l'instant</span>
+          <button id="oda-modal-history-btn" onclick="window.odaNotifications.toggleHistory()">
             📋 Historique
           </button>
-          <button id="oda-notif-close" onclick="window.odaNotifications.dismissBanner()">✕</button>
         </div>
+
+        <!-- Bouton activation notifications — intégré dans la fenêtre, jamais dans le header -->
+        <div id="oda-modal-permission-row">
+          <span class="oda-perm-icon">🔔</span>
+          <span class="oda-perm-text">Activez les notifications pour recevoir les annonces en temps réel</span>
+          <button class="oda-perm-btn" onclick="window.odaNotifications.requestPermission()">Activer</button>
+          <button class="oda-perm-dismiss" title="Ignorer" onclick="window.odaNotifications.dismissPermissionRow()">✕</button>
+        </div>
+
+      </div>
+      <div id="oda-modal-progress">
+        <div id="oda-modal-progress-bar"></div>
       </div>
     `;
-    document.body.insertBefore(root, document.body.firstChild);
+    document.body.appendChild(modal);
 
-    // FAB flottant
+    // ── FAB flottant
     const fab = document.createElement('button');
     fab.id = 'oda-notif-fab';
     fab.title = 'Annonces admin';
@@ -240,7 +452,7 @@
     fab.onclick = () => _api.toggleHistory();
     document.body.appendChild(fab);
 
-    // Panneau historique
+    // ── Panneau historique
     const panel = document.createElement('div');
     panel.id = 'oda-notif-history-panel';
     panel.innerHTML = `
@@ -252,7 +464,7 @@
     `;
     document.body.appendChild(panel);
 
-    // Fermer le panel au clic extérieur
+    // Fermer panneau historique au clic extérieur
     document.addEventListener('click', (e) => {
       const panel = document.getElementById('oda-notif-history-panel');
       const fab   = document.getElementById('oda-notif-fab');
@@ -262,30 +474,89 @@
         }
       }
     });
+
+    // Fermer le modal avec Échap
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') _api.dismissBanner();
+    });
   }
 
   /* ─────────────────────────────────────────
-     AFFICHER UNE ANNONCE
+     TIMER auto-dismiss (non urgent)
+  ───────────────────────────────────────── */
+  let _autoDismissTimer   = null;
+  let _progressAnimFrame  = null;
+  const AUTO_DISMISS_DELAY = 8000; // 8 sec pour les non-urgents
+
+  function _startAutoDismiss(type) {
+    _clearAutoDismiss();
+    if (type === 'urgent') return; // Les urgents restent jusqu'à fermeture manuelle
+
+    const progress    = document.getElementById('oda-modal-progress');
+    const progressBar = document.getElementById('oda-modal-progress-bar');
+    if (progress && progressBar) {
+      progress.style.display    = 'block';
+      progressBar.style.transition = `transform ${AUTO_DISMISS_DELAY}ms linear`;
+      progressBar.style.transform  = 'scaleX(1)';
+      // Déclencher l'animation au prochain frame
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          progressBar.style.transform = 'scaleX(0)';
+        });
+      });
+    }
+
+    _autoDismissTimer = setTimeout(() => {
+      _api.dismissBanner();
+    }, AUTO_DISMISS_DELAY);
+  }
+
+  function _clearAutoDismiss() {
+    if (_autoDismissTimer) { clearTimeout(_autoDismissTimer); _autoDismissTimer = null; }
+    const progressBar = document.getElementById('oda-modal-progress-bar');
+    if (progressBar) {
+      progressBar.style.transition = 'none';
+      progressBar.style.transform  = 'scaleX(1)';
+    }
+    const progress = document.getElementById('oda-modal-progress');
+    if (progress) progress.style.display = 'none';
+  }
+
+  /* ─────────────────────────────────────────
+     AFFICHER UNE ANNONCE (modal)
   ───────────────────────────────────────── */
   function _showBanner(ann) {
-    const icons = { info:'ℹ️', warning:'⚠️', success:'✅', urgent:'🚨' };
-    const icon  = ann.icon || icons[ann.type] || '📢';
+    const icons      = { info:'ℹ️', warning:'⚠️', success:'✅', urgent:'🚨' };
+    const typeLabels = { info:'Info', warning:'Attention', success:'Succès', urgent:'Urgent !' };
+    const icon       = ann.icon || icons[ann.type] || '📢';
+    const type       = ann.type || 'info';
 
-    // Mettre à jour la bannière
-    const banner = document.getElementById('oda-notif-banner');
-    if (!banner) return;
+    const modal  = document.getElementById('oda-notif-modal');
+    const overlay = document.getElementById('oda-notif-overlay');
+    if (!modal) return;
 
-    banner.className = `type-${ann.type || 'info'}`;
-    document.getElementById('oda-notif-icon').textContent  = icon;
-    document.getElementById('oda-notif-title').textContent = ann.title || 'Annonce';
-    document.getElementById('oda-notif-msg').textContent   = ann.message || '';
+    // Appliquer le type
+    modal.className = `type-${type}`;
 
-    // Animation d'entrée
+    // Remplir le contenu
+    document.getElementById('oda-modal-icon').textContent       = icon;
+    document.getElementById('oda-modal-title').textContent      = ann.title   || 'Annonce';
+    document.getElementById('oda-modal-msg').textContent        = ann.message || '';
+    document.getElementById('oda-modal-type-badge').textContent = typeLabels[type] || 'Info';
+    document.getElementById('oda-modal-time').textContent       = _timeAgo(ann.created_at);
+
+    // Afficher
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        banner.classList.add('visible');
+        modal.classList.add('visible');
+        if (overlay) overlay.classList.add('visible');
+        // Afficher la ligne "Activer" si la permission n'a pas encore été traitée
+        _showPermissionBarIfNeeded();
       });
     });
+
+    // Auto-dismiss avec barre de progression
+    _startAutoDismiss(type);
 
     // Ajouter à l'historique
     _addToHistory(ann);
@@ -345,9 +616,9 @@
     if (!fab || !badge) return;
 
     if (_unreadCount > 0) {
-      fab.style.display    = 'flex';
-      badge.style.display  = 'flex';
-      badge.textContent    = _unreadCount > 9 ? '9+' : _unreadCount;
+      fab.style.display   = 'flex';
+      badge.style.display = 'flex';
+      badge.textContent   = _unreadCount > 9 ? '9+' : _unreadCount;
     } else {
       badge.style.display = 'none';
     }
@@ -374,7 +645,6 @@
         _api.toggleHistory();
         n.close();
       };
-      // Fermer auto sauf si urgent
       if (ann.type !== 'urgent') setTimeout(() => n.close(), 8000);
     } catch(e) {}
   }
@@ -417,9 +687,7 @@
           (payload) => {
             const ann = payload.new;
             if (!ann) return;
-            // Vérifier expiration
             if (ann.expiry && new Date(ann.expiry) < new Date()) return;
-            // Éviter les doublons
             if (_lastSeenId && String(ann.id) === _lastSeenId) return;
             _showBanner(ann);
           }
@@ -447,7 +715,6 @@
         const ann = JSON.parse(currentRaw);
         if (!ann || !ann.active) return;
         if (ann.expiry && new Date(ann.expiry) < new Date()) return;
-        // Éviter les doublons avec Realtime/BC
         if (_lastSeenId && String(ann.id) === _lastSeenId) return;
         _showBanner(ann);
       } catch(e) {}
@@ -487,23 +754,28 @@
   }
 
   function _hidePermissionBar() {
-    const bar = document.getElementById('oda-notif-permission-bar');
-    if (bar) bar.classList.remove('visible');
+    // Masque la ligne "Activer" dans le modal
+    const row = document.getElementById('oda-modal-permission-row');
+    if (row) row.classList.remove('visible');
   }
 
   function _showPermissionBarIfNeeded() {
     if (typeof Notification === 'undefined') return;
-    if (Notification.permission === 'default') {
-      const bar = document.getElementById('oda-notif-permission-bar');
-      if (bar) bar.classList.add('visible');
-    }
+    // Ne pas afficher si déjà accordé, refusé, ou ignoré manuellement
+    if (Notification.permission !== 'default') return;
+    try { if (localStorage.getItem('oda_perm_dismissed') === '1') return; } catch(e) {}
+    const row = document.getElementById('oda-modal-permission-row');
+    if (row) row.classList.add('visible');
   }
 
   /* ─────────────────────────────────────────
      UTILITAIRES
   ───────────────────────────────────────── */
   function _esc(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return String(str)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;');
   }
 
   function _timeAgo(d) {
@@ -531,7 +803,6 @@
 
       _injectDOM();
 
-      // Créer ou réutiliser le client Supabase
       if (supabaseClient) {
         _supabase = supabaseClient;
       } else if (global.supabase) {
@@ -540,15 +811,11 @@
         } catch(e) {}
       }
 
-      // Lancer les 3 canaux
       _initBroadcastChannel();
       _initRealtime(_supabase);
       _initPolling();
 
-      // Demander la permission OS après 2 sec (non intrusif)
       setTimeout(_showPermissionBarIfNeeded, 2000);
-
-      // Vérifier une annonce déjà active au chargement
       setTimeout(_checkExistingAnnouncement, 500);
 
       console.log('[ODA Notif] Système initialisé 🚀');
@@ -559,10 +826,13 @@
       return await _requestPermission();
     },
 
-    /** Masquer la bannière courante */
+    /** Fermer le modal */
     dismissBanner() {
-      const banner = document.getElementById('oda-notif-banner');
-      if (banner) banner.classList.remove('visible');
+      _clearAutoDismiss();
+      const modal   = document.getElementById('oda-notif-modal');
+      const overlay = document.getElementById('oda-notif-overlay');
+      if (modal)   modal.classList.remove('visible');
+      if (overlay) overlay.classList.remove('visible');
     },
 
     /** Afficher/masquer le panneau historique */
@@ -572,7 +842,6 @@
       const isOpen = panel.style.display === 'block';
       panel.style.display = isOpen ? 'none' : 'block';
       if (!isOpen) {
-        // Remettre le compteur à zéro
         _unreadCount = 0;
         _updateBadge();
       }
@@ -589,7 +858,7 @@
     },
 
     /**
-     * Afficher manuellement une notification (utilisé par tableau.html)
+     * Afficher manuellement une notification
      * @param {object} options — { title, message, type, icon }
      */
     show(options) {
@@ -601,10 +870,7 @@
       });
     },
 
-    /**
-     * Compatibilité tableau.html — notifySubscriptionAlert
-     * Appelé quand un abonnement est activé/expiré
-     */
+    /** Compatibilité tableau.html — notifySubscriptionAlert */
     notifySubscriptionAlert(options = {}) {
       const { title, message, type = 'info' } = options;
       _showBanner({
@@ -617,13 +883,19 @@
         active:     true,
       });
     },
+
+    /** Masquer définitivement la ligne permission dans le modal */
+    dismissPermissionRow() {
+      _hidePermissionBar();
+      // Mémoriser le refus pour ne plus afficher lors de la prochaine session
+      try { localStorage.setItem('oda_perm_dismissed', '1'); } catch(e) {}
+    },
   };
 
   /* ─────────────────────────────────────────
      VÉRIFIER ANNONCE DÉJÀ ACTIVE (au chargement)
   ───────────────────────────────────────── */
   async function _checkExistingAnnouncement() {
-    // 1. Vérifier localStorage d'abord
     try {
       const raw = localStorage.getItem(LS_KEY);
       if (raw) {
@@ -637,7 +909,6 @@
       }
     } catch(e) {}
 
-    // 2. Vérifier Supabase
     if (!_supabase) return;
     try {
       const { data } = await _supabase
@@ -650,7 +921,6 @@
 
       if (data) {
         if (data.expiry && new Date(data.expiry) < new Date()) return;
-        // Vérifier si déjà vu
         if (_lastSeenId && String(data.id) === _lastSeenId) return;
         _showBanner(data);
       }
@@ -660,33 +930,29 @@
   /* ─────────────────────────────────────────
      EXPOSITION GLOBALE
   ───────────────────────────────────────── */
-  global.odaNotifications      = _api;     // pour tableau.html (utilise window.odaNotifications.init())
-  global.notificationManager   = _api;     // compat tableau.html (window.notificationManager)
-  global.ODANotifications      = _api;     // alias alternatif
+  global.odaNotifications    = _api;
+  global.notificationManager = _api;
+  global.ODANotifications    = _api;
 
   /* ─────────────────────────────────────────
      AUTO-INIT si supabase est déjà disponible
   ───────────────────────────────────────── */
   function _tryAutoInit() {
     if (_initialized) return;
-    // Attendre que le DOM soit prêt
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', _tryAutoInit);
       return;
     }
-    // Attendre que supabase soit disponible (max 3 sec)
     let attempts = 0;
     const timer = setInterval(() => {
       attempts++;
       const sb = global.supabase || (global.window && global.window.supabase);
       if (sb) {
         clearInterval(timer);
-        // Utiliser le client déjà créé s'il existe
         const existingClient = global._supabaseClient || null;
         _api.init(existingClient);
       } else if (attempts > 30) {
         clearInterval(timer);
-        // Initialiser sans Supabase (localStorage + BroadcastChannel seulement)
         _api.init(null);
       }
     }, 100);
@@ -695,4 +961,3 @@
   _tryAutoInit();
 
 })(typeof window !== 'undefined' ? window : this);
-
