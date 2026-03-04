@@ -2150,8 +2150,9 @@ input:checked + .toggle-slider-small:before {
         </main>
     </div>
     <script src="cache-manager.js"></script>
- <script type="module">
-    // ==================== PARTIE 1/5 : CONFIG, AUTH & SAUVEGARDE ====================
+<script type="module">
+
+// ==================== PARTIE 1/5 : CONFIG, AUTH & SAUVEGARDE ====================
 
 const SUPABASE_URL      = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2ticWJxeGN3emNybG11dnpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MTk1MzMsImV4cCI6MjA3NjA5NTUzM30.AMzAUwtjFt7Rvof5r2enMyYIYToc1wNWWEjvZqK_YXM';
@@ -2227,11 +2228,10 @@ async function chargerParametres() {
         }
     } catch (_) {}
 
-    // ✅ FIX #1 : Appliquer le favicon sauvegardé dès le chargement
-    // Cela garantit que l'onglet affiche toujours l'icône de la boutique
-    if (parametres.apparence?.favicon) {
-        _appliquerFaviconOnglet(parametres.apparence.favicon);
-    }
+    // ✅ CORRECTION FAVICON :
+    // On NE modifie PAS le favicon de parametres.html.
+    // On sauvegarde simplement dans localStorage pour que boutique.html puisse le lire.
+    // boutique.html doit appeler _appliquerFaviconOnglet() de son côté.
 
     await initialiserIdentifiantUnique();
     appliquerParametres();
@@ -2279,34 +2279,6 @@ function _exposerConfigPaiement() {
     } catch (e) {
         console.error('❌ Erreur exposition config:', e);
     }
-}
-
-// ==================== FAVICON ONGLET (FIX PRINCIPAL) ====================
-// ✅ FIX #1 : Fonction centralisée pour appliquer le favicon dans l'onglet du navigateur.
-// Appelée lors du chargement ET après chaque upload de favicon.
-// Sans cela, copier le lien boutique ne montre pas l'icône de la boutique dans l'onglet.
-function _appliquerFaviconOnglet(src) {
-    if (!src) return;
-    // Chercher ou créer le tag <link rel="icon">
-    let link = document.querySelector("link[rel~='icon']");
-    if (!link) {
-        link = document.createElement('link');
-        link.rel = 'icon';
-        document.head.appendChild(link);
-    }
-    link.type = src.startsWith('data:image/png') ? 'image/png' :
-                src.startsWith('data:image/svg') ? 'image/svg+xml' :
-                src.startsWith('data:image/ico') ? 'image/x-icon' : 'image/png';
-    link.href = src;
-
-    // Aussi mettre à jour apple-touch-icon pour iOS
-    let appleLink = document.querySelector("link[rel='apple-touch-icon']");
-    if (!appleLink) {
-        appleLink = document.createElement('link');
-        appleLink.rel = 'apple-touch-icon';
-        document.head.appendChild(appleLink);
-    }
-    appleLink.href = src;
 }
 
 // ==================== IDENTIFIANT BOUTIQUE ====================
@@ -2412,8 +2384,8 @@ function appliquerParametres() {
     if (parametres.identifiant) {
         const slugInput   = document.getElementById('shopSlug');
         const slugPreview = document.getElementById('slugPreview');
-        if (slugInput)   slugInput.value          = parametres.identifiant.slug || '';
-        if (slugPreview) slugPreview.textContent  = parametres.identifiant.slug || 'votre-identifiant';
+        if (slugInput)   slugInput.value         = parametres.identifiant.slug || '';
+        if (slugPreview) slugPreview.textContent = parametres.identifiant.slug || 'votre-identifiant';
     }
 
     if (parametres.paiement) {
@@ -2457,7 +2429,7 @@ function appliquerParametres() {
         });
     }
 
-    // ✅ FIX #1 (suite) : Appliquer le logo et favicon sauvegardés dans les previews
+    // Préview logo dans la zone d'upload
     if (parametres.apparence?.logo) {
         const prev = document.getElementById('logoPreview');
         if (prev) {
@@ -2468,6 +2440,11 @@ function appliquerParametres() {
                 </div>`;
         }
     }
+
+    // ✅ CORRECTION FAVICON :
+    // On affiche la preview du favicon dans la zone d'upload (correct),
+    // mais on N'applique PAS _appliquerFaviconOnglet() ici.
+    // Le favicon ne doit changer que dans boutique.html, pas dans parametres.html.
     if (parametres.apparence?.favicon) {
         const prev = document.getElementById('faviconPreview');
         if (prev) {
@@ -2477,7 +2454,8 @@ function appliquerParametres() {
                     <div class="upload-overlay-label">Favicon actuel</div>
                 </div>`;
         }
-        _appliquerFaviconOnglet(parametres.apparence.favicon);
+        // ❌ NE PAS appeler _appliquerFaviconOnglet() ici
+        // boutique.html lit localStorage 'parametres_boutique' et applique le favicon lui-même
     }
 
     // Couleurs et police
@@ -2516,7 +2494,6 @@ window.afficherFormulaireModification = function() {
 window.copierLienBoutique = function() {
     const input = document.getElementById('lienBoutique');
     if (!input) return;
-    // Utiliser l'API Clipboard moderne, avec fallback execCommand
     const text = input.value;
     if (navigator.clipboard?.writeText) {
         navigator.clipboard.writeText(text).then(() => {
@@ -2613,7 +2590,7 @@ window.supprimerCompte = async function() {
         afficherNotification('❌ Erreur lors de la suppression', 'error');
     }
 };
-// ==================== PARTIE 2/5 : NAVIGATION, MENUS & BOUTON RETOUR MOBILE ====================
+// ==================== PARTIE 2/5 : NAVIGATION & MENUS ====================
 
 function initialiserMenuHamburger() {
     const btn     = document.getElementById('hamburgerBtn');
@@ -2680,25 +2657,25 @@ function creerMenuMobileAndroid() {
     menuMobile.id = 'menu-mobile-android';
 
     const items = [
-        { icon: '🏪', label: 'Général',       section: 'general' },
-        { icon: '🔖', label: 'Identifiant',   section: 'identifiant' },
-        { icon: '💳', label: 'Paiement',      section: 'payment' },
-        { icon: '📦', label: 'Livraison',     section: 'shipping' },
-        { icon: '🔔', label: 'Notifs',        section: 'notifications' },
-        { icon: '🔒', label: 'Sécurité',      section: 'security' },
-        { icon: '🎨', label: 'Apparence',     section: 'apparence' }
+        { icon: '🏪', label: 'Général',     section: 'general' },
+        { icon: '🔖', label: 'Identifiant', section: 'identifiant' },
+        { icon: '💳', label: 'Paiement',    section: 'payment' },
+        { icon: '📦', label: 'Livraison',   section: 'shipping' },
+        { icon: '🔔', label: 'Notifs',      section: 'notifications' },
+        { icon: '🔒', label: 'Sécurité',    section: 'security' },
+        { icon: '🎨', label: 'Apparence',   section: 'apparence' }
     ];
 
     items.forEach(item => {
         const btn = document.createElement('button');
-        btn.className   = 'menu-mobile-btn';
+        btn.className = 'menu-mobile-btn';
         btn.dataset.section = item.section;
         const sectionEl = document.getElementById(item.section);
         const isActive  = sectionEl && sectionEl.style.display !== 'none';
         if (isActive) btn.classList.add('active');
 
         const iconSpan  = document.createElement('span');
-        iconSpan.className  = 'link-icon';
+        iconSpan.className   = 'link-icon';
         iconSpan.textContent = item.icon;
 
         const labelSpan = document.createElement('span');
@@ -2767,132 +2744,6 @@ function initialiserMenuMobileAndroid() {
     });
 }
 
-// ==================== ✅ FIX #2 : BOUTON RETOUR MOBILE ====================
-// En mode responsive (≤768px), affiche un bouton "‹ Retour" dans le header
-// pour revenir à la liste des sections, UX typique des apps mobiles.
-
-function initialiserBoutonRetourMobile() {
-    // Injecter le CSS du bouton retour une seule fois
-    if (!document.getElementById('style-back-btn')) {
-        const style = document.createElement('style');
-        style.id = 'style-back-btn';
-        style.textContent = `
-            #btn-retour-mobile {
-                display: none;
-                align-items: center;
-                gap: 6px;
-                background: none;
-                border: none;
-                color: var(--primary-color);
-                font-family: 'Poppins', sans-serif;
-                font-size: 0.95rem;
-                font-weight: 600;
-                cursor: pointer;
-                padding: 6px 10px;
-                border-radius: 8px;
-                transition: all 0.2s ease;
-            }
-            #btn-retour-mobile:hover {
-                background: rgba(0,122,255,0.08);
-            }
-            #btn-retour-mobile svg {
-                width: 18px; height: 18px; flex-shrink: 0;
-            }
-            @media (max-width: 768px) {
-                #btn-retour-mobile.visible {
-                    display: flex !important;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
-    // Créer le bouton et l'insérer dans le header (avant le titre)
-    const headerContainer = document.querySelector('.header-container');
-    if (!headerContainer || document.getElementById('btn-retour-mobile')) return;
-
-    const btn = document.createElement('button');
-    btn.id = 'btn-retour-mobile';
-    btn.setAttribute('aria-label', 'Retour');
-    btn.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M15 18l-6-6 6-6"/>
-        </svg>
-        Retour
-    `;
-
-    // Insérer avant la brand-section ou en premier enfant
-    const brandSection = headerContainer.querySelector('.brand-section');
-    if (brandSection) {
-        headerContainer.insertBefore(btn, brandSection);
-    } else {
-        headerContainer.prepend(btn);
-    }
-
-    // Clic → revenir au menu mobile (première section)
-    btn.addEventListener('click', () => {
-        // Sur mobile, cacher le contenu actif et remettre la navigation en avant
-        // En pratique : naviguer vers la section "general" par défaut (ou aucune)
-        _cacherToutesLessections();
-        _masquerBoutonRetour();
-        _afficherMenuMobile();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-    // Surveiller les changements de section pour afficher/masquer le bouton
-    document.querySelectorAll('.settings-menu-link, .menu-mobile-btn').forEach(el => {
-        el.addEventListener('click', () => {
-            if (window.innerWidth <= 768) {
-                setTimeout(_afficherBoutonRetour, 100);
-            }
-        });
-    });
-
-    // Gestion resize
-    window.addEventListener('resize', () => {
-        if (window.innerWidth > 768) {
-            _masquerBoutonRetour();
-        }
-    });
-}
-
-function _afficherBoutonRetour() {
-    document.getElementById('btn-retour-mobile')?.classList.add('visible');
-    // Mettre à jour le titre avec la section active
-    const activeSection = document.querySelector('.settings-section[style*="block"]');
-    const activeMenuBtn = document.querySelector('.menu-mobile-btn.active');
-    if (activeMenuBtn && activeSection) {
-        const brandName = document.querySelector('.brand-name');
-        if (brandName) {
-            const label = activeMenuBtn.querySelector('span:last-of-type')?.textContent || 'Paramètres';
-            brandName.textContent = label;
-        }
-    }
-}
-
-function _masquerBoutonRetour() {
-    document.getElementById('btn-retour-mobile')?.classList.remove('visible');
-    const brandName = document.querySelector('.brand-name');
-    if (brandName) brandName.textContent = 'Paramètres';
-}
-
-function _cacherToutesLessections() {
-    document.querySelectorAll('.settings-section').forEach(s => s.style.display = 'none');
-    document.querySelectorAll('.settings-menu-link').forEach(l => l.classList.remove('active'));
-    document.querySelectorAll('.menu-mobile-btn').forEach(b => {
-        b.classList.remove('active');
-        b.querySelector('.active-indicator')?.remove();
-    });
-}
-
-function _afficherMenuMobile() {
-    // Ré-afficher la première section (général) comme état par défaut
-    const firstSection = document.getElementById('general');
-    const firstBtn     = document.querySelector('.menu-mobile-btn[data-section="general"]');
-    if (firstSection) { firstSection.style.display = 'block'; }
-    if (firstBtn)     { mettreAJourMenuActif(firstBtn); }
-}
-
 // ==================== BOUTON NOTIFICATIONS ====================
 function ajouterBoutonNotifications() {
     const container = document.querySelector('.header-actions');
@@ -2934,9 +2785,7 @@ function ajouterBoutonNotifications() {
 document.addEventListener('DOMContentLoaded', ajouterBoutonNotifications);
 // ==================== PARTIE 3/5 : FORMULAIRES, IDENTIFIANT, PAIEMENT & LIVRAISON ====================
 
-// ==================== FORMULAIRES GÉNÉRAUX ====================
 function initialiserFormulaires() {
-    // Formulaire général
     document.getElementById('generalForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         parametres.general = {
@@ -2953,7 +2802,6 @@ function initialiserFormulaires() {
         );
     });
 
-    // Formulaire livraison
     document.getElementById('shippingForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         sauvegarderZonesLivraison();
@@ -2972,7 +2820,6 @@ function initialiserFormulaires() {
         );
     });
 
-    // Formulaire sécurité avec indicateur de force du mot de passe
     const newPassInput = document.getElementById('newPassword');
     if (newPassInput) {
         newPassInput.addEventListener('input', () => {
@@ -3006,7 +2853,6 @@ function initialiserFormulaires() {
         }
     });
 
-    // Notifications
     [
         { id: 'notifOrders',  key: 'commandes' },
         { id: 'notifStock',   key: 'stock' },
@@ -3021,7 +2867,6 @@ function initialiserFormulaires() {
         });
     });
 
-    // Devise
     document.getElementById('currency')?.addEventListener('change', async (e) => {
         parametres.paiement.devise = e.target.value;
         await sauvegarderParametres();
@@ -3029,7 +2874,6 @@ function initialiserFormulaires() {
     });
 }
 
-// Indicateur de force du mot de passe
 function _afficherForceMotDePasse(mdp) {
     let barEl = document.getElementById('password-strength-bar');
     if (!barEl) {
@@ -3072,7 +2916,6 @@ function _resetForceMotDePasse() {
     if (label) label.textContent = '';
 }
 
-// ==================== IDENTIFIANT ====================
 function initialiserIdentifiant() {
     const slugInput   = document.getElementById('shopSlug');
     const slugPreview = document.getElementById('slugPreview');
@@ -3096,213 +2939,87 @@ function initialiserIdentifiant() {
 
     document.getElementById('identifiantForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const slug = slugInput?.value.trim();
-        if (!slug)           { afficherNotification('⚠️ Veuillez entrer un identifiant', 'warning'); return; }
-        if (slug.length < 3) { afficherNotification('⚠️ L\'identifiant doit contenir au moins 3 caractères', 'warning'); return; }
-
-        const dispo = await verifierDisponibiliteSlug(slug);
-        if (!dispo && parametres.identifiant?.slug !== slug) {
-            afficherNotification('❌ Cet identifiant est déjà utilisé', 'error');
-            return;
+        const slug = slugInput?.value?.trim();
+        if (!slug || slug.length < 3) {
+            afficherNotification('⚠️ L\'identifiant doit faire au moins 3 caractères', 'warning'); return;
         }
-
+        const dispo = await verifierDisponibiliteSlug(slug);
+        if (!dispo) {
+            afficherNotification('❌ Cet identifiant est déjà utilisé', 'error'); return;
+        }
         parametres.identifiant = {
             slug, disponible: true, auto: false,
-            dateCreation:     parametres.identifiant?.dateCreation || new Date().toISOString(),
-            dateModification: new Date().toISOString()
+            dateCreation: parametres.identifiant?.dateCreation || new Date().toISOString()
         };
         parametres.slug = slug;
-
         const ok = await sauvegarderParametres();
-        if (ok) {
-            afficherNotification('🔖 Identifiant unique enregistré avec succès', 'success');
-            afficherIdentifiantActuel();
-        } else {
-            afficherNotification('⚠️ Sauvegardé localement uniquement', 'warning');
-        }
-    });
-}
-
-// ==================== PAIEMENT ====================
-function initialiserPaiement() {
-    _initTogglePaiement('paymentCard',   'cardDetails',   'carte');
-    _initTogglePaiement('paymentMobile', 'mobileDetails', 'mobile');
-    _initTogglePaiement('paymentCash',   'cashDetails',   'cash');
-}
-
-function _initTogglePaiement(checkboxId, detailsId, key) {
-    const cb      = document.getElementById(checkboxId);
-    const details = document.getElementById(detailsId);
-    if (!cb) return;
-
-    cb.addEventListener('change', async () => {
-        if (details) details.style.display = cb.checked ? 'block' : 'none';
-        parametres.paiement[key].actif = cb.checked;
-        await sauvegarderParametres();
-    });
-
-    if (cb.checked && details) details.style.display = 'block';
-}
-
-window.confirmerPaiement = async function(type) {
-    if (type === 'card') {
-        const cle = document.getElementById('stripeKey')?.value;
-        if (!cle) { afficherNotification('⚠️ Veuillez entrer votre clé API Stripe', 'warning'); return; }
-        parametres.paiement.carte.cle      = cle;
-        parametres.paiement.carte.confirme = true;
-    } else if (type === 'cash') {
-        parametres.paiement.cash.confirme = true;
-    }
-    const ok = await sauvegarderParametres();
-    afficherNotification(
-        ok ? `✅ ${type === 'card' ? 'Carte bancaire' : 'Paiement à la livraison'} configuré` : '⚠️ Sauvegardé localement',
-        ok ? 'success' : 'warning'
-    );
-};
-
-// ==================== MOBILE MONEY ====================
-function initialiserMobileMoney() {
-    const paymentMobile = document.getElementById('paymentMobile');
-    const mobileDetails = document.getElementById('mobileDetails');
-    if (paymentMobile?.checked && mobileDetails) mobileDetails.style.display = 'block';
-
-    // MTN
-    const mtnActive = document.getElementById('mtnActive');
-    const mtnInputs = document.getElementById('mtnInputs');
-    if (mtnActive) {
-        mtnActive.addEventListener('change', async () => {
-            if (mtnInputs) mtnInputs.style.display = mtnActive.checked ? 'block' : 'none';
-            parametres.paiement.mobile.mtn.actif = mtnActive.checked;
-            await sauvegarderParametres();
-            afficherNotification(mtnActive.checked ? '✅ MTN Money activé' : '❌ MTN Money désactivé', 'info');
-        });
-        if (parametres.paiement.mobile.mtn) {
-            mtnActive.checked = parametres.paiement.mobile.mtn.actif || false;
-            if (mtnActive.checked && mtnInputs) mtnInputs.style.display = 'block';
-            const nom = document.getElementById('mtnNomCompte');
-            const num = document.getElementById('mtnNumero');
-            if (nom) nom.value = parametres.paiement.mobile.mtn.nomCompte || '';
-            if (num) num.value = parametres.paiement.mobile.mtn.numero    || '';
-        }
-    }
-
-    // Orange
-    const orangeActive = document.getElementById('orangeActive');
-    const orangeInputs = document.getElementById('orangeInputs');
-    if (orangeActive) {
-        orangeActive.addEventListener('change', async () => {
-            if (orangeInputs) orangeInputs.style.display = orangeActive.checked ? 'block' : 'none';
-            parametres.paiement.mobile.orange.actif = orangeActive.checked;
-            await sauvegarderParametres();
-            afficherNotification(orangeActive.checked ? '✅ Orange Money activé' : '❌ Orange Money désactivé', 'info');
-        });
-        if (parametres.paiement.mobile.orange) {
-            orangeActive.checked = parametres.paiement.mobile.orange.actif || false;
-            if (orangeActive.checked && orangeInputs) orangeInputs.style.display = 'block';
-            const nom = document.getElementById('orangeNomCompte');
-            const num = document.getElementById('orangeNumero');
-            if (nom) nom.value = parametres.paiement.mobile.orange.nomCompte || '';
-            if (num) num.value = parametres.paiement.mobile.orange.numero    || '';
-        }
-    }
-
-    // Bouton Confirmer Mobile Money
-    document.getElementById('confirmerMobileMoney')?.addEventListener('click', async () => {
-        const mtnOn    = document.getElementById('mtnActive')?.checked;
-        const orangeOn = document.getElementById('orangeActive')?.checked;
-
-        if (!mtnOn && !orangeOn) {
-            afficherNotification('⚠️ Veuillez activer au moins MTN Money ou Orange Money', 'warning');
-            return;
-        }
-
-        const erreurs = [];
-        const RE_TEL  = /^\+237[67]\d{8}$/;
-
-        if (mtnOn) {
-            const nom = document.getElementById('mtnNomCompte')?.value.trim();
-            const num = document.getElementById('mtnNumero')?.value.replace(/\s/g, '');
-            if (!nom) erreurs.push('Nom du compte MTN Money manquant');
-            if (!num) erreurs.push('Numéro MTN Money manquant');
-            else if (!RE_TEL.test(num)) erreurs.push('Format numéro MTN Money invalide (+237XXXXXXXXX)');
-            if (!erreurs.some(e => e.includes('MTN'))) {
-                parametres.paiement.mobile.mtn = { actif: true, nomCompte: nom, numero: num, confirme: true };
-            }
-        } else {
-            parametres.paiement.mobile.mtn = { ...parametres.paiement.mobile.mtn, actif: false };
-        }
-
-        if (orangeOn) {
-            const nom = document.getElementById('orangeNomCompte')?.value.trim();
-            const num = document.getElementById('orangeNumero')?.value.replace(/\s/g, '');
-            if (!nom) erreurs.push('Nom du compte Orange Money manquant');
-            if (!num) erreurs.push('Numéro Orange Money manquant');
-            else if (!RE_TEL.test(num)) erreurs.push('Format numéro Orange Money invalide (+237XXXXXXXXX)');
-            if (!erreurs.some(e => e.includes('Orange'))) {
-                parametres.paiement.mobile.orange = { actif: true, nomCompte: nom, numero: num, confirme: true };
-            }
-        } else {
-            parametres.paiement.mobile.orange = { ...parametres.paiement.mobile.orange, actif: false };
-        }
-
-        if (erreurs.length > 0) {
-            erreurs.forEach(err => afficherNotification(`❌ ${err}`, 'error'));
-            return;
-        }
-
-        parametres.paiement.mobile.confirme = true;
-        const ok = await sauvegarderParametres();
+        afficherIdentifiantActuel();
         afficherNotification(
-            ok ? '✅ Mobile Money configuré avec succès !' : '⚠️ Sauvegardé localement',
+            ok ? `✅ Identifiant "${slug}" défini avec succès` : '⚠️ Sauvegardé localement',
             ok ? 'success' : 'warning'
         );
     });
 }
 
-// ==================== ZONES DE LIVRAISON ====================
-function initialiserZonesLivraison() {
-    document.getElementById('ajouterZone')?.addEventListener('click', () => ajouterZoneLivraison());
+function initialiserPaiement() {
+    [
+        { toggleId: 'paymentCard',   detailId: 'cardDetails',   key: 'carte' },
+        { toggleId: 'paymentMobile', detailId: 'mobileDetails', key: 'mobile' },
+        { toggleId: 'paymentCash',   detailId: 'cashDetails',   key: 'cash' }
+    ].forEach(({ toggleId, detailId, key }) => {
+        const toggle  = document.getElementById(toggleId);
+        const details = document.getElementById(detailId);
+        if (!toggle) return;
+        toggle.addEventListener('change', () => {
+            if (details) details.style.display = toggle.checked ? 'block' : 'none';
+            parametres.paiement[key].actif = toggle.checked;
+        });
+    });
+}
 
-    if (parametres.livraison.zonesPersonnalisees?.length > 0) {
-        parametres.livraison.zonesPersonnalisees.forEach(zone => ajouterZoneLivraison(zone));
-        const empty = document.getElementById('emptyZonesMessage');
-        if (empty) empty.style.display = 'none';
+window.confirmerPaiement = async function(type) {
+    if (type === 'card') {
+        parametres.paiement.carte.cle       = document.getElementById('stripeKey')?.value || '';
+        parametres.paiement.carte.confirme  = true;
+    } else if (type === 'cash') {
+        parametres.paiement.cash.confirme   = true;
+    }
+    const ok = await sauvegarderParametres();
+    afficherNotification(
+        ok ? '✅ Paiement configuré et sauvegardé' : '⚠️ Sauvegardé localement',
+        ok ? 'success' : 'warning'
+    );
+};
+
+function initialiserZonesLivraison() {
+    document.getElementById('ajouterZone')?.addEventListener('click', () => {
+        ajouterZoneLivraison({ nom: '', frais: 0 });
+    });
+
+    if (parametres.livraison?.zonesPersonnalisees?.length) {
+        parametres.livraison.zonesPersonnalisees.forEach(ajouterZoneLivraison);
+        document.getElementById('emptyZonesMessage')?.style && (document.getElementById('emptyZonesMessage').style.display = 'none');
     }
 }
 
-function ajouterZoneLivraison(zoneExistante = null) {
+function ajouterZoneLivraison(zone = { nom: '', frais: 0 }) {
     const container = document.getElementById('zonesContainer');
+    const empty     = document.getElementById('emptyZonesMessage');
     if (!container) return;
+    if (empty) empty.style.display = 'none';
 
-    const zoneId   = Date.now();
+    const zoneId  = `zone-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const zoneCard = document.createElement('div');
-    zoneCard.className      = 'zone-card';
+    zoneCard.className  = 'zone-card';
     zoneCard.dataset.zoneId = zoneId;
-    zoneCard.style.cssText  =
-        'background:var(--bg-primary);padding:16px;border-radius:12px;margin-bottom:12px;opacity:0;transform:translateY(10px);transition:all 0.3s ease';
-
+    zoneCard.style.cssText  = 'opacity:0;transform:translateY(-8px);transition:all 0.3s ease;';
     zoneCard.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-            <span style="font-weight:600">📍 Zone ${container.children.length + 1}</span>
-            <button type="button" onclick="supprimerZone(${zoneId})"
-                style="padding:6px 12px;background:var(--danger-color);color:white;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem">
-                🗑️ Supprimer
-            </button>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div>
-                <label style="font-size:0.85rem;font-weight:500;margin-bottom:4px;display:block;">Nom du lieu</label>
-                <input type="text" class="form-input zone-nom" placeholder="Ex: Yaoundé" value="${zoneExistante?.nom || ''}" style="font-size:0.9rem">
-            </div>
-            <div>
-                <label style="font-size:0.85rem;font-weight:500;margin-bottom:4px;display:block;">Frais (FCFA)</label>
-                <input type="number" class="form-input zone-frais" placeholder="0" value="${zoneExistante?.frais || ''}" min="0" style="font-size:0.9rem">
-            </div>
-        </div>
-    `;
-
+        <div class="zone-card-header">
+            <input type="text"   class="form-input zone-nom"   placeholder="Nom de la zone" value="${zone.nom || ''}" style="flex:1;">
+            <input type="number" class="form-input zone-frais" placeholder="Frais (FCFA)"   value="${zone.frais || 0}" min="0" style="width:140px;">
+            <button type="button" class="btn-danger" onclick="supprimerZone('${zoneId}')" style="padding:10px 14px;font-size:1rem;">🗑️</button>
+        </div>`;
     container.appendChild(zoneCard);
-    document.getElementById('emptyZonesMessage')?.style.setProperty('display', 'none');
     setTimeout(() => { zoneCard.style.opacity = '1'; zoneCard.style.transform = 'translateY(0)'; }, 10);
     zoneCard.querySelectorAll('input').forEach(inp => inp.addEventListener('change', sauvegarderZonesLivraison));
 }
@@ -3330,588 +3047,326 @@ function sauvegarderZonesLivraison() {
     });
     parametres.livraison.zonesPersonnalisees = zones;
 }
-// ==================== PARTIE 4/5 : APPARENCE (UPLOAD MODERNE, PALETTE, TYPOGRAPHIE) ====================
 
-// ==================== ✅ FIX #3 : UPLOAD ZONES MODERNES ====================
-// Injecte les styles CSS pour les zones d'upload modernes et professionnelles.
-// Ces styles remplacent les styles inline basiques existants.
+function initialiserMobileMoney() {
+    ['mtn', 'orange'].forEach(op => {
+        const toggle = document.getElementById(`${op}Active`);
+        const inputs = document.getElementById(`${op}Inputs`);
+        if (!toggle || !inputs) return;
+
+        if (parametres.paiement?.mobile?.[op]?.actif) {
+            toggle.checked = true;
+            inputs.style.display = 'block';
+        }
+
+        toggle.addEventListener('change', async () => {
+            inputs.style.display = toggle.checked ? 'block' : 'none';
+            if (!parametres.paiement.mobile[op]) parametres.paiement.mobile[op] = {};
+            parametres.paiement.mobile[op].actif = toggle.checked;
+            await sauvegarderParametres();
+        });
+
+        const nomInput = document.getElementById(`${op}NomCompte`);
+        const numInput = document.getElementById(`${op}Numero`);
+
+        if (nomInput) {
+            nomInput.value = parametres.paiement?.mobile?.[op]?.nomCompte || '';
+            nomInput.addEventListener('change', async () => {
+                if (!parametres.paiement.mobile[op]) parametres.paiement.mobile[op] = {};
+                parametres.paiement.mobile[op].nomCompte = nomInput.value.trim();
+                await sauvegarderParametres();
+            });
+        }
+        if (numInput) {
+            numInput.value = parametres.paiement?.mobile?.[op]?.numero || '';
+            numInput.addEventListener('change', async () => {
+                if (!parametres.paiement.mobile[op]) parametres.paiement.mobile[op] = {};
+                parametres.paiement.mobile[op].numero = numInput.value.trim();
+                await sauvegarderParametres();
+            });
+        }
+    });
+
+    document.getElementById('confirmerMobileMoney')?.addEventListener('click', async () => {
+        parametres.paiement.mobile.confirme = true;
+        const ok = await sauvegarderParametres();
+        afficherNotification(
+            ok ? '✅ Mobile Money configuré' : '⚠️ Sauvegardé localement',
+            ok ? 'success' : 'warning'
+        );
+    });
+}
+// ==================== PARTIE 4/5 : APPARENCE ====================
+
 function injecterStylesUpload() {
     if (document.getElementById('styles-upload-moderne')) return;
     const style = document.createElement('style');
     style.id = 'styles-upload-moderne';
     style.textContent = `
-        /* ---- Zone d'upload moderne ---- */
         .upload-zone-moderne {
-            position: relative;
-            border: 2px dashed var(--border-color);
-            border-radius: 16px;
-            padding: 32px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            background: linear-gradient(135deg, #fafafa 0%, #f5f5f7 100%);
-            overflow: hidden;
-            min-height: 160px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            position: relative; border: 2px dashed var(--border-color);
+            border-radius: 16px; padding: 32px 20px; text-align: center;
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            background: linear-gradient(135deg,#fafafa 0%,#f5f5f7 100%);
+            overflow: hidden; min-height: 160px; display: flex;
+            flex-direction: column; align-items: center; justify-content: center; gap: 8px;
         }
         .upload-zone-moderne::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            border-radius: 14px;
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg,var(--primary-color),var(--secondary-color));
+            opacity: 0; transition: opacity 0.3s ease; border-radius: 14px;
         }
-        .upload-zone-moderne:hover {
-            border-color: var(--primary-color);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,122,255,0.12);
-        }
+        .upload-zone-moderne:hover { border-color:var(--primary-color); transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,122,255,.12); }
         .upload-zone-moderne:hover::before { opacity: 0.04; }
-        .upload-zone-moderne.drag-over {
-            border-color: var(--primary-color);
-            background: rgba(0,122,255,0.06);
-            transform: scale(1.02);
-            box-shadow: 0 12px 32px rgba(0,122,255,0.15);
-        }
-        .upload-zone-moderne.has-image {
-            border-color: var(--success-color);
-            background: rgba(52,199,89,0.04);
-        }
-        .upload-zone-icone {
-            font-size: 2.5rem;
-            line-height: 1;
-            transition: transform 0.3s ease;
-        }
-        .upload-zone-moderne:hover .upload-zone-icone { transform: scale(1.1) rotate(-5deg); }
-        .upload-zone-titre {
-            font-weight: 600;
-            font-size: 0.95rem;
-            color: var(--text-primary);
-            position: relative;
-        }
-        .upload-zone-sous-titre {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            position: relative;
-        }
+        .upload-zone-moderne.drag-over { border-color:var(--primary-color); background:rgba(0,122,255,.06); transform:scale(1.02); box-shadow:0 12px 32px rgba(0,122,255,.15); }
+        .upload-zone-moderne.has-image { border-color:var(--success-color); background:rgba(52,199,89,.04); }
+        .upload-zone-icone { font-size:2.5rem; line-height:1; transition:transform 0.3s ease; }
+        .upload-zone-moderne:hover .upload-zone-icone { transform:scale(1.1) rotate(-5deg); }
+        .upload-zone-titre  { font-weight:600; font-size:0.95rem; color:var(--text-primary); position:relative; }
+        .upload-zone-sous-titre { font-size:0.8rem; color:var(--text-secondary); position:relative; }
         .upload-zone-badge {
-            position: absolute;
-            top: 10px; right: 10px;
-            background: var(--success-color);
-            color: white;
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 3px 8px;
-            border-radius: 20px;
-            opacity: 0;
-            transform: scale(0.8);
-            transition: all 0.3s ease;
+            position:absolute; top:10px; right:10px;
+            background:var(--success-color); color:white;
+            font-size:0.7rem; font-weight:700; padding:3px 8px;
+            border-radius:20px; opacity:0; transform:scale(0.8); transition:all 0.3s ease;
         }
-        .upload-zone-moderne.has-image .upload-zone-badge { opacity: 1; transform: scale(1); }
-        /* Image preview dans la zone */
-        .upload-preview-wrapper {
-            position: relative;
-            display: inline-block;
-            width: 100%;
-        }
-        .upload-preview-img {
-            max-width: 100%;
-            max-height: 120px;
-            object-fit: contain;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
+        .upload-zone-moderne.has-image .upload-zone-badge { opacity:1; transform:scale(1); }
+        .upload-preview-wrapper { position:relative; display:inline-block; width:100%; }
+        .upload-preview-img { max-width:100%; max-height:120px; object-fit:contain; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,.1); transition:all 0.3s ease; }
         .upload-preview-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: white;
-            gap: 6px;
+            position:absolute; inset:0; background:rgba(0,0,0,.6); border-radius:10px;
+            display:flex; align-items:center; justify-content:center; opacity:0;
+            transition:opacity 0.3s ease; font-size:0.85rem; font-weight:600; color:white; gap:6px;
         }
-        .upload-zone-moderne:hover .upload-preview-overlay { opacity: 1; }
-        /* ---- Palette de couleurs améliorée ---- */
-        .palette-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 10px;
-            margin-top: 12px;
-        }
-        .palette-card {
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            cursor: pointer;
-            background: white;
-            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-            overflow: hidden;
-            position: relative;
-        }
-        .palette-card:hover {
-            border-color: var(--primary-color);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        }
-        .palette-card.active-palette {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0,122,255,0.2);
-        }
-        .palette-swatches {
-            display: flex;
-            height: 36px;
-            border-radius: 8px 8px 0 0;
-            overflow: hidden;
-        }
-        .palette-swatch { flex: 1; }
-        .palette-label {
-            padding: 6px 10px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            text-align: center;
-            letter-spacing: 0.3px;
-        }
-        .palette-checkmark {
-            position: absolute;
-            top: 5px; right: 5px;
-            width: 18px; height: 18px;
-            background: var(--primary-color);
-            border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 10px;
-        }
-        .palette-card.active-palette .palette-checkmark { display: flex; }
-        /* ---- Color picker stylé ---- */
-        .color-picker-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px;
-            background: var(--bg-primary);
-            border-radius: 12px;
-            border: 2px solid var(--border-color);
-            transition: border-color 0.2s;
-        }
-        .color-picker-group:focus-within {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
-        }
-        .color-picker-swatch {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            border: 3px solid white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            cursor: pointer;
-            overflow: hidden;
-            position: relative;
-            flex-shrink: 0;
-        }
-        .color-picker-swatch input[type="color"] {
-            position: absolute;
-            inset: -4px;
-            width: calc(100% + 8px);
-            height: calc(100% + 8px);
-            opacity: 0;
-            cursor: pointer;
-            border: none;
-            padding: 0;
-        }
-        .color-picker-hex {
-            flex: 1;
-            padding: 8px 12px;
-            border: none;
-            background: transparent;
-            font-family: 'Courier New', monospace;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            outline: none;
-            text-transform: uppercase;
-        }
+        .upload-zone-moderne:hover .upload-preview-overlay { opacity:1; }
+        .palette-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; margin-top:12px; }
+        .palette-card { border:2px solid var(--border-color); border-radius:12px; cursor:pointer; background:white; transition:all .25s cubic-bezier(0.34,1.56,0.64,1); overflow:hidden; position:relative; }
+        .palette-card:hover { border-color:var(--primary-color); transform:translateY(-3px); box-shadow:0 8px 20px rgba(0,0,0,.12); }
+        .palette-card.active-palette { border-color:var(--primary-color); box-shadow:0 0 0 3px rgba(0,122,255,.2); }
+        .palette-swatches { display:flex; height:36px; border-radius:8px 8px 0 0; overflow:hidden; }
+        .palette-swatch { flex:1; }
+        .palette-label { padding:6px 10px; font-size:0.72rem; font-weight:700; color:var(--text-secondary); text-align:center; letter-spacing:0.3px; }
+        .palette-checkmark { position:absolute; top:5px; right:5px; width:18px; height:18px; background:var(--primary-color); border-radius:50%; display:none; align-items:center; justify-content:center; color:white; font-size:10px; }
+        .palette-card.active-palette .palette-checkmark { display:flex; }
+        .font-card { border:2px solid var(--border-color); border-radius:12px; padding:16px; cursor:pointer; background:white; transition:all .25s ease; }
+        .font-card:hover { border-color:var(--primary-color); transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,.1); }
+        .font-card.active-font { border-color:var(--primary-color); box-shadow:0 0 0 3px rgba(0,122,255,.2); }
     `;
     document.head.appendChild(style);
 }
 
-// ==================== UPLOAD IMAGES MODERNE ====================
-function configurerZoneUploadModerne(containerId, inputId, type, icone, titre, sousTitre) {
-    const container = document.getElementById(containerId);
-    const input     = document.getElementById(inputId);
-    if (!container || !input) return;
-
-    // Réécrire le HTML de la zone avec le nouveau design
-    container.className = 'upload-zone-moderne';
-    container.innerHTML = `
-        <span class="upload-zone-badge">✓ Chargé</span>
-        <div id="${type}PreviewInner" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:8px;">
-            <div class="upload-zone-icone">${icone}</div>
-            <p class="upload-zone-titre">${titre}</p>
-            <p class="upload-zone-sous-titre">${sousTitre}</p>
-        </div>
-    `;
-
-    // Clic → ouvrir le sélecteur de fichier
-    container.addEventListener('click', () => input.click());
-
-    // Drag & Drop
-    container.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        container.classList.add('drag-over');
-    });
-    container.addEventListener('dragleave', () => container.classList.remove('drag-over'));
-    container.addEventListener('drop', async (e) => {
-        e.preventDefault();
-        container.classList.remove('drag-over');
-        const file = e.dataTransfer.files[0];
-        if (file) await traiterImageUpload(file, type, containerId);
-    });
-
-    // Sélection via input
-    input.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (file) await traiterImageUpload(file, type, containerId);
-        e.target.value = ''; // Reset pour permettre re-upload du même fichier
-    });
-}
-
-// ==================== TRAITEMENT UPLOAD (✅ FIX #1 intégré) ====================
 async function traiterImageUpload(file, type, containerId) {
+    if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
-        afficherNotification('❌ Fichier trop volumineux (max 2MB)', 'error'); return;
+        afficherNotification('❌ Fichier trop lourd (max 2MB)', 'error'); return;
     }
     if (!file.type.startsWith('image/')) {
-        afficherNotification('❌ Le fichier doit être une image', 'error'); return;
+        afficherNotification('❌ Fichier non valide (image uniquement)', 'error'); return;
     }
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const src = e.target.result;
+        parametres.apparence[type] = src;
 
-    // Afficher un spinner de chargement
-    const container = document.getElementById(containerId);
-    if (container) {
-        const inner = container.querySelector(`#${type}PreviewInner`);
-        if (inner) inner.innerHTML = `<div style="font-size:2rem;animation:spin 0.8s linear infinite">⏳</div><p class="upload-zone-sous-titre">Chargement...</p>`;
-    }
-
-    try {
-        const b64 = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload  = (e) => resolve(e.target.result);
-            reader.onerror = () => reject(new Error('Lecture échouée'));
-            reader.readAsDataURL(file);
-        });
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.classList.add('has-image');
+            const inner = container.querySelector(`#${type}PreviewInner`);
+            if (inner) inner.innerHTML = `
+                <div class="upload-preview-wrapper">
+                    <img class="upload-preview-img" src="${src}" alt="${type}">
+                    <div class="upload-preview-overlay">✏️ Changer</div>
+                </div>`;
+        }
 
         if (type === 'logo') {
-            parametres.apparence.logo = b64;
-            _afficherPreviewUpload(containerId, type, b64, 'max-width:200px;max-height:100px;');
-            afficherNotification('✅ Logo chargé', 'success');
+            // Mettre à jour le logo dans le header
+            const logoImg = document.querySelector('.logo-image');
+            if (logoImg) {
+                logoImg.style.background = 'none';
+                logoImg.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" alt="Logo">`;
+            }
+        }
 
-        } else if (type === 'favicon') {
-            parametres.apparence.favicon = b64;
-            _afficherPreviewUpload(containerId, type, b64, 'width:64px;height:64px;image-rendering:pixelated;');
-
-            // ✅ FIX #1 : Appliquer immédiatement le favicon dans l'onglet
-            // Dès l'upload, l'onglet du navigateur affiche la nouvelle icône.
-            // Ainsi, quand le visiteur partage le lien, l'icône est déjà active.
-            _appliquerFaviconOnglet(b64);
-            afficherNotification('✅ Favicon chargé — onglet mis à jour !', 'success');
+        if (type === 'favicon') {
+            // ✅ CORRECTION FAVICON :
+            // On NE modifie PAS le favicon de parametres.html.
+            // On sauvegarde simplement dans parametres.apparence.favicon → localStorage via sauvegarderParametres().
+            // boutique.html lira localStorage et appliquera le favicon dans son propre onglet.
+            afficherNotification('🔖 Favicon chargé — sera appliqué sur la boutique après sauvegarde', 'info');
         }
 
         await sauvegarderParametres();
-
-    } catch (e) {
-        console.error('Erreur upload:', e);
-        afficherNotification('❌ Erreur lors du chargement de l\'image', 'error');
-        // Remettre l'état vide
-        const inner = container?.querySelector(`#${type}PreviewInner`);
-        if (inner) inner.innerHTML = `<div class="upload-zone-icone">${type === 'logo' ? '🖼️' : '🔖'}</div>
-            <p class="upload-zone-titre">Cliquez pour charger</p>`;
-    }
+        afficherNotification(
+            type === 'logo' ? '✅ Logo mis à jour' : '✅ Favicon sauvegardé pour la boutique',
+            'success'
+        );
+    };
+    reader.readAsDataURL(file);
 }
 
-function _afficherPreviewUpload(containerId, type, b64, imgStyle) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    const inner = container.querySelector(`#${type}PreviewInner`);
-    if (inner) {
-        inner.innerHTML = `
+function creerZoneUploadModerne(containerId, inputId, type, icone, titre) {
+    const zone = document.getElementById(containerId);
+    if (!zone) return;
+
+    zone.className = 'upload-zone-moderne';
+    zone.innerHTML = `
+        <div class="upload-zone-badge">✓ Chargé</div>
+        <div id="${type}PreviewInner">
+            <div class="upload-zone-icone">${icone}</div>
+            <p class="upload-zone-titre">${titre}</p>
+            <p class="upload-zone-sous-titre">PNG, JPG, SVG — max 2MB</p>
+        </div>`;
+
+    zone.addEventListener('click', () => document.getElementById(inputId)?.click());
+
+    zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', ()  => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file) traiterImageUpload(file, type, containerId);
+    });
+
+    if (parametres.apparence?.[type]) {
+        zone.classList.add('has-image');
+        const inner = zone.querySelector(`#${type}PreviewInner`);
+        if (inner) inner.innerHTML = `
             <div class="upload-preview-wrapper">
-                <img src="${b64}" alt="${type}" class="upload-preview-img" style="${imgStyle}">
-                <div class="upload-preview-overlay">🔄 Changer l'image</div>
+                <img class="upload-preview-img" src="${parametres.apparence[type]}" alt="${type}">
+                <div class="upload-preview-overlay">✏️ Changer</div>
             </div>`;
     }
-    container.classList.add('has-image');
 }
 
-// ==================== ✅ FIX #4 : PALETTE DE COULEURS AMÉLIORÉE ====================
-// Palette avec plus de presets professionnels, design en cartes avec checkmark actif.
-const PALETTES_PREDEFINIES = [
-    { nom: 'Orange Feu',    primaire: '#FF6B00', secondaire: '#1A1A1A' },
-    { nom: 'Bleu Apple',    primaire: '#007AFF', secondaire: '#1D1D1F' },
-    { nom: 'Émeraude',      primaire: '#34C759', secondaire: '#2C3E50' },
-    { nom: 'Rouge Vif',     primaire: '#FF3B30', secondaire: '#1A1A1A' },
-    { nom: 'Violet Royal',  primaire: '#9C27B0', secondaire: '#212121' },
-    { nom: 'Or & Nuit',     primaire: '#FF9500', secondaire: '#2C2C2E' },
-    { nom: 'Rose Mode',     primaire: '#FF2D78', secondaire: '#1A1A1A' },
-    { nom: 'Cyan Tech',     primaire: '#00BCD4', secondaire: '#263238' },
-    { nom: 'Indigo',        primaire: '#3F51B5', secondaire: '#212121' },
-    { nom: 'Terre Brûlée',  primaire: '#8B4513', secondaire: '#2C1810' },
-    { nom: 'Minimaliste',   primaire: '#000000', secondaire: '#555555' },
-    { nom: 'Luxe Champagne',primaire: '#C5A028', secondaire: '#1A1A1A' },
+const PALETTES = [
+    { nom:'Soleil Africain',  primaire:'#FF6B00', secondaire:'#1A1A1A' },
+    { nom:'Océan Bleu',       primaire:'#007AFF', secondaire:'#1D1D1F' },
+    { nom:'Forêt Verte',      primaire:'#34C759', secondaire:'#1A1A1A' },
+    { nom:'Nuit Violette',    primaire:'#5856D6', secondaire:'#1C1C1E' },
+    { nom:'Rose Élégant',     primaire:'#FF2D55', secondaire:'#1A1A1A' },
+    { nom:'Terre Caramel',    primaire:'#AC8961', secondaire:'#2C1810' },
+    { nom:'Teal Moderne',     primaire:'#32ADE6', secondaire:'#1D1D1F' },
+    { nom:'Or Royal',         primaire:'#FFD700', secondaire:'#1A1A1A' },
 ];
 
 function creerPaletteUI() {
-    const container = document.getElementById('palette-presets-container');
+    const container = document.getElementById('paletteContainer');
     if (!container) return;
-
-    container.className = 'palette-grid';
     container.innerHTML = '';
+    container.className = 'palette-grid';
 
-    PALETTES_PREDEFINIES.forEach(({ nom, primaire, secondaire }) => {
+    PALETTES.forEach(palette => {
         const card = document.createElement('div');
         card.className = 'palette-card';
-        card.dataset.primaire   = primaire;
-        card.dataset.secondaire = secondaire;
+        const isActive = parametres.apparence?.couleurPrimaire === palette.primaire;
+        if (isActive) card.classList.add('active-palette');
+
         card.innerHTML = `
-            <div class="palette-swatches">
-                <div class="palette-swatch" style="background:${primaire};"></div>
-                <div class="palette-swatch" style="background:${secondaire};"></div>
-            </div>
-            <div class="palette-label">${nom}</div>
             <div class="palette-checkmark">✓</div>
-        `;
+            <div class="palette-swatches">
+                <div class="palette-swatch" style="background:${palette.primaire}"></div>
+                <div class="palette-swatch" style="background:${palette.secondaire}"></div>
+            </div>
+            <div class="palette-label">${palette.nom}</div>`;
+
         card.addEventListener('click', () => {
-            appliquerPalette(primaire, secondaire);
-            _marquerPaletteActive(card);
+            document.querySelectorAll('.palette-card').forEach(c => c.classList.remove('active-palette'));
+            card.classList.add('active-palette');
+            parametres.apparence.couleurPrimaire   = palette.primaire;
+            parametres.apparence.couleurSecondaire = palette.secondaire;
+            document.documentElement.style.setProperty('--primary-color',   palette.primaire);
+            document.documentElement.style.setProperty('--secondary-color', palette.secondaire);
+            afficherNotification(`🎨 Palette "${palette.nom}" appliquée`, 'success');
         });
+
         container.appendChild(card);
     });
-
-    // Marquer la palette active au chargement
-    _marquerPaletteActiveParValeur(
-        parametres.apparence?.couleurPrimaire   || '#FF6B00',
-        parametres.apparence?.couleurSecondaire || '#1A1A1A'
-    );
 }
 
-function _marquerPaletteActive(cardActif) {
-    document.querySelectorAll('.palette-card').forEach(c => c.classList.remove('active-palette'));
-    cardActif?.classList.add('active-palette');
-}
-
-function _marquerPaletteActiveParValeur(cp, cs) {
-    document.querySelectorAll('.palette-card').forEach(card => {
-        const match = card.dataset.primaire?.toUpperCase() === cp.toUpperCase() &&
-                      card.dataset.secondaire?.toUpperCase() === cs.toUpperCase();
-        card.classList.toggle('active-palette', match);
-    });
-}
-
-window.appliquerPalette = function(couleurPrimaire, couleurSecondaire) {
-    const setColor = (inputId, swatch, hexId, valeur, key) => {
-        const input  = document.getElementById(inputId);
-        const hex    = document.getElementById(hexId);
-        // Chercher le swatch dans le nouveau design ou l'ancien
-        const swatchEl = document.getElementById(swatch) ||
-                         document.querySelector(`#${inputId}`)?.closest('.color-picker-group')?.querySelector('.color-picker-swatch > div');
-        if (input && input.type === 'color')  input.value = valeur;
-        if (hex)    hex.value = valeur.toUpperCase();
-        if (swatchEl) swatchEl.style.background = valeur;
-        // Ancien design fallback
-        const preview = document.getElementById(`${inputId}Preview`) ||
-                        document.getElementById(swatch === 'primaryColorPreview' ? 'primaryColorPreview' : 'secondaryColorPreview');
-        if (preview)  preview.style.background = valeur;
-        parametres.apparence[key] = valeur;
-        document.documentElement.style.setProperty(
-            `--${key === 'couleurPrimaire' ? 'primary' : 'secondary'}-color`, valeur
-        );
-    };
-    setColor('primaryColor',   'primaryColorPreview',   'primaryColorHex',   couleurPrimaire,   'couleurPrimaire');
-    setColor('secondaryColor', 'secondaryColorPreview', 'secondaryColorHex', couleurSecondaire, 'couleurSecondaire');
-    _marquerPaletteActiveParValeur(couleurPrimaire, couleurSecondaire);
-    afficherNotification('🎨 Palette appliquée !', 'success');
-};
-
-// ==================== TYPOGRAPHIE ====================
-const POLICES = [
-    'Inter','Poppins','Nunito','DM Sans','Plus Jakarta Sans','Outfit',
-    'Montserrat','Raleway','Josefin Sans','Lato','Open Sans','Roboto',
-    'Playfair Display','Cormorant Garamond','Libre Baskerville','DM Serif Display',
-    'Pacifico','Righteous','Bebas Neue','Abril Fatface'
-];
-
-function prechargerPolices() {
-    POLICES.forEach(p => {
-        const id = 'gf-' + p.replace(/\s/g, '-');
-        if (document.getElementById(id)) return;
-        const link = document.createElement('link');
-        link.id   = id;
-        link.rel  = 'stylesheet';
-        link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(p)}:wght@300;400;500;600;700;800&display=swap`;
-        document.head.appendChild(link);
-    });
-}
-
-function appliquerPolice(police) {
-    parametres.apparence.police = police;
-    const ids = [
-        'fontPreviewTitle','fontPreviewSubtitle','fontPreviewText',
-        'fontPreviewBadge','fontPreviewPrice','fontPreviewName'
-    ];
-    ids.forEach(id => {
+function appliquerPolice(fontName) {
+    if (!fontName) return;
+    const safeFont = fontName.replace(/[^a-zA-Z0-9\s+]/g, '');
+    const link = document.createElement('link');
+    link.rel  = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?family=${safeFont.replace(/ /g,'+')}:wght@300;400;500;600;700&display=swap`;
+    document.head.appendChild(link);
+    document.documentElement.style.setProperty('--font-family', `'${safeFont}', sans-serif`);
+    document.body.style.fontFamily = `'${safeFont}', sans-serif`;
+    parametres.apparence.police = fontName;
+    ['fontPreviewTitle','fontPreviewSubtitle','fontPreviewText','fontPreviewBadge','fontPreviewPrice'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.style.fontFamily = `'${police}', sans-serif`;
+        if (el) el.style.fontFamily = `'${safeFont}', sans-serif`;
     });
     const nameEl = document.getElementById('fontPreviewName');
-    if (nameEl) nameEl.textContent = `Police actuelle : ${police}`;
+    if (nameEl) nameEl.textContent = `Police actuelle : ${fontName}`;
 }
 
-function genererCartesPolice(policeActive) {
+function genererCartesPolice(fontActuelle) {
     const container = document.getElementById('fontPreviewCards');
     if (!container) return;
+    const polices = ['Inter','Poppins','Roboto','Montserrat','Playfair Display','Raleway','Nunito','Lato'];
     container.innerHTML = '';
-
-    const exemples = [
-        { police: 'Inter',              texte: 'Aa — The quick brown fox',  style: 'normal' },
-        { police: 'Playfair Display',   texte: 'Aa — La Boutique Élégante', style: 'italic' },
-        { police: 'Pacifico',           texte: 'Aa — Bienvenue chez nous',  style: 'normal' },
-        { police: 'Bebas Neue',         texte: 'AA — COLLECTION 2025',      style: 'normal' },
-        { police: 'Poppins',            texte: 'Aa — Style & Élégance',     style: 'normal' },
-        { police: 'Cormorant Garamond', texte: 'Aa — Haute Couture',        style: 'italic' },
-    ];
-
-    exemples.forEach(({ police, texte, style }) => {
-        const isActive = policeActive === police;
+    polices.forEach(font => {
         const card = document.createElement('div');
-        card.style.cssText = `
-            padding:14px 16px;border-radius:12px;cursor:pointer;
-            transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);
-            border:2px solid ${isActive ? 'var(--primary-color)' : 'var(--border-color)'};
-            background:${isActive ? 'rgba(0,122,255,0.05)' : '#fff'};
-            ${isActive ? 'box-shadow:0 4px 12px rgba(0,122,255,0.12);' : ''}
-        `;
+        card.className = 'font-card';
+        if (font === fontActuelle) card.classList.add('active-font');
         card.innerHTML = `
-            <p style="font-family:'${police}',serif;font-size:1rem;font-style:${style};margin-bottom:4px;color:var(--text-primary)">${texte}</p>
-            <small style="font-size:0.75rem;color:var(--text-secondary);font-family:'Poppins',sans-serif">${police}</small>
-            ${isActive ? '<div style="margin-top:4px;width:20px;height:3px;background:var(--primary-color);border-radius:2px;"></div>' : ''}
-        `;
+            <p style="font-family:'${font}',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:4px;">${font}</p>
+            <p style="font-family:'${font}',sans-serif;font-size:0.8rem;color:var(--text-secondary);">Aa Bb Cc 123</p>`;
         card.addEventListener('click', () => {
-            const sel = document.getElementById('fontFamily');
-            if (sel) sel.value = police;
-            appliquerPolice(police);
-            genererCartesPolice(police);
+            document.querySelectorAll('.font-card').forEach(c => c.classList.remove('active-font'));
+            card.classList.add('active-font');
+            appliquerPolice(font);
+            const sel = document.getElementById('fontSelect');
+            if (sel) sel.value = font;
         });
         container.appendChild(card);
     });
 }
 
-// ==================== APPARENCE : INIT PRINCIPALE ====================
 function initialiserApparence() {
     injecterStylesUpload();
 
-    // Couleur Primaire
-    const primaryInput   = document.getElementById('primaryColor');
-    const primaryHex     = document.getElementById('primaryColorHex');
-    const primaryPreview = document.getElementById('primaryColorPreview');
+    creerZoneUploadModerne('logoUploadZone',    'logoUpload',    'logo',    '🖼️', 'Glissez-déposez ou cliquez');
+    creerZoneUploadModerne('faviconUploadZone', 'faviconUpload', 'favicon', '🔖', 'Glissez-déposez ou cliquez');
 
-    primaryInput?.addEventListener('input', (e) => {
-        const c = e.target.value;
-        parametres.apparence.couleurPrimaire = c;
-        if (primaryPreview) primaryPreview.style.background = c;
-        if (primaryHex)     primaryHex.value = c.toUpperCase();
-        document.documentElement.style.setProperty('--primary-color', c);
-        _marquerPaletteActiveParValeur(c, parametres.apparence.couleurSecondaire || '#1A1A1A');
-    });
-
-    // Couleur Secondaire
-    const secondaryInput   = document.getElementById('secondaryColor');
-    const secondaryHex     = document.getElementById('secondaryColorHex');
-    const secondaryPreview = document.getElementById('secondaryColorPreview');
-
-    secondaryInput?.addEventListener('input', (e) => {
-        const c = e.target.value;
-        parametres.apparence.couleurSecondaire = c;
-        if (secondaryPreview) secondaryPreview.style.background = c;
-        if (secondaryHex)     secondaryHex.value = c.toUpperCase();
-        document.documentElement.style.setProperty('--secondary-color', c);
-        _marquerPaletteActiveParValeur(parametres.apparence.couleurPrimaire || '#FF6B00', c);
-    });
-
-    // Hex input (permettre la saisie manuelle)
-    primaryHex?.addEventListener('change', (e) => {
-        const val = e.target.value.trim();
-        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-            if (primaryInput)   primaryInput.value = val;
-            if (primaryPreview) primaryPreview.style.background = val;
-            parametres.apparence.couleurPrimaire = val;
-            document.documentElement.style.setProperty('--primary-color', val);
-        }
-    });
-    secondaryHex?.addEventListener('change', (e) => {
-        const val = e.target.value.trim();
-        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-            if (secondaryInput)   secondaryInput.value = val;
-            if (secondaryPreview) secondaryPreview.style.background = val;
-            parametres.apparence.couleurSecondaire = val;
-            document.documentElement.style.setProperty('--secondary-color', val);
-        }
-    });
-
-    // Palette UI
     creerPaletteUI();
 
-    // Polices
-    prechargerPolices();
-    const fontSelect = document.getElementById('fontFamily');
+    const fontSelect = document.getElementById('fontSelect');
     if (fontSelect) {
-        const saved = parametres.apparence?.police || 'Inter';
-        fontSelect.value = saved;
-        appliquerPolice(saved);
-        genererCartesPolice(saved);
+        fontSelect.value = parametres.apparence?.police || 'Inter';
+        appliquerPolice(fontSelect.value);
+        genererCartesPolice(fontSelect.value);
         fontSelect.addEventListener('change', (e) => {
             appliquerPolice(e.target.value);
             genererCartesPolice(e.target.value);
         });
     }
 
-    // ✅ Configurer les zones d'upload modernes
-    // Remplace les zones upload basiques par le nouveau design
-    configurerZoneUploadModerne(
-        'logoUploadZone', 'logoUpload', 'logo',
-        '🖼️', 'Glissez-déposez ou cliquez', 'PNG, JPG, SVG — max 2MB — 200×80px recommandé'
-    );
-    configurerZoneUploadModerne(
-        'faviconUploadZone', 'faviconUpload', 'favicon',
-        '🔖', 'Glissez-déposez ou cliquez', 'PNG, ICO — max 2MB — 32×32px recommandé'
-    );
+    ['primaryColor','secondaryColor'].forEach(id => {
+        document.getElementById(id)?.addEventListener('input', (e) => {
+            const key = id === 'primaryColor' ? 'couleurPrimaire' : 'couleurSecondaire';
+            parametres.apparence[key] = e.target.value;
+            document.documentElement.style.setProperty(
+                id === 'primaryColor' ? '--primary-color' : '--secondary-color',
+                e.target.value
+            );
+        });
+    });
 
-    // Bouton Sauvegarder
     const saveBtn = document.getElementById('saveAppearance');
     if (saveBtn) {
         saveBtn.addEventListener('click', async () => {
             const originalHTML = saveBtn.innerHTML;
             saveBtn.disabled  = true;
-            saveBtn.innerHTML = `
-                <span style="display:inline-flex;align-items:center;gap:8px">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                         style="animation:spin 0.8s linear infinite;flex-shrink:0">
-                        <path d="M12 2a10 10 0 1 0 10 10" stroke-linecap="round"/>
-                    </svg>
-                    Sauvegarde en cours...
-                </span>`;
+            saveBtn.innerHTML = `<span style="display:inline-flex;align-items:center;gap:8px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                     style="animation:spin 0.8s linear infinite;flex-shrink:0">
+                    <path d="M12 2a10 10 0 1 0 10 10" stroke-linecap="round"/>
+                </svg>
+                Sauvegarde en cours...</span>`;
 
             const ok = await sauvegarderParametres();
 
@@ -3937,7 +3392,6 @@ function initialiserApparence() {
         });
     }
 
-    // Bouton Réinitialiser
     document.getElementById('resetAppearance')?.addEventListener('click', async () => {
         if (!confirm('Voulez-vous vraiment réinitialiser l\'apparence par défaut ?')) return;
         parametres.apparence = {
@@ -3952,15 +3406,12 @@ function initialiserApparence() {
             appliquerPolice('Inter');
             genererCartesPolice('Inter');
         }
-        // Remettre les zones d'upload vides
         _resetUploadZone('logoUploadZone',    'logo',    '🖼️', 'Glissez-déposez ou cliquez');
         _resetUploadZone('faviconUploadZone', 'favicon', '🔖', 'Glissez-déposez ou cliquez');
-
         await sauvegarderParametres();
         afficherNotification('✅ Apparence réinitialisée', 'success');
     });
 
-    // Upload listeners de secours (si les zones n'existent pas encore au DOM)
     document.getElementById('logoUpload')?.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (file) await traiterImageUpload(file, 'logo', 'logoUploadZone');
@@ -3984,7 +3435,6 @@ function _resetUploadZone(containerId, type, icone, titre) {
 }
 // ==================== PARTIE 5/5 : PREVIEW BOUTIQUE & INITIALISATION ====================
 
-// ==================== PREVIEW MODAL ====================
 function initialiserPreviewBoutique() {
     const previewBtn    = document.getElementById('previewEcommerce');
     const previewModal  = document.getElementById('previewModal');
@@ -4038,8 +3488,6 @@ function initialiserPreviewBoutique() {
     });
 }
 
-// ==================== ANIMATION CSS GLOBALE ====================
-// Injecte les keyframes nécessaires si non présents (slideIn, fadeOut, spin, fadeOut)
 function injecterAnimationsGlobales() {
     if (document.getElementById('global-animations')) return;
     const style = document.createElement('style');
@@ -4070,22 +3518,10 @@ function injecterAnimationsGlobales() {
             70%  { transform: scale(1.05); }
             100% { opacity: 1; transform: scale(1); }
         }
-
-        /* ---- Amélioration scroll mobile ---- */
         @media (max-width: 768px) {
-            .settings-section {
-                animation: fadeIn 0.35s ease;
-            }
-            /* Header en mode mobile : réduire padding quand bouton retour visible */
-            .header-container:has(#btn-retour-mobile.visible) .brand-name {
-                font-size: 1rem;
-            }
+            .settings-section { animation: fadeIn 0.35s ease; }
         }
-
-        /* ---- Toast notification amélioré ---- */
-        #notification-container {
-            max-width: 360px;
-        }
+        #notification-container { max-width: 360px; }
     `;
     document.head.appendChild(style);
 }
@@ -4107,14 +3543,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     initialiserZonesLivraison();
     initialiserMobileMoney();
     initialiserMenuMobileAndroid();
-    initialiserBoutonRetourMobile();   // ✅ FIX #2 : Bouton retour mobile
+    // ✅ initialiserBoutonRetourMobile() — SUPPRIMÉ
     initialiserPreviewBoutique();
 
-    // Afficher la section général par défaut
     const first = document.getElementById('general');
     if (first) first.style.display = 'block';
 
-    // Sync header logo avec le logo de la boutique sauvegardé
     if (parametres.apparence?.logo) {
         const logoImg = document.querySelector('.logo-image');
         if (logoImg) {
@@ -4124,9 +3558,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     console.log('%c✅ Paramètres prêts', 'color:#34C759;font-size:14px;font-weight:bold');
-    console.log('%c📋 Modules chargés : Auth, Navigation, Formulaires, Paiement, Apparence, Mobile', 'color:#8E8E93;font-size:11px');
 });
- </script>
+</script>
    <!-- ==================== MODAL PREVIEW BOUTIQUE ==================== -->
 <div id="previewModal">
     <div class="preview-modal-box">
