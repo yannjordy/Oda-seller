@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OdaMarket - Simulation Connexion</title>
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(90deg, #e2e2e2, #c9d6ff);
+    }
+
+    /* ── Conteneur principal ── */
+    .container {
+      position: relative;
+      width: 850px;
+      height: 520px;
+      background: #fff;
+      border-radius: 30px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, .2);
+      overflow: hidden;
+      margin: 20px;
+    }
+
+    /* ── Boîtes de formulaire ── */
+    .form-box {
+      position: absolute;
+      right: 0;
+      width: 50%;
+      height: 100%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      color: #333;
+      text-align: center;
+      padding: 40px;
+      z-index: 1;
+      transition: .6s ease-in-out 1.2s, visibility 0s 1s;
+    }
+
+    .container.active .form-box { right: 50%; }
+
+    .form-box.register { visibility: hidden; }
+    .container.active .form-box.register { visibility: visible; }
+
+    form { width: 100%; }
+
+    .container h1 { font-size: 30px; margin: -10px 0; }
+
+    /* ── Champs input ── */
+    .input-box { position: relative; margin: 30px 0; }
+
+    .input-box input {
+      width: 100%;
+      padding: 13px 50px 13px 20px;
+      background: #eee;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .input-box input::placeholder { color: #888; font-weight: 400; }
+
+    .input-box i {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+      color: #888;
+    }
+
+    .input-box .toggle-password {
+      right: 50px;
+      cursor: pointer;
+    }
+
+    .forgot-link { margin: -15px 0 15px; }
+    .forgot-link a { font-size: 14.5px; color: #333; text-decoration: none; cursor: pointer; }
+    .forgot-link a:hover { color: #7494ec; }
+
+    .btn {
+      width: 100%;
+      height: 46px;
+      background: #7494ec;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #fff;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity .2s;
+    }
+    .btn:hover { opacity: .9; }
+    .btn:disabled { opacity: .6; cursor: not-allowed; }
+
+    .terms-link {
+      font-size: 12px;
+      color: #888;
+      margin: 10px 0 0;
+    }
+    .terms-link a {
+      color: #7494ec;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .terms-link a:hover { text-decoration: underline; }
+
+    .container p { font-size: 14.5px; margin: 15px 0; }
+
+    /* ── Bouton Google ── */
+    .social-icons { display: flex; justify-content: center; }
+
+    .google-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      color: #333;
+      text-decoration: none;
+      background: #fff;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      gap: 8px;
+    }
+    .google-btn:hover { border-color: #7494ec; background: #f8f9ff; }
+    .google-btn i { font-size: 24px; }
+
+    /* ── Toggle box (panneau animé) ── */
+    .toggle-box {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .toggle-box::before {
+      content: '';
+      position: absolute;
+      left: -250%;
+      width: 300%;
+      height: 100%;
+      background: #7494ec;
+      border-radius: 150px;
+      z-index: 2;
+      transition: 1.8s ease-in-out;
+    }
+
+    .container.active .toggle-box::before { left: 50%; }
+
+    .toggle-panel {
+      position: absolute;
+      width: 50%;
+      height: 100%;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .toggle-panel.toggle-left {
+      left: 0;
+      transition-delay: 1.2s;
+    }
+    .container.active .toggle-panel.toggle-left {
+      left: -50%;
+      transition-delay: .6s;
+    }
+
+    .toggle-panel.toggle-right {
+      right: -50%;
+      transition-delay: .6s;
+    }
+    .container.active .toggle-panel.toggle-right {
+      right: 0;
+      transition-delay: 1.2s;
+    }
+
+    .toggle-panel p { margin-bottom: 20px; }
+
+    .toggle-panel .btn {
+      width: 160px;
+      height: 46px;
+      background: transparent;
+      border: 2px solid #fff;
+      box-shadow: none;
+    }
+    .toggle-panel .btn:hover { background: rgba(255,255,255,.15); }
+
+    /* ── Modal général ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeIn .2s ease;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes popIn { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 20px;
+      padding: 32px;
+      width: 360px;
+      max-width: 90vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: popIn .25s ease;
+    }
+
+    .modal-box h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .modal-success {
+      color: #34C759;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    .modal-error {
+      color: #FF3B30;
+      font-size: 0.85rem;
+      margin: -10px 0 10px;
+      text-align: left;
+    }
+
+    .modal-box .btn { margin-top: 10px; }
+    .modal-box .btn-outline {
+      background: transparent;
+      border: 2px solid #7494ec;
+      color: #7494ec;
+    }
+    .modal-box .btn-outline:hover { background: #f0f4ff; }
+
+    /* ── Modal Terms ── */
+    @keyframes terms-fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes terms-slideUp { from { opacity: 0; transform: translateY(40px) scale(.97); } to { opacity: 1; transform: none; } }
+
+    .terms-overlay {
+      position: fixed; inset: 0; z-index: 100000;
+      background: rgba(0,0,0,.6); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px; animation: terms-fadeIn .3s ease;
+    }
+    @media (max-width: 640px) {
+      .terms-overlay { padding: 0; align-items: flex-end; }
+    }
+
+    .terms-card {
+      background: white; border-radius: 20px;
+      width: 100%; max-width: 560px; max-height: 90vh;
+      display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 32px 80px rgba(0,0,0,.35);
+      animation: terms-slideUp .4s cubic-bezier(.25,.46,.45,.94);
+    }
+    @media (max-width: 640px) {
+      .terms-card { max-height: 95vh; border-radius: 18px 18px 0 0; }
+    }
+
+    /* Header */
+    .terms-header {
+      padding: 24px 24px 16px; border-bottom: 1px solid #F0F0F2;
+      flex-shrink: 0; background: linear-gradient(135deg, #4F46E5, #7C3AED);
+      color: white;
+    }
+    .terms-header h2 {
+      font-size: 1.2rem; font-weight: 800; margin: 0 0 4px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .terms-header p {
+      font-size: .82rem; opacity: .85; margin: 0;
+    }
+
+    /* Progress bar */
+    .terms-progress {
+      height: 3px; background: rgba(255,255,255,.2); margin-top: 12px; border-radius: 2px; overflow: hidden;
+    }
+    .terms-progress-fill {
+      height: 100%; background: white; border-radius: 2px;
+      transition: width .4s ease;
+    }
+
+    /* Nav tabs */
+    .terms-nav {
+      display: flex; gap: 0; overflow-x: auto; padding: 0 24px;
+      border-bottom: 1px solid #F0F0F2; background: #FAFAFA;
+      flex-shrink: 0;
+    }
+    .terms-nav::-webkit-scrollbar { display: none; }
+    .terms-tab {
+      padding: 10px 14px; font-size: .72rem; font-weight: 600;
+      white-space: nowrap; border: none; background: none;
+      color: #6E6E73; cursor: pointer; transition: .2s;
+      border-bottom: 2px solid transparent;
+    }
+    .terms-tab:hover { color: #4F46E5; }
+    .terms-tab.active {
+      color: #4F46E5; border-bottom-color: #4F46E5;
+    }
+
+    /* Content */
+    .terms-content {
+      flex: 1; overflow-y: auto; padding: 24px;
+    }
+    .terms-content::-webkit-scrollbar { width: 4px; }
+    .terms-content::-webkit-scrollbar-thumb { background: #D2D2D7; border-radius: 2px; }
+
+    .terms-section { animation: terms-fadeIn .3s ease; }
+    .terms-section-title {
+      font-size: 1rem; font-weight: 700; color: #1D1D1F;
+      margin: 0 0 12px;
+    }
+    .terms-section-text {
+      font-size: .9rem; color: #4B5563; line-height: 1.75;
+    }
+
+    /* Footer */
+    .terms-footer {
+      padding: 16px 24px; border-top: 1px solid #F0F0F2;
+      background: #FAFAFA; flex-shrink: 0;
+    }
+
+    .terms-checkbox {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 16px; background: white; border-radius: 12px;
+      border: 2px solid #E5E7EB; margin-bottom: 14px;
+      cursor: pointer; transition: .2s;
+    }
+    .terms-checkbox:hover { border-color: #4F46E5; }
+    .terms-checkbox.checked {
+      border-color: #4F46E5; background: rgba(79,70,229,.04);
+    }
+
+    .terms-checkbox-box {
+      width: 22px; height: 22px; border-radius: 6px;
+      border: 2px solid #D2D2D7; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: .2s; margin-top: 1px;
+    }
+    .terms-checkbox.checked .terms-checkbox-box {
+      background: #4F46E5; border-color: #4F46E5;
+    }
+    .terms-checkbox-box svg {
+      opacity: 0; transform: scale(.5); transition: .2s;
+    }
+    .terms-checkbox.checked .terms-checkbox-box svg {
+      opacity: 1; transform: scale(1);
+    }
+
+    .terms-checkbox-label {
+      font-size: .85rem; color: #1D1D1F; font-weight: 500; line-height: 1.4;
+    }
+
+    .terms-actions {
+      display: flex; gap: 10px;
+    }
+    .terms-btn {
+      flex: 1; padding: 13px 20px; border-radius: 12px;
+      font-size: .9rem; font-weight: 700; cursor: pointer;
+      transition: .2s; border: none; text-align: center;
+    }
+    .terms-btn-decline {
+      background: #F5F5F7; color: #6E6E73;
+    }
+    .terms-btn-decline:hover { background: #FEE2E2; color: #FF3B30; }
+    .terms-btn-accept {
+      background: linear-gradient(135deg, #4F46E5, #7C3AED);
+      color: white; box-shadow: 0 2px 8px rgba(79,70,229,.25);
+    }
+    .terms-btn-accept:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(79,70,229,.35);
+    }
+    .terms-btn-accept:disabled {
+      opacity: .4; cursor: not-allowed; transform: none;
+      box-shadow: none;
+    }
+
+    .next-btn {
+      padding: 10px 24px; background: #4F46E5; color: white;
+      border: none; border-radius: 10px;
+      font-weight: 600; font-size: .85rem; cursor: pointer;
+    }
+    .next-btn:hover { opacity: .9; }
+
+    .terms-info {
+      margin-top: 24px; padding: 16px 20px; background: rgba(79,70,229,.06);
+      border-radius: 12px; border: 1px solid rgba(79,70,229,.15);
+    }
+    .terms-info p {
+      font-size: .82rem; color: #4F46E5; font-weight: 600; margin: 0;
+    }
+
+    /* ── Responsive ── */
+    @media screen and (max-width: 600px) {
+      .container {
+        width: 100%;
+        height: 100vh;
+        border-radius: 0;
+        margin: 0;
+      }
+      .form-box {
+        bottom: 0;
+        width: 100%;
+        height: 70%;
+      }
+      .container.active .form-box {
+        right: 0;
+        bottom: 30%;
+      }
+      .toggle-box::before {
+        left: 0;
+        top: -270%;
+        width: 100%;
+        height: 300%;
+        border-radius: 20vw;
+      }
+      .container.active .toggle-box::before {
+        left: 0;
+        top: 70%;
+      }
+      .toggle-panel {
+        width: 100%;
+        height: 30%;
+      }
+      .toggle-panel.toggle-left { top: 0; }
+      .container.active .toggle-panel.toggle-left {
+        left: 0;
+        top: -30%;
+      }
+      .toggle-panel.toggle-right {
+        right: 0;
+        bottom: -30%;
+      }
+      .container.active .toggle-panel.toggle-right {
+        bottom: 0;
+      }
+    }
+
+    @media screen and (max-width: 400px) {
+      .form-box { padding: 20px; }
+      .toggle-panel h1 { font-size: 25px; }
+    }
+
+    /* ── Status bar ── */
+    .status-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #1D1D1F;
+      color: white;
+      padding: 12px 24px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 99999;
+    }
+    .status-bar .status-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #34C759;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .5; }
+    }
+    .status-bar .reset-btn {
+      background: rgba(255,255,255,.15);
+      border: none;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .status-bar .reset-btn:hover {
+      background: rgba(255,255,255,.25);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <div class="status-left">
+      <div class="status-dot"></div>
+      <span>Simulation OdaMarket - Connexion</span>
+    </div>
+    <button class="reset-btn" onclick="resetTerms()">Réinitialiser les CGU</button>
+  </div>
+
+  <!-- Main container -->
+  <div class="container" id="container">
+    <!-- Login form -->
+    <div class="form-box login">
+      <form onsubmit="handleLogin(event)">
+        <h1>Login</h1>
+        <div class="input-box">
+          <input type="text" id="loginEmail" placeholder="Email" required />
+          <i class="bx bxs-user"></i>
+        </div>
+        <div class="input-box">
+          <input type="password" id="loginPassword" placeholder="Password" required />
+          <i class="bx bxs-lock-alt"></i>
+          <i class="bx bx-hide toggle-password" onclick="togglePassword('loginPassword', this)"></i>
+        </div>
+        <div class="forgot-link">
+          <a onclick="showForgotModal()">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn" id="loginBtn">
+          <span>Login</span>
+        </button>
+        <p class="terms-link">
+          En vous connectant, vous acceptez nos <a onclick="showTermsModal()">conditions d'utilisation</a>
+        </p>
+        <p>or login with</p>
+        <div class="social-icons">
+          <button type="button" class="google-btn" onclick="handleGoogleLogin()">
+            <i class="bx bxl-google"></i>
+            <span>Continue with Google</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Register form -->
+    <div class="form-box register">
+      <form onsubmit="handleRegister(event)">
+        <h1>Registration</h1>
+        <div class="input-box">
+          <input type="text" id="registerUsername" placeholder="Username" required />
+          <i class="bx bxs-user"></i>
+        </div>
+        <div class="input-box">
+          <input type="email" id="registerEmail" placeholder="Email" required />
+          <i class="bx bxs-envelope"></i>
+        </div>
+        <div class="input-box">
+          <input type="password" id="registerPassword" placeholder="Password" required />
+          <i class="bx bxs-lock-alt"></i>
+          <i class="bx bx-hide toggle-password" onclick="togglePassword('registerPassword', this)"></i>
+        </div>
+        <button type="submit" class="btn" id="registerBtn">
+          <span>Register</span>
+        </button>
+        <p class="terms-link">
+          En vous inscrivant, vous acceptez nos <a onclick="showTermsModal()">conditions d'utilisation</a>
+        </p>
+        <p>or register with</p>
+        <div class="social-icons">
+          <button type="button" class="google-btn" onclick="handleGoogleLogin()">
+            <i class="bx bxl-google"></i>
+            <span>Continue with Google</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Toggle panels -->
+    <div class="toggle-box">
+      <div class="toggle-panel toggle-left">
+        <h1>Hello, Welcome!</h1>
+        <p>Don't have an account?</p>
+        <button type="button" class="btn" onclick="toggleRegister()">
+          Register
+        </button>
+      </div>
+      <div class="toggle-panel toggle-right">
+        <h1>Welcome Back!</h1>
+        <p>Already have an account?</p>
+        <button type="button" class="btn" onclick="toggleLogin()">
+          Login
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forgot password modal -->
+  <div id="forgotModal" class="modal-overlay" style="display: none;" onclick="closeForgotModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <h2>Mot de passe oublié</h2>
+      <div id="forgotContent">
+        <form onsubmit="handleForgotPassword(event)">
+          <div class="input-box">
+            <input type="email" id="forgotEmail" placeholder="Votre adresse email" required />
+            <i class="bx bxs-envelope"></i>
+          </div>
+          <div id="forgotError" class="modal-error" style="display: none;"></div>
+          <button type="submit" class="btn" id="forgotBtn">Envoyer le lien</button>
+          <button type="button" class="btn btn-outline" onclick="closeForgotModal()">Annuler</button>
+        </form>
+      </div>
+      <div id="forgotSuccess" style="display: none;">
+        <p class="modal-success" id="forgotSuccessMsg"></p>
+        <button class="btn" onclick="closeForgotModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terms modal container -->
+  <div id="termsContainer"></div>
+
+  <script>
+    // ── Terms data ──
+    const TERMS = [
+      { title: '1. Acceptation des conditions', content: 'En accédant et en utilisant la plateforme OdaMarket, vous acceptez pleinement et sans réserve les présentes conditions d\'utilisation. Si vous n\'acceptez pas ces conditions, veuillez ne pas utiliser nos services.' },
+      { title: '2. Description du service', content: 'OdaMarket est une plateforme de commerce en ligne permettant aux vendeurs de créer leur boutique numérique, gérer leurs produits, traiter des commandes et recevoir des paiements. Le service inclut la gestion de boutique, le suivi des commandes, la messagerie client et des outils de marketing.' },
+      { title: '3. Inscription et compte', content: 'Pour utiliser les services OdaMarket, vous devez créer un compte en fournissant des informations exactes et complètes. Vous êtes responsable de la confidentialité de vos identifiants et de toutes les activités effectuées sous votre compte. Vous devez nous informer immédiatement de toute utilisation non autorisée.' },
+      { title: '4. Obligations du vendeur', content: 'En tant que vendeur, vous vous engagez à : fournir des descriptions de produits exactes et honnêtes ; respecter les lois et réglementations applicables ; honorer toutes les commandes passées par les clients ; fournir un service client de qualité ; ne pas vendre de produits illicites, dangereux ou prohibés.' },
+      { title: '5. Politique de paiement', content: 'OdaMarket supporte plusieurs méthodes de paiement : Mobile Money (MTN, Orange), carte bancaire et paiement à la livraison. Les transactions sont sécurisées via nos partenaires de paiement. OdaMarket peut prélever des frais de service sur chaque transaction selon le plan d\'abonnement souscrit.' },
+      { title: '6. Propriété intellectuelle', content: 'Le contenu de la plateforme OdaMarket (design, logos, textes, code source) est protégé par les droits de propriété intellectuelle. Les vendeurs conservent les droits sur leurs propres contenus (photos, descriptions de produits).' },
+      { title: '7. Protection des données', content: 'OdaMarket collecte et traite vos données personnelles conformément à notre politique de confidentialité. Vos données sont utilisées pour fournir et améliorer nos services, traiter vos transactions et vous communiquer des informations importantes.' },
+      { title: '8. Responsabilité', content: 'OdaMarket agit comme intermédiaire technique entre vendeurs et acheteurs. Nous ne sommes pas responsables de la qualité des produits vendus, des litiges entre utilisateurs, ou des interruptions de service dues à des cas de force majeure.' },
+      { title: '9. Résiliation', content: 'OdaMarket se réserve le droit de suspendre ou résilier votre compte en cas de violation des présentes conditions, sans préavis. Vous pouvez également résilier votre compte à tout moment depuis les paramètres de votre compte.' },
+      { title: '10. Modification des conditions', content: 'OdaMarket peut modifier ces conditions d\'utilisation à tout moment. Les utilisateurs seront notifiés des changements significatifs. L\'utilisation continue du service après modification constitue une acceptation des nouvelles conditions.' },
+      { title: '11. Loi applicable', content: 'Les présentes conditions sont régies par la loi en vigueur dans le pays d\'exploitation de la plateforme. En cas de litige, une tentative de résolution amiable sera privilégiée avant toute action judiciaire.' },
+    ];
+
+    // ── State ──
+    let termsAccepted = false;
+    let currentSection = 0;
+    let termsAgreed = false;
+    let loginLoading = false;
+    let registerLoading = false;
+
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', () => {
+      const accepted = localStorage.getItem('oda_terms_accepted') === 'true';
+      termsAccepted = accepted;
+      if (!accepted) {
+        showTermsModal();
+      }
+    });
+
+    // ── Toggle between login and register ──
+    function toggleRegister() {
+      document.getElementById('container').classList.add('active');
+    }
+
+    function toggleLogin() {
+      document.getElementById('container').classList.remove('active');
+    }
+
+    // ── Toggle password visibility ──
+    function togglePassword(inputId, icon) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bx-hide');
+        icon.classList.add('bx-show');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('bx-show');
+        icon.classList.add('bx-hide');
+      }
+    }
+
+    // ── Handle login ──
+    function handleLogin(e) {
+      e.preventDefault();
+      if (!termsAccepted) {
+        showTermsModal();
+        return;
+      }
+
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      if (!email || !password) {
+        alert('Veuillez remplir tous les champs');
+        return;
+      }
+
+      loginLoading = true;
+      const btn = document.getElementById('loginBtn');
+      btn.innerHTML = '<i class="bx bx-loader bx-spin"></i> Connexion...';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        loginLoading = false;
+        btn.innerHTML = '<span>Login</span>';
+        btn.disabled = false;
+        alert(`✅ Connexion réussie!\n\nEmail: ${email}\n\nRedirection vers le dashboard...`);
+      }, 1500);
+    }
+
+    // ── Handle register ──
+    function handleRegister(e) {
+      e.preventDefault();
+      if (!termsAccepted) {
+        showTermsModal();
+        return;
+      }
+
+      const username = document.getElementById('registerUsername').value;
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+      if (!username || !email || !password) {
+        alert('Veuillez remplir tous les champs');
+        return;
+      }
+
+      registerLoading = true;
+      const btn = document.getElementById('registerBtn');
+      btn.innerHTML = '<i class="bx bx-loader bx-spin"></i> Inscription...';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        registerLoading = false;
+        btn.innerHTML = '<span>Register</span>';
+        btn.disabled = false;
+        alert(`✅ Inscription réussie!\n\nUtilisateur: ${username}\nEmail: ${email}\n\nRedirection vers le dashboard...`);
+      }, 1500);
+    }
+
+    // ── Handle Google login ──
+    function handleGoogleLogin() {
+      if (!termsAccepted) {
+        showTermsModal();
+        return;
+      }
+      alert('🔄 Redirection vers Google OAuth...\n\n(Simulation)');
+    }
+
+    // ── Forgot password ──
+    function showForgotModal() {
+      document.getElementById('forgotModal').style.display = 'flex';
+      document.getElementById('forgotContent').style.display = 'block';
+      document.getElementById('forgotSuccess').style.display = 'none';
+      document.getElementById('forgotError').style.display = 'none';
+      document.getElementById('forgotEmail').value = '';
+    }
+
+    function closeForgotModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('forgotModal').style.display = 'none';
+    }
+
+    function handleForgotPassword(e) {
+      e.preventDefault();
+      const email = document.getElementById('forgotEmail').value;
+      if (!email.includes('@')) {
+        document.getElementById('forgotError').textContent = 'Veuillez entrer une adresse email valide';
+        document.getElementById('forgotError').style.display = 'block';
+        return;
+      }
+
+      const btn = document.getElementById('forgotBtn');
+      btn.innerHTML = '<i class="bx bx-loader bx-spin"></i> Envoi...';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        btn.innerHTML = 'Envoyer le lien';
+        btn.disabled = false;
+        document.getElementById('forgotContent').style.display = 'none';
+        document.getElementById('forgotSuccess').style.display = 'block';
+        document.getElementById('forgotSuccessMsg').textContent = `Un email de réinitialisation a été envoyé à ${email}`;
+      }, 1000);
+    }
+
+    // ── Terms modal ──
+    function showTermsModal() {
+      termsAgreed = false;
+      currentSection = 0;
+      document.getElementById('termsContainer').innerHTML = buildTermsHTML();
+      document.body.style.overflow = 'hidden';
+    }
+
+    function hideTermsModal() {
+      document.getElementById('termsContainer').innerHTML = '';
+      document.body.style.overflow = '';
+    }
+
+    function buildTermsHTML() {
+      return `
+        <div class="terms-overlay" onclick="event.target === this && handleTermsDecline()">
+          <div class="terms-card">
+            <div class="terms-header">
+              <h2>📋 Conditions d'Utilisation</h2>
+              <p>Veuillez lire et accepter nos conditions pour continuer</p>
+              <div class="terms-progress">
+                <div class="terms-progress-fill" style="width: ${((currentSection + 1) / TERMS.length) * 100}%"></div>
+              </div>
+            </div>
+            <div class="terms-nav">
+              ${TERMS.map((t, i) => `
+                <button class="terms-tab ${i === currentSection ? 'active' : ''}" onclick="goToSection(${i})">
+                  ${t.title.split('.')[0]}
+                </button>
+              `).join('')}
+            </div>
+            <div class="terms-content">
+              <div class="terms-section">
+                <h3 class="terms-section-title">${TERMS[currentSection].title}</h3>
+                <p class="terms-section-text">${TERMS[currentSection].content}</p>
+              </div>
+              ${currentSection < TERMS.length - 1 ? `
+                <div style="margin-top: 24px; text-align: center;">
+                  <button class="next-btn" onclick="goToSection(${currentSection + 1})">Section suivante →</button>
+                </div>
+              ` : `
+                <div class="terms-info">
+                  <p>ℹ️ Vous avez atteint la fin des conditions. Veuillez les accepter ou refuser ci-dessous.</p>
+                </div>
+              `}
+            </div>
+            <div class="terms-footer">
+              <div class="terms-checkbox ${termsAgreed ? 'checked' : ''}" onclick="toggleTermsAgree()">
+                <div class="terms-checkbox-box">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
+                <span class="terms-checkbox-label">J'ai lu et j'accepte les conditions d'utilisation d'OdaMarket</span>
+              </div>
+              <div class="terms-actions">
+                <button class="terms-btn terms-btn-decline" onclick="handleTermsDecline()">Refuser</button>
+                <button class="terms-btn terms-btn-accept" ${termsAgreed ? '' : 'disabled'} onclick="handleTermsAccept()">Accepter et continuer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function goToSection(index) {
+      currentSection = index;
+      document.getElementById('termsContainer').innerHTML = buildTermsHTML();
+    }
+
+    function toggleTermsAgree() {
+      termsAgreed = !termsAgreed;
+      document.getElementById('termsContainer').innerHTML = buildTermsHTML();
+    }
+
+    function handleTermsAccept() {
+      if (!termsAgreed) return;
+      localStorage.setItem('oda_terms_accepted', 'true');
+      termsAccepted = true;
+      hideTermsModal();
+    }
+
+    function handleTermsDecline() {
+      alert('❌ Vous devez accepter les conditions pour utiliser OdaMarket.\n\nRedirection vers la page d\'accueil...');
+      hideTermsModal();
+    }
+
+    function resetTerms() {
+      localStorage.removeItem('oda_terms_accepted');
+      termsAccepted = false;
+      showTermsModal();
+    }
+  </script>
+</body>
+</html>
