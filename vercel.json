@@ -1,7 +1,5 @@
 {
   "framework": "nextjs",
-  "buildCommand": "next build",
-  "devCommand": "next dev",
-  "installCommand": "npm install",
-  "outputDirectory": ".next"
+  "installCommand": "npm install --prefer-offline",
+  "buildCommand": "NODE_OPTIONS='--max-old-space-size=3072' npx next build"
 }
