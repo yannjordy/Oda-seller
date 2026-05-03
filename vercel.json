@@ -1,5 +1,3 @@
 {
-  "framework": "nextjs",
-  "installCommand": "npm install --prefer-offline",
-  "buildCommand": "NODE_OPTIONS='--max-old-space-size=3072' npx next build"
+  "framework": "nextjs"
 }

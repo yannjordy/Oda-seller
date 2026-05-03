@@ -1,7 +1,6 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import NotificationPermission from './NotificationPermission';
 
 export default function Header({ onMenuToggle }) {
   const { user } = useAuth();
@@ -11,7 +10,6 @@ export default function Header({ onMenuToggle }) {
   return (
     <header className="main-header">
       <div className="header-container">
-        {/* Hamburger (mobile only) */}
         <button className="hamburger-btn md:hidden" onClick={onMenuToggle} aria-label="Menu">
           <span></span>
           <span></span>
@@ -27,7 +25,6 @@ export default function Header({ onMenuToggle }) {
             <span>👤</span>
             <span className="user-name">{displayName}</span>
           </div>
-          <NotificationPermission />
         </div>
       </div>
     </header>

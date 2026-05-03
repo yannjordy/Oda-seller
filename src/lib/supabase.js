@@ -1,18 +1,19 @@
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 
-export function createClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables');
 }
 
-// Instance singleton pour le côté client
 let supabaseClient = null;
 
 export function getSupabase() {
   if (!supabaseClient) {
-    supabaseClient = createClient();
+    supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
   }
   return supabaseClient;
 }
+
+export { createClient };

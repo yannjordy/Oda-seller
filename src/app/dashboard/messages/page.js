@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
 import '@/styles/globals.css';
-import { setBadgeCount } from '@/lib/badge';
 
 /* ─── Supabase ─── */
 const SUPABASE_URL      = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
@@ -937,7 +936,9 @@ export default function MessagesPage() {
 
   // Update the badge icon with the unread count
   useEffect(() => {
-    setBadgeCount(nbNonLus);
+    if (typeof document !== 'undefined') {
+      document.title = nbNonLus > 0 ? `(${nbNonLus}) Messages - OdaMarket` : 'Messages - OdaMarket';
+    }
   }, [nbNonLus]);
 
   /* ════════════════════════ ÉCRAN DE CHARGEMENT ════════════════════════ */
