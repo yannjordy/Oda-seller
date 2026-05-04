@@ -382,7 +382,7 @@ export default function TableauDeBord() {
   }
 
   function copierLienBoutique() {
-    const url = `${window.location.origin}/dashboard/boutique?shop=${shopSlug}`;
+    const url = `${window.location.origin}/share/${shopSlug}`;
     navigator.clipboard.writeText(url).then(() => {
       setLinkAnimating(true);
       setLinkCopied(true);
