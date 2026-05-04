@@ -96,6 +96,7 @@ const LAYOUT_STYLES = `
   ══════════════════════════════════════ */
   .oda-header {
     position: fixed; top: 0; left: 0; right: 0;
+    padding-top: var(--sat, 0px);
     background: rgba(255,255,255,.88);
     backdrop-filter: saturate(180%) blur(24px);
     -webkit-backdrop-filter: saturate(180%) blur(24px);
@@ -107,6 +108,14 @@ const LAYOUT_STYLES = `
     padding: 0 16px;
     max-width: 1920px; margin: 0 auto;
     height: 52px;
+  }
+
+  @supports (top: max(0px, env(safe-area-inset-top))) {
+    .oda-header { padding-top: env(safe-area-inset-top); }
+  }
+
+  @supports selector(:has(*)) {
+    :root { --sat: env(safe-area-inset-top, 0px); }
   }
 
   /* ── Brand centrée ── */
@@ -250,9 +259,10 @@ const LAYOUT_STYLES = `
   }
 
   /* Safe area iOS */
-  @supports (padding: env(safe-area-inset-top)) {
+  @supports (padding-top: env(safe-area-inset-top)) {
     .oda-menu-hero { padding-top: max(24px, calc(env(safe-area-inset-top) + 10px)) !important; }
     .oda-menu { padding-bottom: env(safe-area-inset-bottom); }
+    .oda-header { padding-top: env(safe-area-inset-top); }
   }
   @supports (-webkit-touch-callout: none) {
     .oda-menu { height: -webkit-fill-available; }
@@ -472,9 +482,9 @@ const LAYOUT_STYLES = `
   /* Tablette portrait / grand téléphone */
   @media (max-width: 768px) {
     .oda-header-inner { padding: 0 14px; height: 50px; }
-    .oda-content { padding-top: 50px; }
+    .oda-content { padding-top: calc(50px + env(safe-area-inset-top, 0px)); }
     .oda-menu { width: min(70vw, 280px); }
-    .oda-menu-hero { padding: 20px 14px 16px; }
+    .oda-menu-hero { padding: 20px 14px 16px; padding-top: max(20px, calc(env(safe-area-inset-top) + 10px)); }
     .oda-hero-logo-icon { width: 32px; height: 32px; font-size: 1rem; }
     .oda-hero-logo-text { font-size: 1.1rem; }
     .oda-hero-profile { padding: 8px 11px; gap: 9px; }
@@ -526,7 +536,7 @@ const LAYOUT_STYLES = `
     .oda-hero-top { margin-bottom: 10px; }
     .oda-nav-link { min-height: 40px; padding: 7px 10px; }
     .oda-header-inner { height: 46px; }
-    .oda-content { padding-top: 46px; }
+    .oda-content { padding-top: calc(46px + env(safe-area-inset-top, 0px)); }
   }
 
   /* Cibles tactiles minimales */
