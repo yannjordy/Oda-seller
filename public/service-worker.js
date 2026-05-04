@@ -1,4 +1,4 @@
-const CACHE_NAME = 'OdaMarket-v2.0.0';
+const CACHE_NAME = 'OdaMarket-v3.0.0';
 const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000;
 
 const STATIC_ASSETS = [
@@ -12,7 +12,7 @@ const STATIC_ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
-    console.log('[SW] Installing OdaMarket Seller...');
+    console.log('[SW] Installing OdaMarket Seller v3...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => cache.addAll(STATIC_ASSETS))
@@ -21,7 +21,7 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-    console.log('[SW] Activating...');
+    console.log('[SW] Activating v3...');
     event.waitUntil(
         caches.keys().then((cacheNames) =>
             Promise.all(
@@ -44,12 +44,11 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(
             caches.match(event.request).then((cached) => {
                 if (cached) {
-                    const fetchPromise = fetch(event.request).then((response) => {
+                    fetch(event.request).then((response) => {
                         if (response.status === 200) {
                             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
                         }
-                        return response;
-                    }).catch(() => cached);
+                    }).catch(() => {});
                     return cached;
                 }
                 return fetch(event.request).then((response) => {
@@ -120,32 +119,120 @@ self.addEventListener('message', (event) => {
     if (event.data?.type === 'CACHE_URLS') {
         event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(event.data.urls)));
     }
-    if (event.data?.type === 'SCHEDULE_DAILY_NOTIFICATION') {
-        scheduleDailyNotification(event.data.hour || 10);
+    if (event.data?.type === 'SCHEDULE_ALL_NOTIFICATIONS') {
+        scheduleAllNotifications();
     }
 });
 
-function scheduleDailyNotification(hour = 10) {
+const DAILY_NOTIFICATIONS = [
+    {
+        hour: 7,
+        tag: 'morning-motivation',
+        messages: [
+            { title: '☀️ Bonjour vendeur !', body: 'Nouvelle journée, nouvelles opportunités ! Connectez-vous pour booster vos ventes.' },
+            { title: '🌅 Bonne journée !', body: 'Votre boutique OdaMarket vous attend. C\'est le moment de performer !' },
+            { title: '💪 Motivation matinale', body: 'Les meilleurs vendeurs commencent tôt ! Votre dashboard vous attend.' },
+            { title: '☕ Café & Ventes', body: 'Prenez un café et venez vérifier vos performances du jour !' },
+            { title: '🚀 Nouveau jour', body: 'Chaque jour est une chance de dépasser vos objectifs. Commencez maintenant !' },
+        ]
+    },
+    {
+        hour: 10,
+        tag: 'tip-conseil',
+        messages: [
+            { title: '📈 Conseil du jour', body: 'Les boutiques qui mettent à jour leurs produits chaque jour voient leurs ventes +30% !' },
+            { title: '💡 Astuce vendeur', body: 'Ajoutez de belles photos à vos produits : les annonces avec images reçoivent 5x plus de clics !' },
+            { title: '🎯 Stratégie', body: 'Répondez rapidement aux messages clients : une réponse en 5 min augmente les ventes de 40%.' },
+            { title: '📦 Produit du jour', body: 'Mettez un produit en avant aujourd\'hui pour attirer l\'attention des acheteurs !' },
+            { title: '⭐ Avis clients', body: 'Encouragez vos clients satisfaits à laisser un avis : ça booste votre visibilité !' },
+        ]
+    },
+    {
+        hour: 13,
+        tag: 'afternoon-engagement',
+        messages: [
+            { title: '🍽️ Pause déjeuner ?', body: 'Pendant votre pause, jetez un œil à vos messages clients en attente !' },
+            { title: '💬 Messages clients', body: 'Vous avez des clients qui attendent une réponse ! Ne laissez pas passer vos ventes.' },
+            { title: '🔥 Activité en cours', body: 'C\'est le pic d\'activité ! Connectez-vous maintenant pour capter un maximum de clients.' },
+            { title: '👥 Vos clients', body: 'Des acheteurs parcourent vos produits. Soyez disponible pour convertir !' },
+            { title: '⚡ Action rapide', body: '10 minutes sur votre dashboard = plus de ventes cet après-midi. Connectez-vous !' },
+        ]
+    },
+    {
+        hour: 16,
+        tag: 'stats-performance',
+        messages: [
+            { title: '📊 Point stats', body: 'Consultez vos statistiques de la journée. Voyez ce qui marche et optimisez !' },
+            { title: '🏆 Votre performance', body: 'Vous êtes un vendeur actif ! Voyez vos chiffres et visez encore plus haut.' },
+            { title: '📈 Tendances du jour', body: 'Vérifiez quels produits sont les plus consultés aujourd\'hui et ajustez !' },
+            { title: '💰 Suivi des ventes', body: 'Faites le point sur vos ventes de la journée. Il est encore temps d\'en conclure !' },
+            { title: '🎯 Objectifs', body: 'Où en êtes-vous de vos objectifs ? Consultez vos stats et ajustez votre stratégie.' },
+        ]
+    },
+    {
+        hour: 19,
+        tag: 'evening-recap',
+        messages: [
+            { title: '🌙 Bilan de la journée', body: 'Merci pour votre engagement ! Faites un dernier tour sur votre dashboard.' },
+            { title: '🏅 Journée terminée', body: 'Bravo pour votre travail ! Préparez-vous pour demain avec une dernière vérification.' },
+            { title: '✨ Dernier check', body: 'Vérifiez vos commandes en cours avant de finir la journée. Bonne soirée !' },
+            { title: '💪 Belle journée', body: 'Chaque jour compte. Consultez vos résultats et reposez-vous bien !' },
+            { title: '📋 Récap du soir', body: 'Faites votre récap avant de dormir. Vos clients vous retrouveront demain !' },
+        ]
+    },
+];
+
+function getTodayKey() {
+    return new Date().toDateString();
+}
+
+function getSentNotifications() {
+    try {
+        const data = self.clients ? null : null;
+        return {};
+    } catch {
+        return {};
+    }
+}
+
+function scheduleNotification(hour, tag, messages) {
     const now = new Date();
     const scheduled = new Date();
-    scheduled.setHours(hour, 0, 0, 0);
-    if (scheduled <= now) scheduled.setDate(scheduled.getDate() + 1);
+    scheduled.setHours(hour, Math.floor(Math.random() * 30), 0, 0);
+
+    if (scheduled <= now) {
+        scheduled.setDate(scheduled.getDate() + 1);
+    }
 
     const delay = scheduled.getTime() - now.getTime();
+
     setTimeout(() => {
-        self.registration.showNotification('OdaMarket - Motivation !', {
-            body: '💪 Votre boutique vous attend ! Consultez vos performances et continuez à booster vos ventes.',
+        const msg = messages[Math.floor(Math.random() * messages.length)];
+        self.registration.showNotification(msg.title, {
+            body: msg.body,
             icon: '/icons/oda-192.png',
             badge: '/icons/oda-192.png',
-            tag: 'daily-motivation',
+            tag: tag,
             renotify: true,
             vibrate: [200, 100, 200],
             data: { url: '/dashboard' },
             actions: [
-                { action: 'open', title: 'Voir mon dashboard' },
+                { action: 'open', title: 'Ouvrir OdaMarket' },
                 { action: 'close', title: 'Plus tard' }
             ]
-        });
-        scheduleDailyNotification(hour);
+        }).catch(err => console.log('[SW] Notification error:', err));
+
+        scheduleNotification(hour, tag, messages);
     }, delay);
 }
+
+function scheduleAllNotifications() {
+    console.log('[SW] Scheduling 5 daily notifications...');
+    DAILY_NOTIFICATIONS.forEach(({ hour, tag, messages }) => {
+        scheduleNotification(hour, tag, messages);
+    });
+}
+
+self.addEventListener('activate', () => {
+    scheduleAllNotifications();
+});
