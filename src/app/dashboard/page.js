@@ -179,6 +179,8 @@ export default function TableauDeBord() {
   const [productName, setProductName]         = useState('');
   const [productDesc, setProductDesc]         = useState('');
   const [productPrice, setProductPrice]       = useState('');
+  const [productPromoPrice, setProductPromoPrice] = useState('');
+  const [productInitialPrice, setProductInitialPrice] = useState('');
   const [productStock, setProductStock]       = useState('');
   const [productCategory, setProductCategory] = useState('');
   const [productStatus, setProductStatus]     = useState('published');
@@ -465,6 +467,8 @@ export default function TableauDeBord() {
       setProductName(data.nom);
       setProductDesc(data.description);
       setProductPrice(String(data.prix));
+      setProductPromoPrice(data.prix_promo ? String(data.prix_promo) : '');
+      setProductInitialPrice(data.prix_initial ? String(data.prix_initial) : '');
       setProductStock(String(data.stock));
       setProductCategory(data.categorie);
       setProductStatus(data.statut);
@@ -593,13 +597,15 @@ export default function TableauDeBord() {
         catch (err) { console.error(`❌ desc image ${i + 1}:`, err); }
       }
 
-      const produitData = {
-        nom, description, prix, stock, categorie,
-        statut: statutFinal,
-        main_image: mainImageUrl,
-        description_images: descUrls,
-        date_draft: statutFinal === 'draft' ? new Date().toISOString() : null,
-      };
+       const produitData = {
+         nom, description, prix, stock, categorie,
+         prix_promo: productPromoPrice && Number(productPromoPrice) > 0 && Number(productPromoPrice) < prix ? Number(productPromoPrice) : null,
+         prix_initial: productInitialPrice && Number(productInitialPrice) > 0 ? Number(productInitialPrice) : null,
+         statut: statutFinal,
+         main_image: mainImageUrl,
+         description_images: descUrls,
+         date_draft: statutFinal === 'draft' ? new Date().toISOString() : null,
+       };
 
       setSubmitLabel('Sauvegarde...');
       if (produitEnEdition) {
@@ -637,6 +643,7 @@ export default function TableauDeBord() {
 
   function reinitialiserFormulaire() {
     setProductName(''); setProductDesc(''); setProductPrice('');
+    setProductPromoPrice(''); setProductInitialPrice('');
     setProductStock(''); setProductCategory(''); setProductStatus('published');
     setMainImage(null); setMainImagePreview(null);
     setDescImages([]); setDescPreviews([]);
@@ -692,7 +699,7 @@ export default function TableauDeBord() {
   // ==================== DÉRIVÉS ====================
   const previewTitle = productName || 'Nom du produit';
   const previewDesc  = productDesc  || 'La description apparaîtra ici...';
-  const previewPrice = `${(parseInt(productPrice) || 0).toLocaleString('fr-FR')} FCFA`;
+  const hasPromoPreview = productPromoPrice && Number(productPromoPrice) > 0 && Number(productPromoPrice) < Number(productPrice);
 
   // Fill animation progress
   const fillSteps = [
@@ -1806,9 +1813,40 @@ export default function TableauDeBord() {
                       style={{ marginTop: 10 }}
                       onChange={e => setProductPrice(e.target.value)}
                     />
-                  </div>
-                  <div className="oda-fgroup">
-                    <label className="oda-flabel">Stock <span className="oda-req">*</span></label>
+                   </div>
+                   <div className="oda-fgroup">
+                     <label className="oda-flabel">Prix avant promo <span className="oda-req" style={{color:'var(--oda-muted)',fontWeight:400,fontSize:'.75rem'}}> (optionnel)</span></label>
+                     <input
+                       type="number"
+                       className="oda-finput"
+                       placeholder="Ex: 8000"
+                       value={productInitialPrice}
+                       onChange={e => setProductInitialPrice(e.target.value)}
+                     />
+                   </div>
+                   <div className="oda-fgroup">
+                     <label className="oda-flabel">Prix promotionnel <span className="oda-req" style={{color:'var(--oda-muted)',fontWeight:400,fontSize:'.75rem'}}> (optionnel)</span></label>
+                     <input
+                       type="number"
+                       className="oda-finput"
+                       placeholder="Ex: 4500"
+                       value={productPromoPrice}
+                       onChange={e => setProductPromoPrice(e.target.value)}
+                       style={productPromoPrice && Number(productPromoPrice) > 0 && Number(productPromoPrice) < Number(productPrice) ? {borderColor:'var(--oda-success)'} : {}}
+                     />
+                     {productPromoPrice && Number(productPromoPrice) > 0 && Number(productPromoPrice) < Number(productPrice) && (
+                       <p style={{margin:'6px 0 0',fontSize:'.78rem',color:'var(--oda-success)',fontWeight:500}}>
+                         ✅ Promo: {Math.round((1 - Number(productPromoPrice)/Number(productPrice)) * 100)}% de réduction
+                       </p>
+                     )}
+                     {productPromoPrice && Number(productPromoPrice) >= Number(productPrice) && productPrice && (
+                       <p style={{margin:'6px 0 0',fontSize:'.78rem',color:'var(--oda-warning)',fontWeight:500}}>
+                         ⚠️ Le prix promo doit être inférieur au prix actuel
+                       </p>
+                     )}
+                   </div>
+                   <div className="oda-fgroup">
+                     <label className="oda-flabel">Stock <span className="oda-req">*</span></label>
                     <div className="oda-slider-wrap">
                       <div className="oda-slider-val">
                         <strong>{parseInt(productStock) || 0} <span style={{ fontSize:'.7rem', fontWeight:500 }}>unités</span></strong>
@@ -1881,15 +1919,16 @@ export default function TableauDeBord() {
             <button type="button" className="oda-btn-secondary" onClick={reinitialiserFormulaire}>
               <Icon.X size={14} /> Annuler
             </button>
-            <button type="button" className="oda-btn-secondary" onClick={() => {
-              setProductName(''); setProductDesc(''); setProductPrice('');
-              setProductStock(''); setProductCategory(''); setProductStatus('published');
-              setMainImage(null); setMainImagePreview(null);
-              setDescImages([]); setDescPreviews([]);
-              setProduitEnEdition(null);
-              if (mainImageRef.current) mainImageRef.current.value = '';
-              if (descInputRef.current) descInputRef.current.value = '';
-            }}>
+             <button type="button" className="oda-btn-secondary" onClick={() => {
+               setProductName(''); setProductDesc(''); setProductPrice('');
+               setProductPromoPrice(''); setProductInitialPrice('');
+               setProductStock(''); setProductCategory(''); setProductStatus('published');
+               setMainImage(null); setMainImagePreview(null);
+               setDescImages([]); setDescPreviews([]);
+               setProduitEnEdition(null);
+               if (mainImageRef.current) mainImageRef.current.value = '';
+               if (descInputRef.current) descInputRef.current.value = '';
+             }}>
               <Icon.RefreshCw /> Réinitialiser
             </button>
             <button
@@ -1932,7 +1971,30 @@ export default function TableauDeBord() {
                   ))}
                 </div>
               )}
-              <p className="oda-preview-price">{previewPrice}</p>
+              <div className="oda-preview-price">
+                {hasPromoPreview ? (
+                  <>
+                    <span style={{color:'var(--oda-primary)',fontWeight:700}}>
+                      {(Number(productPromoPrice)).toLocaleString('fr-FR')} FCFA
+                    </span>
+                    {productInitialPrice && (
+                      <span style={{textDecoration:'line-through',color:'var(--oda-muted)',fontSize:'.82rem',marginLeft:8}}>
+                        {Number(productInitialPrice).toLocaleString('fr-FR')} FCFA
+                      </span>
+                    )}
+                    {!productInitialPrice && productPrice && (
+                      <span style={{textDecoration:'line-through',color:'var(--oda-muted)',fontSize:'.82rem',marginLeft:8}}>
+                        {(Number(productPrice)).toLocaleString('fr-FR')} FCFA
+                      </span>
+                    )}
+                    <span style={{background:'var(--oda-success)',color:'white',fontSize:'.65rem',padding:'2px 6px',borderRadius:10,marginLeft:8,fontWeight:600}}>
+                      -{Math.round((1 - Number(productPromoPrice)/Number(productPrice)) * 100)}%
+                    </span>
+                  </>
+                ) : (
+                  <span>{((parseInt(productPrice) || 0).toLocaleString('fr-FR'))} FCFA</span>
+                )}
+              </div>
             </div>
           </div>
 
