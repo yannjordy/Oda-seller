@@ -458,8 +458,8 @@ export default function ParametresPage() {
     }
 
     if (slug) {
-      const shopUrl = `${window.location.origin}/share/${slug}`;
-      const imgUrl  = favicon || logo || '';
+      const shopUrl = `${window.location.origin}/dashboard/boutique?shop=${slug}`;
+      const imgUrl  = logo || favicon || '';
       setMeta('property', 'og:type',        'website');
       setMeta('property', 'og:url',         shopUrl);
       setMeta('property', 'og:title',       nom);
@@ -700,7 +700,7 @@ export default function ParametresPage() {
 
   /* ── Copier lien boutique ── */
   function copierLienBoutique() {
-    const url = `${window.location.origin}/share/${params.identifiant?.slug}`;
+    const url = `${window.location.origin}/dashboard/boutique?shop=${params.identifiant?.slug}`;
     navigator.clipboard.writeText(url).then(() => showNotif('✅ Lien copié !', 'success'));
   }
 
@@ -725,7 +725,7 @@ export default function ParametresPage() {
   ];
 
   const boutiqueLien = params.identifiant?.slug
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/share/${params.identifiant.slug}`
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard/boutique?shop=${params.identifiant.slug}`
     : '';
 
   if (loading) {

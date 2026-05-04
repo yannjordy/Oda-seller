@@ -225,7 +225,7 @@ export default function ShopCreationModal({ open, onClose, userId, onDone }) {
       if (error) throw error;
 
       const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      const link = `${origin}/share/${slug}`;
+      const link = `${origin}/dashboard/boutique?shop=${slug}`;
       setShopLink(link);
       setStep(5);
 
@@ -651,7 +651,7 @@ export default function ShopCreationModal({ open, onClose, userId, onDone }) {
                 <div className="scm-url-preview">
                   <strong>Aperçu URL :</strong>
                   <div className="scm-url-text">
-                    {typeof window !== 'undefined' ? window.location.origin : ''}/share/{slug || 'votre-identifiant'}
+                    {typeof window !== 'undefined' ? window.location.origin : ''}/dashboard/boutique?shop={slug || 'votre-identifiant'}
                   </div>
                 </div>
               </>
