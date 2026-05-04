@@ -104,7 +104,7 @@ export default function ConnexionPage() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         console.log('✅ Utilisateur déjà connecté, redirection...');
-        router.replace('/dashboard');
+        router.replace('/');
       }
     });
   }, [router]);

@@ -4,6 +4,7 @@ import { useState, useEffect, createContext, useContext } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import PageLoader from '@/components/PageLoader';
 
 
 export const LanguageContext = createContext({ lang: 'fr', setLang: () => {}, t: (k) => k });
@@ -608,15 +609,7 @@ export default function DashboardLayout({ children }) {
 
   /* Chargement */
   if (loading) {
-    return (
-      <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', background:'#F2F2F7' }}>
-        <div style={{ textAlign:'center' }}>
-          <div style={{ fontSize:'2.5rem', marginBottom:'16px', animation:'spin 1s linear infinite' }}>⏳</div>
-          <p style={{ color:'#8E8E93', fontFamily:'Poppins, sans-serif', fontSize:'.9rem' }}>{t('loading')}</p>
-        </div>
-        <style>{`@keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }`}</style>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!user) return null;
