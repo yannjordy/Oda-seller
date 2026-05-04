@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/contexts/TranslationContext';
 
 // Chart.js lazy load
@@ -22,8 +21,8 @@ export default function LandingPage() {
   const scrollRef = useRef(null);
   const totalPages = 4;
   const { lang, changeLang } = useTranslation();
-  const { user, loading } = useAuth();
   const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('oda_language');
@@ -31,12 +30,19 @@ export default function LandingPage() {
   }, [changeLang]);
 
   useEffect(() => {
-    if (!loading && user) {
-      router.replace('/dashboard');
-    }
-  }, [user, loading, router]);
-
-  if (loading) return null;
+    const checkAuth = async () => {
+      try {
+        const { getSupabase } = await import('@/lib/supabase');
+        const supabase = getSupabase();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          setIsAuthenticated(true);
+          router.replace('/dashboard');
+        }
+      } catch {}
+    };
+    checkAuth();
+  }, [router]);
 
   // Scroll to page
   const goToPage = (index) => {
