@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/contexts/TranslationContext';
 
 // Chart.js lazy load
@@ -20,11 +22,21 @@ export default function LandingPage() {
   const scrollRef = useRef(null);
   const totalPages = 4;
   const { lang, changeLang } = useTranslation();
+  const { user, loading } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     const saved = localStorage.getItem('oda_language');
     if (saved) changeLang(saved);
   }, [changeLang]);
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace('/dashboard');
+    }
+  }, [user, loading, router]);
+
+  if (loading) return null;
 
   // Scroll to page
   const goToPage = (index) => {
