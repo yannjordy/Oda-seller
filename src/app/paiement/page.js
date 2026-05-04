@@ -592,7 +592,7 @@ export default function PaiementPage() {
             </p>
             <button
               className="btn-primary"
-              onClick={() => { window.location.href = 'boutique'; }}
+              onClick={() => { window.location.href = '/boutique'; }}
             >
               Retour à la boutique
             </button>
@@ -822,7 +822,7 @@ export default function PaiementPage() {
 
               <button
                 className="btn-primary"
-                onClick={() => { window.location.href = 'boutique'; }}
+                onClick={() => { window.location.href = '/boutique'; }}
               >
                 Retour à la boutique
               </button>
@@ -837,7 +837,7 @@ export default function PaiementPage() {
               </p>
               <button
                 className="btn-primary"
-                onClick={() => { window.location.href = 'boutique'; }}
+                onClick={() => { window.location.href = '/boutique'; }}
               >
                 Retour à la boutique
               </button>
