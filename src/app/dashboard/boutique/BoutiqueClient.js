@@ -1101,9 +1101,23 @@ export default function BoutiqueClient() {
                         {produit.stock < 5 && <span className="product-badge">Stock limité</span>}
                         <button className="btn-mention-chat" title="Discuter de ce produit" onClick={e => { e.stopPropagation(); mentionnerProduitDansChat(produit.id) }}>💬</button>
                       </div>
-                      <div className="product-info">
+                        <div className="product-info">
                         <h3 className="product-name">{produit.nom}</h3>
-                        <div className="product-price">{prixFormate(produit.prix)}</div>
+                        {produit.prix_promo && Number(produit.prix_promo) > 0 && Number(produit.prix_promo) < Number(produit.prix) ? (
+                          <>
+                            <div className="product-price" style={{color:'var(--oda-blue)',fontWeight:800,fontSize:'1.15rem'}}>{prixFormate(produit.prix_promo)}</div>
+                            <div style={{display:'flex',alignItems:'center',gap:'6px',marginBottom:'4px'}}>
+                              <span style={{textDecoration:'line-through',color:'var(--oda-gray-400)',fontSize:'.9rem'}}>
+                                {produit.prix_initial ? prixFormate(produit.prix_initial) : prixFormate(produit.prix)}
+                              </span>
+                              <span style={{background:'var(--oda-green)',color:'white',fontSize:'.65rem',padding:'2px 6px',borderRadius:'10px',fontWeight:700}}>
+                                -{Math.round((1 - Number(produit.prix_promo)/Number(produit.prix)) * 100)}%
+                              </span>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="product-price">{prixFormate(produit.prix)}</div>
+                        )}
                         <div className="product-stock">Stock: {produit.stock}</div>
                         <button className="btn-add-cart" onClick={e => { e.stopPropagation(); ajouterAuPanier(produit.id) }}>
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 2L7.17 4M15 2l1.83 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><path d="M7.17 4H20l-2 9H9L7.17 4zm0 0L6 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -1186,7 +1200,21 @@ export default function BoutiqueClient() {
               </div>
               <h2 style={{ fontSize:'1.3rem',fontWeight:700,marginBottom:'8px' }}>{productModal.produit.nom}</h2>
               <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'16px' }}>
-                <div style={{ fontSize:'1.5rem',fontWeight:800,color:'var(--primary-color)' }}>{prixFormate(productModal.produit.prix)}</div>
+                {productModal.produit.prix_promo && Number(productModal.produit.prix_promo) > 0 && Number(productModal.produit.prix_promo) < Number(productModal.produit.prix) ? (
+                  <div>
+                    <div style={{ fontSize:'1.5rem',fontWeight:800,color:'var(--oda-blue)' }}>{prixFormate(productModal.produit.prix_promo)}</div>
+                    <div style={{ display:'flex',alignItems:'center',gap:'8px',marginTop:'4px' }}>
+                      <span style={{ textDecoration:'line-through',color:'var(--oda-gray-400)',fontSize:'1rem' }}>
+                        {productModal.produit.prix_initial ? prixFormate(productModal.produit.prix_initial) : prixFormate(productModal.produit.prix)}
+                      </span>
+                      <span style={{ background:'var(--oda-green)',color:'white',fontSize:'.7rem',padding:'3px 8px',borderRadius:'12px',fontWeight:700 }}>
+                        -{Math.round((1 - Number(productModal.produit.prix_promo)/Number(productModal.produit.prix)) * 100)}%
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ fontSize:'1.5rem',fontWeight:800,color:'var(--primary-color)' }}>{prixFormate(productModal.produit.prix)}</div>
+                )}
                 <div style={{ fontSize:'0.9rem',color:'var(--text-secondary)' }}>Stock: <strong>{productModal.produit.stock}</strong></div>
               </div>
               <div style={{ background:'var(--bg-secondary)',padding:'12px',borderRadius:'8px',marginBottom:'16px' }}>

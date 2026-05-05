@@ -1063,12 +1063,30 @@ export default function ParametresPage() {
                       ✓ Confirmer les paramètres Mobile Money
                     </button>
                   </div>
-                )}
-              </div>
-            </section>
-          )}
+                 )}
+                 {/* Paiement à la livraison (Cash) */}
+                 <div className="prm-setting-item" style={{ marginTop:'32px', paddingTop:'28px', borderTop:'1px solid var(--oda-gray-100)' }}>
+                   <div className="prm-setting-info">
+                     <div className="prm-setting-title">💵 Paiement à la livraison</div>
+                     <div className="prm-setting-desc">Accepter les paiements en espèces à la livraison</div>
+                   </div>
+                   <Toggle id="paymentCash" checked={params.paiement.cash?.actif ?? false} onChange={v => updateParam('paiement.cash.actif', v)} />
+                 </div>
+                 {params.paiement.cash?.actif && (
+                   <div style={{ padding:'16px 20px', background:'var(--oda-gray-50)', borderRadius:'12px', marginTop:'16px', border:'1px solid var(--oda-gray-200)' }}>
+                     <p style={{ margin:'0 0 8px', fontSize:'.88rem', color:'var(--oda-gray-500)' }}>
+                       ✅ Le client paiera en espèces à la livraison
+                     </p>
+                     <button type="button" className="prm-btn prm-btn-secondary" style={{ padding:'8px 16px', fontSize:'.85rem' }} onClick={() => { updateParam('paiement.cash.confirme', true); }}>
+                       ✅ Confirmer
+                     </button>
+                   </div>
+                 )}
+               </div>
+             </section>
+           )}
 
-          {/* ══ LIVRAISON ═ */}
+           {/* ══ LIVRAISON ═ */}
           {activeSection === 'shipping' && (
             <section id="shipping" className="prm-section">
               <div className="prm-section-header">
