@@ -1,0 +1,25 @@
+-- ==========================================
+-- MIGRATION SQL : Ajouter prix promotionnel
+-- À exécuter dans Supabase > SQL Editor
+-- ==========================================
+
+-- 1. Ajouter les nouvelles colonnes à la table 'produits'
+ALTER TABLE produits 
+  ADD COLUMN IF NOT EXISTS prix_promo NUMERIC,
+  ADD COLUMN IF NOT EXISTS prix_initial NUMERIC;
+
+-- 2. S'assurer que les valeurs par défaut sont NULL
+UPDATE produits SET prix_promo = NULL WHERE prix_promo IS NULL;
+UPDATE produits SET prix_initial = NULL WHERE prix_initial IS NULL;
+
+-- 3. Ajouter des commentaires pour la documentation
+COMMENT ON COLUMN produits.prix_promo IS 'Prix promotionnel (null si pas de promo)';
+COMMENT ON COLUMN produits.prix_initial IS 'Prix avant promotion (null si pas de promo)';
+
+-- ==========================================
+-- Vérification (optionnel) :
+-- ==========================================
+-- SELECT column_name, data_type, is_nullable 
+-- FROM information_schema.columns 
+-- WHERE table_name = 'produits' 
+-- AND column_name IN ('prix_promo', 'prix_initial');
