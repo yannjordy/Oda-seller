@@ -1,470 +1,979 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { getSupabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 
 /* ═══════════════════════════════════════════════════════════════
-   CSS PROFESSIONNEL — PALETTE ODA + INSPIRATION SHOPIFY/STRIPE
+   PALETTE & FONTS
    ═══════════════════════════════════════════════════════════════ */
-const PAGE_CSS = `
+const FONTS = [
+  { label: 'Outfit',        value: 'Outfit',        url: 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap' },
+  { label: 'Sora',          value: 'Sora',          url: 'https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap' },
+  { label: 'Figtree',       value: 'Figtree',       url: 'https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&display=swap' },
+  { label: 'Nunito',        value: 'Nunito',        url: 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap' },
+  { label: 'DM Sans',       value: 'DM Sans',       url: 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap' },
+  { label: 'Plus Jakarta',  value: 'Plus Jakarta Sans', url: 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap' },
+  { label: 'Lexend',        value: 'Lexend',        url: 'https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap' },
+  { label: 'Manrope',       value: 'Manrope',       url: 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap' },
+];
+
+const PALETTES = [
+  { name: 'ODA Orange',  primary: '#FF6B00', secondary: '#1D1D1F', accent: '#FF9A3C' },
+  { name: 'Indigo',      primary: '#6366F1', secondary: '#1E1B4B', accent: '#818CF8' },
+  { name: 'Émeraude',    primary: '#10B981', secondary: '#064E3B', accent: '#34D399' },
+  { name: 'Ciel',        primary: '#0EA5E9', secondary: '#0C4A6E', accent: '#38BDF8' },
+  { name: 'Rose',        primary: '#F43F5E', secondary: '#4C0519', accent: '#FB7185' },
+  { name: 'Violet',      primary: '#8B5CF6', secondary: '#2E1065', accent: '#A78BFA' },
+  { name: 'Ambre',       primary: '#F59E0B', secondary: '#451A03', accent: '#FBBF24' },
+  { name: 'Ardoise',     primary: '#64748B', secondary: '#0F172A', accent: '#94A3B8' },
+  { name: 'Teal',        primary: '#14B8A6', secondary: '#134E4A', accent: '#2DD4BF' },
+  { name: 'Cramoisi',    primary: '#E11D48', secondary: '#4C0519', accent: '#FB7185' },
+];
+
+const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
-  @keyframes fadeIn     { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
-  @keyframes slideIn    { from{opacity:0;transform:translateX(24px)} to{opacity:1;transform:translateX(0)} }
-  @keyframes slideOut   { from{opacity:1} to{opacity:0;transform:translateX(24px)} }
-  @keyframes scaleIn    { 0%{opacity:0;transform:scale(.92)} 100%{opacity:1;transform:scale(1)} }
-  @keyframes progressBar { from{width:0} to{width:100%} }
+  /* ── Reset & base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  /* ── Animations ── */
+  @keyframes fadeUp    { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+  @keyframes slideIn   { from{opacity:0;transform:translateX(24px)} to{opacity:1;transform:none} }
+  @keyframes slideOut  { from{opacity:1;transform:none} to{opacity:0;transform:translateX(24px)} }
+  @keyframes scaleIn   { from{opacity:0;transform:scale(.94)} to{opacity:1;transform:scale(1)} }
+  @keyframes spin      { to{transform:rotate(360deg)} }
+  @keyframes shimmer   { 0%{background-position:-400% 0} 100%{background-position:400% 0} }
+  @keyframes pulse     { 0%,100%{opacity:1} 50%{opacity:.5} }
+  @keyframes pageEnter { from{opacity:0;transform:translateX(20px) scale(.985)} to{opacity:1;transform:translateX(0) scale(1)} }
+  @keyframes pageExit  { from{opacity:1;transform:translateX(0) scale(1)} to{opacity:0;transform:translateX(-16px) scale(.985)} }
+  @keyframes fadeIn    { from{opacity:0} to{opacity:1} }
+  @keyframes odaPopIn  { 0%{opacity:0;transform:translateY(10px) scale(.97)} 60%{opacity:1;transform:translateY(-2px) scale(1.01)} 100%{opacity:1;transform:none} }
+
+  /* ── Variables — alignées sur layout.js ── */
   :root {
-    --oda-orange:    #FF6B00;
-    --oda-orange-light: #FFF1EB;
-    --oda-blue:      #007AFF;
-    --oda-blue-light: #EBF5FF;
-    --oda-green:     #34C759;
-    --oda-green-light:#E8F9ED;
-    --oda-red:       #FF3B30;
-    --oda-red-light:  #FFEBEE;
-    --oda-gray-50:   #F9FAFB;
-    --oda-gray-100:  #F0F2F5;
-    --oda-gray-200:  #E5E7EB;
-    --oda-gray-300:  #D2D4D7;
-    --oda-gray-400:  #9E9EA3;
-    --oda-gray-500:  #6E6E73;
-    --oda-gray-600:  #4A4A4F;
-    --oda-gray-700:  #2D2D31;
-    --oda-gray-800:  #1D1D1F;
-    --shadow-xs:  0 1px 2px rgba(0,0,0,.04);
-    --shadow-sm:  0 2px 8px rgba(0,0,0,.06);
-    --shadow-md:  0 8px 24px rgba(0,0,0,.08);
-    --shadow-lg:  0 20px 60px rgba(0,0,0,.12);
-    --radius-sm:  8px;
-    --radius-md:  12px;
-    --radius-lg:  16px;
-    --radius-xl:  20px;
-    --font:      'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    --bg:           #F2F2F7;
+    --bg-card:      #FFFFFF;
+    --bg-raised:    #EFEFEF;
+    --bg-hover:     #E5E5EA;
+    --border:       #E5E5EA;
+    --border-md:    rgba(0,0,0,0.11);
+    --text-1:       #000000;
+    --text-2:       #8E8E93;
+    --text-3:       #C7C7CC;
+    --accent:       #FF6B00;
+    --accent-dim:   rgba(255,107,0,0.09);
+    --accent-glow:  rgba(255,107,0,0.22);
+    --primary:      #007AFF;
+    --primary-dim:  rgba(0,122,255,0.10);
+    --secondary:    #5856D6;
+    --green:        #34C759;
+    --green-dim:    rgba(52,199,89,0.10);
+    --red:          #FF3B30;
+    --red-dim:      rgba(255,59,48,0.09);
+    --yellow:       #FF9500;
+    --yellow-dim:   rgba(255,149,0,0.10);
+    --radius-sm:    10px;
+    --radius-md:    14px;
+    --radius-lg:    20px;
+    --radius-xl:    28px;
+    --shadow-sm:    0 1px 3px rgba(0,0,0,.08);
+    --shadow-md:    0 4px 12px rgba(0,0,0,.10);
+    --shadow-lg:    0 8px 24px rgba(0,0,0,.12);
+    --ease:         cubic-bezier(.4,0,.2,1);
+    --spring:       cubic-bezier(.34,1.56,.64,1);
+    --transition:   .18s cubic-bezier(.4,0,.2,1);
+    --font:         'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:var(--font); color:var(--oda-gray-800); background:var(--oda-gray-50); -webkit-font-smoothing:antialiased; }
-
-  /* ── Container ── */
-  .prm-container {
-    max-width:1440px; margin:0 auto; padding:32px 40px;
-    display:grid; grid-template-columns:280px 1fr; gap:40px;
-    animation:fadeIn .5s ease;
+  /* ── Layout ── */
+  .p-wrap {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: var(--font);
+    color: var(--text-1);
   }
-  @media(max-width:1100px){ .prm-container { grid-template-columns:1fr; padding:24px 20px; gap:24px; } }
+  @media(max-width:1024px){ .p-wrap{grid-template-columns:1fr} }
 
-  /* ── Sidebar ── */
-  .prm-sidebar {
-    background:white; border-radius:var(--radius-lg); padding:28px 20px;
-    box-shadow:var(--shadow-sm); height:fit-content; position:sticky; top:calc(24px + env(safe-area-inset-top));
-    border:1px solid var(--oda-gray-200);
+  /* ════════════════════════════════
+     SIDEBAR — style layout.js
+  ════════════════════════════════ */
+  .p-side {
+    background: #FAFAFA;
+    border-right: .5px solid rgba(0,0,0,.08);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: none;
   }
-  @media(max-width:1100px){ .prm-sidebar { display:none; } }
+  .p-side::-webkit-scrollbar { display: none; }
+  @media(max-width:1024px){ .p-side{display:none} }
 
-  .prm-sidebar-title {
-    font-size:.82rem; font-weight:600; color:var(--oda-gray-400);
-    text-transform:uppercase; letter-spacing:1.2px; margin-bottom:20px; padding:0 12px;
+  /* Hero brand */
+  .p-side-brand {
+    background: linear-gradient(145deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    padding: 28px 16px 22px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
   }
-
-  .prm-nav-item {
-    display:flex; align-items:center; gap:12px; padding:11px 16px; border-radius:var(--radius-md);
-    color:var(--oda-gray-600); text-decoration:none; transition:all .25s ease;
-    font-weight:500; font-size:.92rem; margin-bottom:4px; border:none; background:none;
-    width:100%; cursor:pointer; text-align:left; font-family:var(--font);
+  .p-side-brand::before {
+    content: '';
+    position: absolute; top: -30px; right: -30px;
+    width: 100px; height: 100px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,122,255,.28) 0%, transparent 70%);
   }
-  .prm-nav-item:hover { background:var(--oda-gray-50); color:var(--oda-gray-800); }
-  .prm-nav-item.active {
-    background:linear-gradient(135deg, var(--oda-blue), #5856D6); color:white;
-    box-shadow:0 4px 12px rgba(0,122,255,.25);
+  .p-side-brand::after {
+    content: '';
+    position: absolute; bottom: -20px; left: -14px;
+    width: 70px; height: 70px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(88,86,214,.2) 0%, transparent 70%);
   }
-  .prm-nav-icon { font-size:1.15rem; flex-shrink:0; width:24px; text-align:center; }
-
-  /* ── Main Content ── */
-  .prm-main { display:flex; flex-direction:column; gap:28px; }
-
-  .prm-section {
-    background:white; border-radius:var(--radius-lg); padding:32px 36px;
-    box-shadow:var(--shadow-sm); border:1px solid var(--oda-gray-200);
-    animation:fadeIn .5s ease;
+  .p-side-logo {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 10px;
   }
-  @media(max-width:768px){ .prm-section { padding:24px 20px; } }
-
-  .prm-section-header { margin-bottom:28px; padding-bottom:20px; border-bottom:1px solid var(--oda-gray-100); }
-  .prm-section-title { font-size:1.35rem; font-weight:700; color:var(--oda-gray-800); margin-bottom:6px; }
-  .prm-section-desc { font-size:.88rem; color:var(--oda-gray-500); line-height:1.6; }
-
-  /* ── Form Grid ── */
-  .prm-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
-  @media(max-width:768px){ .prm-form-grid { grid-template-columns:1fr; } }
-
-  .prm-field { margin-bottom:20px; }
-  .prm-label {
-    display:block; font-weight:600; font-size:.88rem; color:var(--oda-gray-700);
-    margin-bottom:8px;
+  .p-side-logo-icon {
+    width: 36px; height: 36px;
+    background: white; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,.2);
+    flex-shrink: 0;
   }
-  .prm-input, .prm-textarea, .prm-select {
-    width:100%; padding:11px 16px; border:1.5px solid var(--oda-gray-200);
-    border-radius:var(--radius-sm); font-family:var(--font); font-size:.92rem;
-    color:var(--oda-gray-800); background:white; transition:all .25s ease; outline:none;
+  .p-side-logo-text {
+    font-size: 1rem; font-weight: 700; color: white; letter-spacing: -.2px;
   }
-  .prm-input:focus, .prm-textarea:focus, .prm-select:focus {
-    border-color:var(--oda-blue); box-shadow:0 0 0 3px rgba(0,122,255,.15);
-  }
-  .prm-textarea { resize:vertical; min-height:100px; }
-  .prm-hint { font-size:.78rem; color:var(--oda-gray-400); margin-top:6px; display:block; }
-
-  /* ── Toggle ── */
-  .prm-toggle { position:relative; display:inline-block; width:48px; height:26px; flex-shrink:0; }
-  .prm-toggle input { opacity:0; width:0; height:0; position:absolute; }
-  .prm-toggle-slider {
-    position:absolute; cursor:pointer; inset:0; background:var(--oda-gray-300);
-    transition:.3s ease; border-radius:26px;
-  }
-  .prm-toggle-slider::before {
-    position:absolute; content:""; height:20px; width:20px; left:3px; bottom:3px;
-    background:white; transition:.3s ease; border-radius:50%;
-    box-shadow:var(--shadow-xs);
-  }
-  input:checked + .prm-toggle-slider { background:linear-gradient(135deg, var(--oda-blue), #5856D6); }
-  input:checked + .prm-toggle-slider::before { transform:translateX(22px); }
-
-  /* ── Setting Item ── */
-  .prm-setting-item {
-    display:flex; justify-content:space-between; align-items:center;
-    padding:18px 20px; background:var(--oda-gray-50); border-radius:var(--radius-md);
-    margin-bottom:12px; border:1px solid var(--oda-gray-100);
-    transition:all .25s ease;
-  }
-  .prm-setting-item:hover { border-color:var(--oda-gray-200); box-shadow:var(--shadow-xs); }
-  @media(max-width:768px){ .prm-setting-item { flex-direction:column; gap:12px; align-items:flex-start; } }
-
-  .prm-setting-info { flex:1; }
-  .prm-setting-title { font-weight:600; font-size:.92rem; color:var(--oda-gray-800); margin-bottom:3px; }
-  .prm-setting-desc { font-size:.82rem; color:var(--oda-gray-500); line-height:1.5; }
-
-  /* ── Buttons ── */
-  .prm-btn {
-    padding:11px 24px; border-radius:var(--radius-sm); font-family:var(--font);
-    font-size:.9rem; font-weight:600; cursor:pointer; transition:all .25s ease;
-    display:inline-flex; align-items:center; gap:8px; border:none;
-  }
-  .prm-btn-primary {
-    background:linear-gradient(135deg, var(--oda-blue), #5856D6); color:white;
-    box-shadow:0 4px 12px rgba(0,122,255,.2);
-  }
-  .prm-btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,122,255,.3); }
-  .prm-btn-primary:disabled { opacity:.6; cursor:not-allowed; transform:none; }
-
-  .prm-btn-secondary {
-    background:white; color:var(--oda-blue); border:1.5px solid var(--oda-blue);
-  }
-  .prm-btn-secondary:hover { background:var(--oda-blue-light); }
-
-  .prm-btn-danger { background:var(--oda-red); color:white; }
-  .prm-btn-danger:hover { background:#d32f2f; }
-
-  .prm-btn-success { background:var(--oda-green); color:white; }
-  .prm-btn-success:hover { background:#2da94e; }
-
-  /* ── Alert ── */
-  .prm-alert {
-    display:flex; gap:12px; padding:16px 20px; border-radius:var(--radius-md);
-    margin-bottom:24px; font-size:.9rem; line-height:1.6;
-  }
-  .prm-alert-info { background:var(--oda-blue-light); border-left:4px solid var(--oda-blue); color:var(--oda-gray-700); }
-  .prm-alert-success { background:var(--oda-green-light); border-left:4px solid var(--oda-green); }
-  .prm-alert-warning { background:#FFF9EB; border-left:4px solid #FF9500; }
-
-  /* ── Slug Status ── */
-  .prm-slug-status { margin-top:10px; padding:10px 14px; border-radius:var(--radius-sm); font-size:.85rem; font-weight:500; }
-  .prm-slug-status.available { background:var(--oda-green-light); color:var(--oda-green); }
-  .prm-slug-status.unavailable { background:var(--oda-red-light); color:var(--oda-red); }
-
-  /* ── Input Prefix ── */
-  .prm-input-prefix { display:flex; border:1.5px solid var(--oda-gray-200); border-radius:var(--radius-sm); overflow:hidden; transition:all .25s ease; }
-  .prm-input-prefix:focus-within { border-color:var(--oda-blue); box-shadow:0 0 0 3px rgba(0,122,255,.15); }
-  .prm-prefix {
-    background:var(--oda-gray-50); padding:11px 16px; font-weight:600;
-    color:var(--oda-gray-500); flex-shrink:0; border-right:1.5px solid var(--oda-gray-200);
-    font-size:.9rem;
-  }
-  .prm-input-prefix .prm-input { border:none; box-shadow:none; border-radius:0; }
-
-  /* ── Payment Cards ── */
-  .prm-payment-card {
-    border:1.5px solid var(--oda-gray-200); border-radius:var(--radius-md);
-    padding:24px; transition:all .3s ease; margin-bottom:16px;
-  }
-  .prm-payment-card:hover { border-color:var(--oda-blue); box-shadow:var(--shadow-sm); }
-
-  .prm-payment-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
-  .prm-payment-icon {
-    width:44px; height:44px; border-radius:var(--radius-sm); display:flex;
-    align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;
-  }
-  .prm-payment-title { font-weight:600; font-size:1rem; color:var(--oda-gray-800); }
-  .prm-payment-desc { font-size:.82rem; color:var(--oda-gray-500); margin-top:2px; }
-
-  /* ── Mobile Money Section ── */
-  .prm-mm-section {
-    margin-top:16px; padding:18px; background:var(--oda-gray-50);
-    border-radius:var(--radius-md); border:1px solid var(--oda-gray-100);
-  }
-  .prm-mm-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
-  .prm-mm-icon {
-    width:40px; height:40px; border-radius:var(--radius-sm); display:flex;
-    align-items:center; justify-content:center; font-size:1.3rem;
+  .p-side-logo-sub {
+    font-size: .66rem; color: rgba(255,255,255,.48); font-weight: 400; margin-top: 1px;
   }
 
-  /* ── Shipping Zones ── */
-  .prm-zone-row {
-    display:grid; grid-template-columns:1fr 120px auto; gap:12px;
-    padding:16px; background:var(--oda-gray-50); border-radius:var(--radius-md);
-    margin-bottom:10px; align-items:center; border:1px solid var(--oda-gray-100);
-  }
-  @media(max-width:600px){ .prm-zone-row { grid-template-columns:1fr; } }
-
-  /* ── Danger Zone ── */
-  .prm-danger-zone { margin-top:40px; padding-top:32px; border-top:2px solid var(--oda-gray-100); }
-
-  /* ── Preview Modal ── */
-  .prm-modal-overlay {
-    display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,.55);
-    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
-    align-items:center; justify-content:center; padding:20px;
-  }
-  .prm-modal-overlay.active { display:flex; animation:fadeIn .3s ease; }
-
-  .prm-modal-box {
-    background:white; border-radius:var(--radius-xl); width:100%; max-width:440px;
-    height:85vh; max-height:820px; display:flex; flex-direction:column;
-    overflow:hidden; box-shadow:var(--shadow-lg);
-    animation:scaleIn .35s cubic-bezier(.34,1.56,.64,1);
+  .p-nav-section {
+    padding: 14px 16px 5px;
+    font-size: .65rem;
+    font-weight: 600;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    color: var(--text-2);
   }
 
-  .prm-modal-bar {
-    display:flex; align-items:center; justify-content:space-between;
-    padding:16px 20px; border-bottom:1px solid var(--oda-gray-100);
-    background:var(--oda-gray-50); flex-shrink:0; gap:10px;
+  .p-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    width: 100%;
+    padding: 9px 11px;
+    margin: 1px 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    text-align: left;
+    font-size: .88rem;
+    font-weight: 500;
+    color: #1C1C1E;
+    border-radius: 11px;
+    transition: background .18s var(--ease), transform .18s var(--spring), color .18s;
+    font-family: var(--font);
+    position: relative;
+    min-height: 46px;
+    -webkit-tap-highlight-color: transparent;
   }
-  .prm-modal-dots { display:flex; gap:5px; }
-  .prm-modal-dots span { width:10px; height:10px; border-radius:50%; }
-  .prm-modal-dots span:nth-child(1){background:#FF5F56}
-  .prm-modal-dots span:nth-child(2){background:#FFBD2E}
-  .prm-modal-dots span:nth-child(3){background:#27C93F}
+  .p-nav-btn:hover  { background: rgba(0,0,0,.05); }
+  .p-nav-btn:active { transform: scale(.96); }
+  .p-nav-btn.active {
+    background: var(--primary-dim);
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .p-nav-ico {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 9px;
+    background: #EFEFEF;
+    font-size: .95rem;
+    flex-shrink: 0;
+    transition: background var(--transition), box-shadow var(--transition), transform .2s var(--spring);
+  }
+  .p-nav-btn.active .p-nav-ico {
+    background: var(--primary);
+    box-shadow: 0 4px 10px rgba(0,122,255,.32);
+  }
+  .p-nav-btn:active .p-nav-ico { transform: scale(.9); }
+  .p-nav-chevron {
+    margin-left: auto; color: #C7C7CC; font-size: .72rem; flex-shrink: 0;
+    transition: transform .2s var(--spring), color .18s;
+  }
+  .p-nav-btn.active .p-nav-chevron { color: var(--primary); transform: translateX(2px); }
 
-  .prm-modal-url {
-    flex:1; min-width:0; background:white; border:1px solid var(--oda-gray-200);
-    border-radius:var(--radius-sm); padding:6px 12px; font-size:.78rem;
-    color:var(--oda-blue); font-family:monospace; overflow:hidden; text-overflow:ellipsis;
-    white-space:nowrap;
+  .p-side-footer {
+    margin-top: auto;
+    padding: 14px 16px;
+    border-top: .5px solid var(--border);
+  }
+  .p-side-footer-tag {
+    font-size: .68rem;
+    color: var(--text-3);
+    text-align: center;
+    letter-spacing: .04em;
   }
 
-  .prm-modal-iframe { flex:1; border:none; width:100%; background:white; }
+  /* ════════════════════════════════
+     MAIN
+  ════════════════════════════════ */
+  /* ════════════════════════════════
+     MAIN ENTRANCE
+  ════════════════════════════════ */
+  .p-main {
+    background: var(--bg);
+    padding: 40px 48px;
+    max-width: 900px;
+    animation: pageEnter .3s cubic-bezier(.22,1,.36,1) both;
+  }
+  @media(max-width:768px){ .p-main{padding:24px 16px} }
 
-  .prm-modal-footer {
-    padding:12px 20px; border-top:1px solid var(--oda-gray-100);
-    background:var(--oda-gray-50); display:flex; align-items:center;
-    justify-content:space-between; gap:8px; flex-shrink:0;
+  /* ── Page header ── */
+  .p-head {
+    margin-bottom: 32px;
+    animation: fadeUp .35s ease;
+  }
+  .p-head-eyebrow {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .p-head h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-1);
+    line-height: 1.2;
+    margin-bottom: 6px;
+    letter-spacing: -.02em;
+  }
+  .p-head p { font-size: .9rem; color: var(--text-2); }
+
+  /* ── Divider ── */
+  .p-divider { height:1px; background:var(--border); margin:24px 0; }
+
+  /* ════════════════════════════════
+     CARD
+  ════════════════════════════════ */
+  .p-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 16px;
+    animation: fadeUp .35s ease;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    box-shadow: var(--shadow-sm);
+  }
+  .p-card:hover { border-color: var(--border-md); box-shadow: var(--shadow-md); }
+
+  .p-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .p-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-1);
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .p-card-title-icon {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg-raised);
+    border-radius: 7px;
+    font-size: .85rem;
+  }
+  .p-card-desc { font-size: .8125rem; color: var(--text-2); }
+
+  /* ════════════════════════════════
+     FORM ELEMENTS
+  ════════════════════════════════ */
+  .p-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media(max-width:600px){ .p-grid{grid-template-columns:1fr} }
+
+  .p-field { display:flex; flex-direction:column; gap:6px; }
+
+  .p-lbl {
+    font-size: .8125rem;
+    font-weight: 500;
+    color: var(--text-2);
+    letter-spacing: .01em;
   }
 
-  /* ── Link Row ── */
-  .prm-link-row { display:flex; gap:10px; align-items:center; margin-top:10px; min-width:0; }
-  .prm-link-row .prm-input { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; }
-  @media(max-width:480px){
-    .prm-link-row { flex-direction:column; align-items:stretch; }
-    .prm-link-row button { align-self:flex-end; }
+  .p-inp, .p-ta, .p-sel {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border-md);
+    border-radius: var(--radius-sm);
+    font-size: .875rem;
+    color: var(--text-1);
+    background: #FFFFFF;
+    outline: none;
+    transition: border var(--transition), box-shadow var(--transition), background var(--transition);
+    font-family: var(--font);
+  }
+  .p-inp::placeholder, .p-ta::placeholder { color: var(--text-3); }
+  .p-inp:hover, .p-ta:hover, .p-sel:hover { border-color: rgba(0,0,0,.18); background: #FAFAFA; }
+  .p-inp:focus, .p-ta:focus, .p-sel:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+    background: #FFFFFF;
+  }
+  .p-sel option { background: #FFFFFF; color: var(--text-1); }
+  .p-ta { resize: vertical; min-height: 90px; }
+  .p-hint { font-size: .75rem; color: var(--text-3); }
+
+  /* ════════════════════════════════
+     BUTTONS
+  ════════════════════════════════ */
+  .p-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-size: .875rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all var(--transition);
+    font-family: var(--font);
+    letter-spacing: .01em;
+    white-space: nowrap;
+  }
+  .p-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .p-btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 2px 12px var(--accent-glow);
+  }
+  .p-btn-primary:hover:not(:disabled) {
+    background: #ff7d1a;
+    box-shadow: 0 4px 20px var(--accent-glow);
+    transform: translateY(-1px);
+  }
+  .p-btn-primary:active:not(:disabled) { transform: none; }
+
+  .p-btn-ghost {
+    background: var(--bg-raised);
+    color: var(--text-2);
+    border-color: var(--border-md);
+  }
+  .p-btn-ghost:hover:not(:disabled) { background: var(--bg-hover); color: var(--text-1); border-color: rgba(255,255,255,.2); }
+
+  .p-btn-danger {
+    background: var(--red-dim);
+    color: var(--red);
+    border-color: rgba(242,69,61,.25);
+  }
+  .p-btn-danger:hover:not(:disabled) { background: rgba(242,69,61,.2); }
+
+  .p-btn-success {
+    background: var(--green-dim);
+    color: var(--green);
+    border-color: rgba(29,185,84,.25);
+  }
+  .p-btn-success:hover:not(:disabled) { background: rgba(29,185,84,.22); }
+
+  .p-btn-sm { padding: 7px 14px; font-size: .8125rem; }
+  .p-btn-xs { padding: 5px 10px; font-size: .75rem; border-radius: 6px; }
+
+  .p-btn-group { display:flex; gap:8px; flex-wrap:wrap; }
+
+  /* ════════════════════════════════
+     TOGGLE
+  ════════════════════════════════ */
+  .p-toggle { position:relative; width:44px; height:24px; flex-shrink:0; cursor:pointer; }
+  .p-toggle input { opacity:0; width:0; height:0; position:absolute; }
+  .p-toggle-track {
+    position: absolute;
+    inset: 0;
+    background: #DDE1EC;
+    border: 1px solid rgba(0,0,0,.1);
+    border-radius: 24px;
+    transition: all .22s ease;
+  }
+  .p-toggle-track::before {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 18px; height: 18px;
+    background: #FFFFFF;
+    border-radius: 50%;
+    transition: all .22s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 1px 4px rgba(0,0,0,.18);
+  }
+  .p-toggle input:checked + .p-toggle-track {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .p-toggle input:checked + .p-toggle-track::before {
+    transform: translateX(20px);
+    background: #fff;
   }
 
-  /* ── Notification Toast ── */
-  .prm-notif {
-    position:fixed; top:calc(24px + env(safe-area-inset-top)); right:24px; z-index:10000;
-    background:white; padding:14px 22px; border-radius:var(--radius-md);
-    box-shadow:var(--shadow-md); animation:slideIn .4s cubic-bezier(.34,1.56,.64,1);
-    max-width:360px; font-family:var(--font); font-weight:500;
-    color:var(--oda-gray-800); cursor:pointer; font-size:.9rem;
-    border-left:4px solid var(--oda-blue);
+  /* ════════════════════════════════
+     ROW SETTING
+  ════════════════════════════════ */
+  .p-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .p-row:last-child { border-bottom:none; padding-bottom:0; }
+  .p-row:first-child { padding-top:0; }
+  .p-row-info { flex:1; }
+  .p-row-title { font-size:.875rem; font-weight:500; color:var(--text-1); }
+  .p-row-desc  { font-size:.8rem; color:var(--text-2); margin-top:3px; line-height:1.4; }
+
+  /* ════════════════════════════════
+     SLUG BOX
+  ════════════════════════════════ */
+  .p-slug-box {
+    background: var(--green-dim);
+    border: 1px solid rgba(29,185,84,.2);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .p-slug-status { margin-top:8px; font-size:.8125rem; font-weight:600; }
+  .p-slug-status.ok   { color:var(--green); }
+  .p-slug-status.fail { color:var(--red); }
+
+  .p-slug-handle {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-1);
+    letter-spacing: -.01em;
+    margin-bottom: 14px;
+  }
+  .p-slug-handle span { color:var(--accent); }
+
+  /* ════════════════════════════════
+     PALETTE DROPDOWN
+  ════════════════════════════════ */
+  .p-palette-dropdown {
+    position: relative;
+    margin-bottom: 20px;
+  }
+  .p-palette-trigger {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 16px;
+    background: #FFFFFF;
+    border: 1.5px solid var(--border-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: var(--font);
+    font-size: .875rem;
+    font-weight: 500;
+    color: var(--text-1);
+  }
+  .p-palette-trigger:hover { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); }
+  .p-palette-trigger .p-pt-swatches { display:flex; gap:4px; }
+  .p-palette-trigger .p-pt-swatch { width:16px; height:16px; border-radius:5px; box-shadow:0 1px 3px rgba(0,0,0,.18); }
+  .p-palette-trigger .p-pt-name { flex:1; text-align:left; }
+  .p-palette-trigger .p-pt-arrow { color:var(--text-3); font-size:.75rem; transition:transform var(--transition); }
+  .p-palette-dropdown.open .p-pt-arrow { transform:rotate(180deg); }
+
+  .p-palette-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0; right: 0;
+    background: #FFFFFF;
+    border: 1.5px solid var(--border-md);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    z-index: 100;
+    overflow: hidden;
+    animation: scaleIn .18s ease;
+    transform-origin: top center;
+  }
+  .p-palette-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 16px;
+    cursor: pointer;
+    transition: background var(--transition);
+    font-size: .875rem;
+    font-weight: 500;
+    color: var(--text-1);
+  }
+  .p-palette-option:hover { background: var(--bg-raised); }
+  .p-palette-option.active { background: var(--accent-dim); color:var(--accent); }
+  .p-palette-option .p-po-swatches { display:flex; gap:4px; }
+  .p-palette-option .p-po-swatch { width:14px; height:14px; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,.18); }
+  .p-palette-option .p-po-check { margin-left:auto; font-size:.8rem; color:var(--accent); }
+
+  /* ════════════════════════════════
+     FONT DROPDOWN
+  ════════════════════════════════ */
+  .p-font-dropdown { position:relative; }
+  .p-font-trigger {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 16px;
+    background: #FFFFFF;
+    border: 1.5px solid var(--border-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: var(--font);
+    font-size: .875rem;
+    font-weight: 500;
+    color: var(--text-1);
+  }
+  .p-font-trigger:hover { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); }
+  .p-font-trigger .p-ft-preview { font-size:1rem; font-weight:700; flex:1; text-align:left; }
+  .p-font-trigger .p-ft-name { font-size:.8rem; color:var(--text-2); }
+  .p-font-trigger .p-ft-arrow { color:var(--text-3); font-size:.75rem; transition:transform var(--transition); }
+  .p-font-dropdown.open .p-ft-arrow { transform:rotate(180deg); }
+
+  .p-font-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0; right: 0;
+    background: #FFFFFF;
+    border: 1.5px solid var(--border-md);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    z-index: 100;
+    overflow: hidden;
+    animation: scaleIn .18s ease;
+    transform-origin: top center;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  .p-font-menu::-webkit-scrollbar { width:4px; }
+  .p-font-menu::-webkit-scrollbar-track { background:transparent; }
+  .p-font-menu::-webkit-scrollbar-thumb { background:var(--border-md); border-radius:4px; }
+  .p-font-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background var(--transition);
+    border-bottom: 1px solid var(--border);
+  }
+  .p-font-option:last-child { border-bottom:none; }
+  .p-font-option:hover { background: var(--bg-raised); }
+  .p-font-option.active { background: var(--accent-dim); }
+  .p-font-option .p-fo-preview { font-size:1.1rem; font-weight:700; color:var(--text-1); flex:1; }
+  .p-font-option.active .p-fo-preview { color:var(--accent); }
+  .p-font-option .p-fo-name { font-size:.75rem; color:var(--text-2); }
+  .p-font-option .p-fo-check { font-size:.8rem; color:var(--accent); }
+
+  /* ════════════════════════════════
+     UPLOAD ZONE
+  ════════════════════════════════ */
+  .p-upload-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .p-upload {
+    border: 1.5px dashed var(--border-md);
+    border-radius: var(--radius-sm);
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition);
+    background: #F8F9FD;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 72px;
+  }
+  .p-upload:hover { border-color:var(--accent); background:var(--accent-dim); }
+  .p-upload.has-img { border-style:solid; border-color:rgba(29,185,84,.3); background:var(--green-dim); }
+  .p-upload-img { max-width:100%; max-height:38px; border-radius:6px; }
+  .p-upload-icon { font-size:1.1rem; opacity:.7; }
+  .p-upload-label { font-size:.72rem; color:var(--text-2); font-weight:500; line-height:1.3; }
+
+  /* ════════════════════════════════
+     ZONE ROW (LIVRAISON)
+  ════════════════════════════════ */
+  .p-zone {
+    display: grid;
+    grid-template-columns: 1fr 1fr 36px;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  @media(max-width:600px){ .p-zone{grid-template-columns:1fr 1fr 36px} }
+
+  .p-zone-del {
+    display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px;
+    border: none; border-radius: 10px;
+    background: var(--red-dim);
+    color: var(--red);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background .18s var(--ease), transform .18s var(--spring), box-shadow .18s;
+  }
+  .p-zone-del:hover {
+    background: rgba(255,59,48,.18);
+    box-shadow: 0 2px 8px rgba(255,59,48,.22);
+    transform: scale(1.08);
+  }
+  .p-zone-del:active { transform: scale(.92); }
+
+  /* ════════════════════════════════
+     PAYMENT PROVIDER BLOCKS
+  ════════════════════════════════ */
+  .p-provider-block {
+    background: #F8F9FD;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: border-color var(--transition);
+  }
+  .p-provider-block:hover { border-color:var(--border-md); }
+  .p-provider-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .p-provider-label {
+    font-size: .875rem;
+    font-weight: 600;
+    color: var(--text-1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .p-provider-badge {
+    font-size: .65rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .p-badge-mtn    { background:#fffbeb; color:#92400e; }
+  .p-badge-orange { background:#fff7ed; color:#9a3412; }
+
+  /* ════════════════════════════════
+     COLOR PICKER ROW
+  ════════════════════════════════ */
+  .p-color-row { display:flex; gap:10px; align-items:center; }
+  .p-color-swatch {
+    width: 38px; height: 38px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-md);
+    cursor: pointer;
+    overflow: hidden;
+    flex-shrink: 0;
+    transition: transform var(--transition);
+  }
+  .p-color-swatch:hover { transform:scale(1.08); }
+  .p-color-swatch input[type=color] {
+    width: 150%;
+    height: 150%;
+    margin: -25%;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    background: none;
   }
 
-  /* ── Upload Zone ── */
-  .prm-upload-zone {
-    position:relative; border:2px dashed var(--oda-gray-200); border-radius:var(--radius-lg);
-    padding:40px 24px; text-align:center; cursor:pointer;
-    transition:all .3s cubic-bezier(.34,1.56,.64,1);
-    background:linear-gradient(135deg, #fafafa 0%, var(--oda-gray-50) 100%);
-    min-height:170px; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:10px;
+  /* ════════════════════════════════
+     TOAST
+  ════════════════════════════════ */
+  .p-toast {
+    position: fixed;
+    top: 24px; right: 24px;
+    z-index: 10000;
+    background: #FFFFFF;
+    border: 1px solid var(--border-md);
+    border-radius: var(--radius-md);
+    padding: 14px 20px;
+    box-shadow: var(--shadow-md);
+    font-size: .875rem;
+    font-weight: 500;
+    color: var(--text-1);
+    animation: slideIn .3s cubic-bezier(.4,0,.2,1);
+    cursor: pointer;
+    max-width: 360px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Outfit', sans-serif;
   }
-  .prm-upload-zone:hover { border-color:var(--oda-blue); transform:translateY(-3px); box-shadow:var(--shadow-sm); }
-  .prm-upload-zone.drag-over { border-color:var(--oda-blue); background:rgba(0,122,255,.04); transform:scale(1.02); box-shadow:var(--shadow-md); }
-  .prm-upload-zone.has-image { border-color:var(--oda-green); background:var(--oda-green-light); border-style:solid; }
-
-  .prm-upload-badge {
-    position:absolute; top:12px; right:12px; background:var(--oda-green); color:white;
-    font-size:.7rem; font-weight:700; padding:4px 10px; border-radius:20px;
-    opacity:0; transform:scale(.8); transition:all .3s ease; pointer-events:none;
+  .p-toast::before {
+    content: '';
+    display: block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: #64748B;
   }
-  .prm-upload-zone.has-image .prm-upload-badge { opacity:1; transform:scale(1); }
+  .p-toast.success::before { background:var(--green); box-shadow:0 0 8px rgba(29,185,84,.5); }
+  .p-toast.error::before   { background:var(--red);   box-shadow:0 0 8px rgba(242,69,61,.5); }
+  .p-toast.warning::before { background:var(--yellow); box-shadow:0 0 8px rgba(245,166,35,.5); }
 
-  .prm-upload-icon { font-size:2.8rem; line-height:1; transition:transform .3s ease; }
-  .prm-upload-zone:hover .prm-upload-icon { transform:scale(1.1) rotate(-5deg); }
-
-  .prm-upload-preview-img { max-width:100%; max-height:130px; object-fit:contain; border-radius:var(--radius-sm); box-shadow:var(--shadow-xs); }
-
-  .prm-upload-overlay {
-    position:absolute; inset:0; background:rgba(0,0,0,.5); border-radius:calc(var(--radius-lg) - 2px);
-    display:flex; align-items:center; justify-content:center;
-    opacity:0; transition:opacity .3s ease; font-size:.85rem; font-weight:600;
-    color:white; gap:6px; pointer-events:none;
+  /* ════════════════════════════════
+     MOBILE BAR — floating pill
+  ════════════════════════════════ */
+  .p-mob {
+    position: fixed;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1.5px solid rgba(255,255,255,0.85);
+    border-radius: 36px;
+    display: none;
+    z-index: 9999;
+    padding: 8px 10px;
+    overflow-x: auto;
+    gap: 2px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.13), 0 2px 10px rgba(0,0,0,.07), 0 0 0 1px rgba(0,0,0,.04);
+    width: max-content;
+    max-width: calc(100vw - 32px);
   }
-  .prm-upload-zone:hover .prm-upload-overlay { opacity:1; }
+  .p-mob::-webkit-scrollbar { display:none; }
+  @media(max-width:1024px){ .p-mob{display:flex} body{padding-bottom:100px} }
 
-  /* ── Mobile Menu ── */
-  .prm-mobile-menu {
-    position:fixed; bottom:0; left:0; right:0; background:var(--oda-gray-800);
-    display:none; justify-content:flex-start; align-items:center;
-    padding:10px 0 calc(10px + env(safe-area-inset-bottom));
-    box-shadow:0 -4px 20px rgba(0,0,0,.25); z-index:9999;
-    border-radius:var(--radius-xl) var(--radius-xl) 0 0; overflow-x:auto; -webkit-overflow-scrolling:touch; gap:4px;
+  .p-mob-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 14px;
+    border-radius: 28px;
+    color: var(--text-3);
+    font-size: .6rem;
+    font-weight: 600;
+    letter-spacing: .03em;
+    min-width: 54px;
+    flex-shrink: 0;
+    transition: all .26s cubic-bezier(.4,0,.2,1);
+    font-family: var(--font);
+    position: relative;
   }
-  .prm-mobile-menu::-webkit-scrollbar { display:none; }
-  .prm-mobile-menu { -ms-overflow-style:none; scrollbar-width:none; }
-
-  .prm-mob-btn {
-    display:flex; flex-direction:column; align-items:center; gap:3px;
-    background:none; border:none; color:var(--oda-gray-400); cursor:pointer;
-    padding:8px 10px; border-radius:var(--radius-md); transition:all .3s ease;
-    position:relative; min-width:68px; flex-shrink:0; font-family:var(--font);
+  .p-mob-btn:hover { color:var(--text-2); background:var(--bg-raised); }
+  .p-mob-btn.active {
+    color: var(--accent);
+    background: var(--accent-dim);
+    border-radius: 24px;
   }
-  .prm-mob-btn .prm-mob-icon { font-size:22px; transition:transform .3s ease; display:block; }
-  .prm-mob-btn .prm-mob-label { font-size:9px; font-weight:500; white-space:nowrap; text-align:center; display:block; }
-  .prm-mob-btn.active { color:var(--oda-blue); }
-  .prm-mob-btn.active .prm-mob-label { font-weight:600; }
-  .prm-mob-btn .prm-mob-dot {
-    position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
-    width:4px; height:4px; background:var(--oda-blue); border-radius:2px;
+  .p-mob-btn .p-mob-ico {
+    font-size: 1.2rem;
+    transition: transform .26s cubic-bezier(.34,1.56,.64,1);
   }
-  .prm-mob-btn:active { transform:scale(.95); }
-  @media(hover:hover){ .prm-mob-btn:hover { background:rgba(0,122,255,.12); } }
+  .p-mob-btn.active .p-mob-ico { transform: scale(1.22) translateY(-1px); }
 
-  @media(max-width:1100px){ .prm-mobile-menu { display:flex; } body { padding-bottom:90px; } }
-  @media(min-width:1101px){ .prm-mobile-menu { display:none !important; } }
+  /* ════════════════════════════════
+     PREVIEW MODAL
+  ════════════════════════════════ */
+  .p-modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    background: rgba(0,0,0,.75);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .p-modal-bg.open { display:flex; animation:scaleIn .25s ease; }
+  .p-modal-box {
+    background: #FFFFFF;
+    border: 1px solid var(--border-md);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 440px;
+    height: 82vh;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+  }
+  .p-modal-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #F5F6FA;
+    border-bottom: 1px solid var(--border);
+  }
+  .p-modal-dots { display:flex; gap:6px; }
+  .p-modal-dots i { width:11px; height:11px; border-radius:50%; }
+  .p-modal-url {
+    flex: 1;
+    background: #FFFFFF;
+    border: 1px solid var(--border-md);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: .72rem;
+    color: var(--text-2);
+    font-family: 'SF Mono','Fira Code',monospace;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .p-modal-iframe { flex:1; border:none; }
 
-  /* ── Scrollbar ── */
-  ::-webkit-scrollbar { width:6px; }
-  ::-webkit-scrollbar-thumb { background:rgba(0,0,0,.12); border-radius:10px; }
+  /* ════════════════════════════════
+     DROPDOWN PORTAL MODAL
+  ════════════════════════════════ */
+  .p-dd-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9990;
+    background: rgba(15,17,23,0.18);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    animation: fadeIn .18s ease;
+  }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+  .p-dd-portal {
+    position: fixed;
+    z-index: 9995;
+    background: #FFFFFF;
+    border: 1.5px solid var(--border-md);
+    border-radius: var(--radius-md);
+    box-shadow: 0 24px 60px rgba(0,0,0,.22), 0 4px 16px rgba(0,0,0,.10);
+    animation: scaleIn .18s cubic-bezier(.22,1,.36,1);
+    transform-origin: top center;
+    overflow: hidden;
+  }
+  .p-dd-portal-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-md) transparent;
+  }
+  .p-dd-portal-scroll::-webkit-scrollbar { width: 4px; }
+  .p-dd-portal-scroll::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 4px; }
+
+
+  .p-section-anim {
+    animation: pageEnter .34s cubic-bezier(.22,1,.36,1);
+    will-change: opacity, transform;
+  }
+  .p-section-anim > * {
+    animation: fadeUp .38s cubic-bezier(.22,1,.36,1) both;
+  }
+  .p-section-anim > *:nth-child(1) { animation-delay: .04s; }
+  .p-section-anim > *:nth-child(2) { animation-delay: .08s; }
+  .p-section-anim > *:nth-child(3) { animation-delay: .12s; }
+  .p-section-anim > *:nth-child(4) { animation-delay: .16s; }
+
+  /* ── LOADING ── */
+  .p-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: var(--font);
+    color: var(--text-2);
+    flex-direction: column;
+    gap: 16px;
+  }
+  .p-spin {
+    width: 32px; height: 32px;
+    border: 2px solid var(--border-md);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+
+  /* ════════════════════════════════
+     INLINE FORM SPACING UTIL
+  ════════════════════════════════ */
+  .p-stack { display:flex; flex-direction:column; gap:14px; }
+  .p-link { color:var(--accent); font-size:.875rem; font-weight:500; cursor:pointer; text-decoration:none; }
+  .p-link:hover { text-decoration:underline; }
 `;
 
 /* ═══════════════════════════════════════════════════════════════
    HELPERS
    ═══════════════════════════════════════════════════════════════ */
-function injectStyles() {
+function injectCSS() {
   if (typeof document === 'undefined') return;
-  if (document.getElementById('prm-page-style')) return;
-  const el = document.createElement('style');
-  el.id = 'prm-page-style';
-  el.textContent = PAGE_CSS;
-  document.head.appendChild(el);
+  if (document.getElementById('p-css')) return;
+  const s = document.createElement('style'); s.id = 'p-css'; s.textContent = CSS;
+  document.head.appendChild(s);
 }
 
-function showNotif(msg, type = 'info') {
+function loadFont(name) {
   if (typeof document === 'undefined') return;
-  const colors = { success:'#34C759', error:'#FF3B30', info:'#007AFF', warning:'#FF9500' };
-  let c = document.getElementById('prm-notif-c');
-  if (!c) {
-    c = document.createElement('div');
-    c.id = 'prm-notif-c';
-    Object.assign(c.style, { position:'fixed', top:'100px', right:'20px', zIndex:'10000', display:'flex', flexDirection:'column', gap:'12px', pointerEvents:'none' });
-    document.body.appendChild(c);
-  }
-  const n = document.createElement('div');
-  n.className = 'prm-notif';
-  n.style.borderLeftColor = colors[type] || colors.info;
-  n.style.pointerEvents = 'all';
-  n.textContent = msg;
-  n.addEventListener('click', () => n.remove());
-  c.appendChild(n);
+  const f = FONTS.find(x => x.value === name);
+  if (!f) return;
+  const existing = document.getElementById('p-font');
+  if (existing) existing.remove();
+  const l = document.createElement('link'); l.id = 'p-font'; l.rel = 'stylesheet'; l.href = f.url;
+  document.head.appendChild(l);
+}
+
+function toast(msg, type = 'info') {
+  if (typeof document === 'undefined') return;
+  const t = document.createElement('div');
+  t.className = `p-toast ${type}`;
+  t.textContent = msg;
+  t.onclick = () => t.remove();
+  document.body.appendChild(t);
   setTimeout(() => {
-    n.style.animation = 'slideOut .4s ease forwards';
-    setTimeout(() => n.remove(), 400);
-  }, 3500);
+    t.style.animation = 'slideOut .3s ease forwards';
+    setTimeout(() => t.remove(), 300);
+  }, 3200);
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   TOGGLE COMPONENT
+   DEFAULTS
    ═══════════════════════════════════════════════════════════════ */
-function Toggle({ id, checked, onChange }) {
-  return (
-    <label className="prm-toggle">
-      <input id={id} type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} />
-      <span className="prm-toggle-slider" />
-    </label>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   UPLOAD ZONE COMPONENT (Logo & Favicon)
-   ═══════════════════════════════════════════════════════════════ */
-function UploadZone({ type, value, onUpload, icon, title, hint, accept }) {
-  const [dragOver, setDragOver] = useState(false);
-  const inputRef = useRef(null);
-  const hasImage = !!value;
-
-  function handleFile(file) {
-    if (!file) return;
-    if (file.size > 2 * 1024 * 1024) { showNotif('❌ Fichier trop lourd (max 2 MB)', 'error'); return; }
-    if (!file.type.startsWith('image/')) { showNotif('❌ Fichier invalide (image uniquement)', 'error'); return; }
-    const reader = new FileReader();
-    reader.onload = e => onUpload(type, e.target.result);
-    reader.readAsDataURL(file);
-  }
-
-  return (
-    <div>
-      <div
-        className={`prm-upload-zone${hasImage ? ' has-image' : ''}${dragOver ? ' drag-over' : ''}`}
-        onClick={() => inputRef.current?.click()}
-        onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={e => { e.preventDefault(); setDragOver(false); handleFile(e.dataTransfer.files[0]); }}
-      >
-        <div className="prm-upload-badge">✓ Chargé</div>
-
-        {hasImage ? (
-          <>
-            <img className="prm-upload-preview-img" src={value} alt={type} />
-            <div className="prm-upload-overlay">✏️ Changer</div>
-          </>
-        ) : (
-          <>
-            <div className="prm-upload-icon">{icon}</div>
-            <p style={{ fontWeight:600, fontSize:'.92rem', color:'var(--oda-gray-700)', position:'relative' }}>{title}</p>
-            <p style={{ fontSize:'.82rem', color:'var(--oda-gray-400)', position:'relative' }}>
-              {type === 'favicon' ? 'PNG, ICO — max 2 MB' : 'PNG, JPG, SVG — max 2 MB'}
-            </p>
-          </>
-        )}
-      </div>
-      <input
-        ref={inputRef}
-        type="file"
-        accept={accept || 'image/*'}
-        style={{ display:'none' }}
-        onChange={e => handleFile(e.target.files[0])}
-      />
-      <small style={{ display:'block', marginTop:'8px', fontSize:'.82rem', color:'var(--oda-gray-400)' }}>{hint}</small>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   DEFAULT PARAMS
-   ═══════════════════════════════════════════════════════════════ */
-const DEFAULT_PARAMS = {
+const DEFAULTS = {
   general:      { nom:'', description:'', email:'', telephone:'', adresse:'' },
   identifiant:  { slug:'', disponible:false, auto:false },
   paiement: {
@@ -474,846 +983,889 @@ const DEFAULT_PARAMS = {
     devise: 'FCFA'
   },
   livraison: { fraisDouala:1000, fraisAutres:2500, delai:'2-5 jours ouvrables', gratuit:false, montantMin:50000, zonesPersonnalisees:[] },
-  apparence: { couleurPrimaire:'#FF6B00', couleurSecondaire:'#1A1A1A', logo:'', favicon:'', police:'Inter' },
+  apparence: { couleurPrimaire:'#FF6B00', couleurSecondaire:'#1D1D1F', accent:'#FF9A3C', logo:'', favicon:'', police:'Outfit' },
   notifications: { commandes:true, stock:true, clients:false, rapports:true }
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   DEEP MERGE HELPER
-   ═══════════════════════════════════════════════════════════════ */
-function deepMerge(defaults, incoming) {
-  if (!incoming || typeof incoming !== 'object') return defaults;
-  const result = { ...defaults };
-  for (const key of Object.keys(defaults)) {
-    const def = defaults[key];
-    const inc = incoming[key];
-    if (inc === undefined || inc === null) {
-      result[key] = def;
-    } else if (typeof def === 'object' && !Array.isArray(def)) {
-      result[key] = deepMerge(def, inc);
-    } else {
-      result[key] = inc;
-    }
+function deepMerge(def, inc) {
+  if (!inc || typeof inc !== 'object') return def;
+  const r = { ...def };
+  for (const k of Object.keys(def)) {
+    const d = def[k], i = inc[k];
+    if (i === undefined || i === null) { r[k] = d; }
+    else if (typeof d === 'object' && !Array.isArray(d)) { r[k] = deepMerge(d, i); }
+    else { r[k] = i; }
   }
-  return result;
+  return r;
+}
+
+function genSlug() { return `oda-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,6)}`; }
+
+/* ═══════════════════════════════════════════════════════════════
+   SUB-COMPONENTS
+   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   DROPDOWN PORTAL — renders menu at body level to avoid z-index issues
+   ═══════════════════════════════════════════════════════════════ */
+function DropdownPortal({ triggerRef, open, onClose, children }) {
+  const [style, setStyle] = useState({});
+  useEffect(() => {
+    if (!open || !triggerRef.current) return;
+    const r = triggerRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - r.bottom;
+    const spaceAbove = r.top;
+    const menuH = 310;
+    const above = spaceBelow < menuH && spaceAbove > spaceBelow;
+    setStyle({
+      left:  r.left,
+      width: r.width,
+      ...(above
+        ? { bottom: window.innerHeight - r.top + 6, top: 'auto' }
+        : { top: r.bottom + 6 }
+      ),
+    });
+  }, [open]);
+
+  if (!open || typeof document === 'undefined') return null;
+
+  return createPortal(
+    <>
+      <div className="p-dd-backdrop" onClick={onClose} />
+      <div className="p-dd-portal" style={style}>
+        <div className="p-dd-portal-scroll">{children}</div>
+      </div>
+    </>,
+    document.body
+  );
+}
+
+/* ─── Icône Poubelle SVG ─── */
+function TrashIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+      <path d="M10 11v6M14 11v6" />
+      <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+    </svg>
+  );
+}
+
+function Toggle({ id, checked, onChange }) {
+  return (
+    <label className="p-toggle">
+      <input type="checkbox" id={id} checked={checked} onChange={e => onChange(e.target.checked)} />
+      <span className="p-toggle-track" />
+    </label>
+  );
+}
+
+function UpZone({ value, onFile, icon, label, accept }) {
+  const ref = useRef(null);
+  const has = !!value;
+  function pick(file) {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { toast('Fichier trop lourd (max 2 MB)', 'error'); return; }
+    if (!file.type.startsWith('image/')) { toast('Image uniquement', 'error'); return; }
+    const r = new FileReader();
+    r.onload = e => onFile(e.target.result);
+    r.readAsDataURL(file);
+  }
+  return (
+    <div className={`p-upload${has ? ' has-img' : ''}`} onClick={() => ref.current?.click()}>
+      {has
+        ? (<><img className="p-upload-img" src={value} alt="" /><span style={{ fontSize:'.68rem', color:'var(--green)', fontWeight:600 }}>✓ Chargé</span></>)
+        : (<><span className="p-upload-icon">{icon}</span><span className="p-upload-label">{label}</span><span style={{ fontSize:'.65rem', color:'var(--text-3)' }}>max 2 MB</span></>)
+      }
+      <input ref={ref} type="file" accept={accept || 'image/*'} hidden onChange={e => pick(e.target.files[0])} />
+    </div>
+  );
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   MAIN PAGE COMPONENT
+   PAGE
    ═══════════════════════════════════════════════════════════════ */
 export default function ParametresPage() {
   const supabase = getSupabase();
-  const { user }  = useAuth();
-  const router    = useRouter();
+  const { user } = useAuth();
+  const router = useRouter();
 
-  const [activeSection, setActiveSection] = useState('general');
-  const [params,  setParams]  = useState(DEFAULT_PARAMS);
+  const [section, setSection] = useState('general');
+  const [params, setParams] = useState(DEFAULTS);
   const [loading, setLoading] = useState(true);
-  const [saving,  setSaving]  = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  /* Slug */
-  const [slugInput,    setSlugInput]    = useState('');
-  const [slugStatus,   setSlugStatus]   = useState(null);
-  const [showSlugForm, setShowSlugForm] = useState(false);
+  const [slugIn, setSlugIn] = useState('');
+  const [slugSt, setSlugSt] = useState(null);
+  const [showSlug, setShowSlug] = useState(false);
 
-  /* Sécurité */
-  const [passwords, setPasswords] = useState({ current:'', new:'', confirm:'' });
-  const [pwdChanging, setPwdChanging] = useState(false);
+  const [pw, setPw] = useState({ new:'', confirm:'' });
+  const [pwBusy, setPwBusy] = useState(false);
 
-  /* Preview boutique */
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewUrl,  setPreviewUrl]  = useState('');
+  const [prevOpen, setPrevOpen] = useState(false);
+  const [prevUrl,  setPrevUrl]  = useState('');
   const iframeRef = useRef(null);
 
-  useEffect(() => { injectStyles(); }, []);
-  useEffect(() => { if (user) loadParams(); }, [user]);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [fontOpen,    setFontOpen]    = useState(false);
+  const [animKey,     setAnimKey]     = useState(0);
+  const palTriggerRef  = useRef(null);
+  const fontTriggerRef = useRef(null);
 
-  /* ═─ Injection meta OG pour partage du lien boutique ═─ */
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    const slug    = params.identifiant?.slug;
-    const favicon = params.apparence?.favicon;
-    const logo    = params.apparence?.logo;
-    const nom     = params.general?.nom  || 'Ma Boutique';
-    const desc    = params.general?.description || 'Boutique en ligne';
+  // Close dropdowns when changing section
+  
 
-    function setMeta(attr, attrVal, content) {
-      let el = document.querySelector(`meta[${attr}="${attrVal}"]`);
-      if (!el) { el = document.createElement('meta'); el.setAttribute(attr, attrVal); document.head.appendChild(el); }
-      el.setAttribute('content', content);
-    }
+  useEffect(() => { injectCSS(); }, []);
+  useEffect(() => { if (user) load(); }, [user]);
 
-    if (slug) {
-      const shopUrl = `${window.location.origin}/dashboard/boutique?shop=${slug}`;
-      const imgUrl  = logo || favicon || '';
-      setMeta('property', 'og:type',        'website');
-      setMeta('property', 'og:url',         shopUrl);
-      setMeta('property', 'og:title',       nom);
-      setMeta('property', 'og:description', desc);
-      if (imgUrl) {
-        setMeta('property', 'og:image',       imgUrl);
-        setMeta('property', 'og:image:width',  '512');
-        setMeta('property', 'og:image:height', '512');
-        setMeta('name',     'twitter:card',    'summary');
-        setMeta('name',     'twitter:image',   imgUrl);
-        setMeta('name',     'twitter:title',   nom);
-        setMeta('name',     'twitter:description', desc);
-      }
-    }
-
-    /* Met aussi à jour le favicon visible dans l'onglet navigateur */
-    if (favicon) {
-      let link = document.querySelector("link[rel~='icon']");
-      if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
-      link.href = favicon;
-    }
-  }, [params.identifiant?.slug, params.apparence?.favicon, params.apparence?.logo,
-      params.general?.nom, params.general?.description]);
-
-  /* ═─ Génération slug auto ═─ */
-  function genSlug() { return `oda-${Date.now().toString(36)}-${Math.random().toString(36).substring(2,6)}`; }
-
-  /* ═─ Chargement ═─ */
-  async function loadParams() {
+  /* ── Load ── */
+  async function load() {
     try {
       const { data } = await supabase.from('parametres_boutique').select('*').eq('user_id', user.id).single();
       if (data?.config) {
-        const merged = deepMerge(DEFAULT_PARAMS, data.config);
-        setParams(merged);
-        setSlugInput(merged.identifiant?.slug || '');
-        if (!merged.identifiant?.slug) await initSlug(merged);
+        const m = deepMerge(DEFAULTS, data.config);
+        setParams(m); setSlugIn(m.identifiant?.slug || '');
+        if (!m.identifiant?.slug) await initSlug(m);
       } else {
-        const local = localStorage.getItem(`parametres_${user.id}`);
-        if (local) {
+        const loc = localStorage.getItem(`p_${user.id}`);
+        if (loc) {
           try {
-            const parsed = deepMerge(DEFAULT_PARAMS, JSON.parse(local));
-            setParams(parsed);
-            setSlugInput(parsed.identifiant?.slug || '');
-            if (!parsed.identifiant?.slug) await initSlug(parsed);
-          } catch { await initSlug(DEFAULT_PARAMS); }
-        } else {
-          await initSlug(DEFAULT_PARAMS);
-        }
+            const p = deepMerge(DEFAULTS, JSON.parse(loc));
+            setParams(p); setSlugIn(p.identifiant?.slug || '');
+            if (!p.identifiant?.slug) await initSlug(p);
+          } catch { await initSlug(DEFAULTS); }
+        } else { await initSlug(DEFAULTS); }
       }
-    } catch { await initSlug(DEFAULT_PARAMS); }
-      finally { setLoading(false); }
+    } catch { await initSlug(DEFAULTS); }
+    finally { setLoading(false); }
   }
 
   async function initSlug(base) {
-    const slug = genSlug();
-    const next = deepMerge(DEFAULT_PARAMS, { ...base, identifiant:{ slug, disponible:true, auto:true, dateCreation:new Date().toISOString() }, slug });
-    setParams(next);
-    setSlugInput(slug);
-    await saveParams(next);
-    showNotif('🔖 Identifiant unique généré automatiquement', 'success');
+    const s = genSlug();
+    const n = deepMerge(DEFAULTS, { ...base, identifiant:{ slug:s, disponible:true, auto:true, dateCreation:new Date().toISOString() } });
+    setParams(n); setSlugIn(s); await save(n);
+    toast('Identifiant unique généré', 'success');
   }
 
-  /* ═─ Sauvegarde ═─ */
-  async function saveParams(p = params) {
+  /* ── Save ── */
+  async function save(p = params) {
     if (!user?.id) return false;
-    const json = JSON.stringify(p);
-    localStorage.setItem(`parametres_${user.id}`, json);
-    localStorage.setItem('parametres_boutique', json);
-    if (p.identifiant?.slug) localStorage.removeItem(`boutique_cache_${p.identifiant.slug}`);
+    localStorage.setItem(`p_${user.id}`, JSON.stringify(p));
+    localStorage.setItem('parametres_boutique', JSON.stringify(p));
     try {
       const { error } = await supabase.from('parametres_boutique').upsert(
         { user_id:user.id, config:p, updated_at:new Date().toISOString() },
         { onConflict:'user_id' }
       );
-      if (error) throw error;
-      return true;
+      return !error;
     } catch { return false; }
   }
 
-  function updateParam(path, value) {
+  function up(path, val) {
     setParams(prev => {
-      const next = JSON.parse(JSON.stringify(prev));
-      const keys = path.split('.');
-      let obj = next;
-      keys.forEach((k, i) => { if (i === keys.length-1) obj[k] = value; else obj = obj[k]; });
-      return next;
+      const n = JSON.parse(JSON.stringify(prev));
+      const ks = path.split('.');
+      let o = n;
+      ks.forEach((k, i) => { if (i === ks.length-1) o[k] = val; else o = o[k]; });
+      return n;
     });
   }
 
-  /* ═─ Vérifier slug ═─ */
-  async function checkSlug(slug) {
-    if (slug === params.identifiant?.slug) { setSlugStatus({ cls:'available', txt:"✓ C'est votre identifiant actuel" }); return true; }
-    if (slug.length < 3) { setSlugStatus({ cls:'unavailable', txt:'✗ Minimum 3 caractères' }); return false; }
+  /* ── Slug check ── */
+  async function checkSlug(s) {
+    if (s === params.identifiant?.slug) { setSlugSt({ ok:true, msg:'Identifiant actuel' }); return true; }
+    if (s.length < 3) { setSlugSt({ ok:false, msg:'Minimum 3 caractères' }); return false; }
     try {
-      const { data } = await supabase.from('parametres_boutique').select('user_id').eq('config->identifiant->>slug', slug).neq('user_id', user.id).single();
+      const { data } = await supabase.from('parametres_boutique').select('user_id').eq('config->identifiant->>slug', s).neq('user_id', user.id).single();
       const ok = !data;
-      setSlugStatus({ cls: ok?'available':'unavailable', txt: ok?'✓ Identifiant disponible':'✗ Identifiant déjà utilisé' });
+      setSlugSt({ ok, msg: ok ? '✓ Disponible' : '✕ Déjà utilisé' });
       return ok;
     } catch { return false; }
   }
 
-  /* ═─ Soumettre slug ═─ */
-  async function handleSlugSubmit(e) {
+  async function submitSlug(e) {
     e.preventDefault();
-    const slug = slugInput.toLowerCase().replace(/[^a-z0-9-]/g,'');
-    if (slug.length < 3) { showNotif('❌ Minimum 3 caractères', 'error'); return; }
-    const ok = await checkSlug(slug);
-    if (!ok) { showNotif('❌ Identifiant non disponible', 'error'); return; }
-    const next = { ...params, identifiant:{ slug, disponible:true, auto:false, dateCreation:params.identifiant?.dateCreation || new Date().toISOString() }, slug };
-    setParams(next);
-    setShowSlugForm(false);
-    const saved = await saveParams(next);
-    showNotif(saved ? '✅ Identifiant sauvegardé !' : '⚠️ Sauvegardé localement', saved?'success':'warning');
+    const s = slugIn.toLowerCase().replace(/[^a-z0-9-]/g,'');
+    if (s.length < 3) { toast('Minimum 3 caractères', 'error'); return; }
+    if (!(await checkSlug(s))) { toast('Identifiant non disponible', 'error'); return; }
+    const n = { ...params, identifiant:{ slug:s, disponible:true, auto:false, dateCreation:params.identifiant?.dateCreation || new Date().toISOString() } };
+    setParams(n); setShowSlug(false);
+    const ok = await save(n);
+    toast(ok ? 'Identifiant sauvegardé' : 'Sauvegardé localement', ok ? 'success' : 'warning');
   }
 
-  /* ═─ Save général ═─ */
-  async function handleGeneralSubmit(e) {
+  /* ── Handlers ── */
+  async function saveGeneral(e) {
+    e.preventDefault(); setSaving(true);
+    const ok = await save(); setSaving(false);
+    toast(ok ? 'Modifications enregistrées' : 'Sauvegardé localement', ok ? 'success' : 'warning');
+  }
+
+  async function confirmerPaiement(type) { up(`paiement.${type}.confirme`, true); await save(); toast(`Paiement ${type} confirmé`, 'success'); }
+  async function confirmerMM() { up('paiement.mobile.confirme', true); up('paiement.mobile.mtn.confirme', true); up('paiement.mobile.orange.confirme', true); await save(); toast('Mobile Money confirmé', 'success'); }
+
+  async function saveShipping(e) { e.preventDefault(); const ok = await save(); toast(ok ? 'Livraison sauvegardée' : 'Sauvegardé localement', ok ? 'success' : 'warning'); }
+
+  function addZone() { up('livraison.zonesPersonnalisees', [...(params.livraison.zonesPersonnalisees||[]), { nom:'', frais:0 }]); }
+  function upZone(i, k, v) { const z = [...(params.livraison.zonesPersonnalisees||[])]; z[i] = { ...z[i], [k]:v }; up('livraison.zonesPersonnalisees', z); }
+  function rmZone(i) { up('livraison.zonesPersonnalisees', (params.livraison.zonesPersonnalisees||[]).filter((_,x) => x!==i)); }
+
+  async function saveNotifs() { const ok = await save(); toast(ok ? 'Notifications sauvegardées' : 'Sauvegardé localement', ok ? 'success' : 'warning'); }
+
+  async function submitPw(e) {
     e.preventDefault();
-    setSaving(true);
-    const ok = await saveParams();
-    setSaving(false);
-    showNotif(ok ? '✅ Modifications enregistrées !' : '⚠️ Sauvegardé localement', ok?'success':'warning');
+    if (pw.new !== pw.confirm) { toast('Mots de passe différents', 'error'); return; }
+    if (pw.new.length < 6) { toast('Minimum 6 caractères', 'error'); return; }
+    setPwBusy(true);
+    try { const { error } = await supabase.auth.updateUser({ password:pw.new }); if (error) throw error; toast('Mot de passe modifié', 'success'); setPw({ new:'', confirm:'' }); }
+    catch(err) { toast(`Erreur : ${err.message}`, 'error'); }
+    finally { setPwBusy(false); }
   }
 
-  /* ═─ Paiement ═─ */
-  async function confirmerPaiement(type) {
-    updateParam(`paiement.${type}.confirme`, true);
-    await saveParams();
-    showNotif(`✅ Paiement ${type} confirmé !`, 'success');
+  async function saveApp() { setSaving(true); const ok = await save(); setSaving(false); toast(ok ? 'Apparence sauvegardée' : 'Sauvegardé localement', ok ? 'success' : 'warning'); }
+
+  async function resetApp() {
+    if (!confirm("Réinitialiser l'apparence par défaut ?")) return;
+    const n = { ...params, apparence:{ couleurPrimaire:'#FF6B00', couleurSecondaire:'#1D1D1F', accent:'#FF9A3C', logo:'', favicon:'', police:'Outfit' } };
+    setParams(n); await save(n); toast('Apparence réinitialisée', 'success');
   }
 
-  async function confirmerMobileMoney() {
-    updateParam('paiement.mobile.confirme', true);
-    updateParam('paiement.mobile.mtn.confirme', true);
-    updateParam('paiement.mobile.orange.confirme', true);
-    await saveParams();
-    showNotif('✅ Mobile Money confirmé !', 'success');
+  async function upImg(key, b64) {
+    const n = JSON.parse(JSON.stringify(params)); n.apparence[key] = b64; setParams(n);
+    const ok = await save(n);
+    toast(ok ? `${key === 'logo' ? 'Logo' : 'Favicon'} mis à jour` : 'Sauvegardé localement', ok ? 'success' : 'warning');
   }
 
-  /* ═─ Livraison ═─ */
-  async function handleShippingSubmit(e) {
-    e.preventDefault();
-    const ok = await saveParams();
-    showNotif(ok ? '✅ Livraison sauvegardée !' : '⚠️ Sauvegardé localement', ok?'success':'warning');
+  function applyPalette(pal) {
+    setParams(prev => {
+      const n = JSON.parse(JSON.stringify(prev));
+      n.apparence.couleurPrimaire   = pal.primary;
+      n.apparence.couleurSecondaire = pal.secondary;
+      n.apparence.accent            = pal.accent;
+      return n;
+    });
   }
 
-  function addZone() {
-    const zones = [...(params.livraison.zonesPersonnalisees || []), { nom:'', frais:0 }];
-    updateParam('livraison.zonesPersonnalisees', zones);
-  }
-
-  function updateZone(i, key, val) {
-    const zones = [...(params.livraison.zonesPersonnalisees || [])];
-    zones[i] = { ...zones[i], [key]: val };
-    updateParam('livraison.zonesPersonnalisees', zones);
-  }
-
-  function removeZone(i) {
-    const zones = (params.livraison.zonesPersonnalisees || []).filter((_, idx) => idx !== i);
-    updateParam('livraison.zonesPersonnalisees', zones);
-  }
-
-  /* ═─ Notifications ═─ */
-  async function saveNotifs() {
-    const ok = await saveParams();
-    showNotif(ok ? '✅ Notifications sauvegardées !' : '⚠️ Sauvegardé localement', ok?'success':'warning');
-  }
-
-  /* ═─ Sécurité ═─ */
-  async function handlePasswordSubmit(e) {
-    e.preventDefault();
-    if (passwords.new !== passwords.confirm) { showNotif('❌ Les mots de passe ne correspondent pas', 'error'); return; }
-    if (passwords.new.length < 6) { showNotif('❌ Mot de passe trop court (min 6 caractères)', 'error'); return; }
-    setPwdChanging(true);
-    try {
-      const { error } = await supabase.auth.updateUser({ password: passwords.new });
-      if (error) throw error;
-      showNotif('✅ Mot de passe modifié avec succès !', 'success');
-      setPasswords({ current:'', new:'', confirm:'' });
-    } catch(err) { showNotif(`❌ Erreur : ${err.message}`, 'error'); }
-    finally { setPwdChanging(false); }
-  }
-
-  async function exporterDonnees() {
-    try {
-      const [prods, cmds, clients] = await Promise.all([
-        supabase.from('produits').select('*').eq('user_id', user.id),
-        supabase.from('commandes').select('*').eq('user_id', user.id),
-        supabase.from('clients').select('*').eq('user_id', user.id),
-      ]);
-      const blob = new Blob([JSON.stringify({ produits:prods.data, commandes:cmds.data, clients:clients.data, parametres:params }, null, 2)], { type:'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = `oda-export-${new Date().toISOString().split('T')[0]}.json`; a.click();
-      URL.revokeObjectURL(url);
-      showNotif('📥 Données exportées !', 'success');
-    } catch { showNotif('❌ Erreur export', 'error'); }
-  }
-
-  async function supprimerCompte() {
-    if (!confirm('⚠️ Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) return;
-    const code = prompt('Tapez "SUPPRIMER" pour confirmer :');
-    if (code !== 'SUPPRIMER') { showNotif('❌ Suppression annulée', 'info'); return; }
-    showNotif('🗑️ Contacter le support pour supprimer le compte.', 'warning');
-  }
-
-  /* ═─ Apparence : sauvegarde & reset ═─ */
-  async function saveAppearance() {
-    setSaving(true);
-    const ok = await saveParams();
-    setSaving(false);
-    showNotif(ok ? '✅ Apparence sauvegardée — boutique mise à jour !' : '⚠️ Sauvegardé localement', ok?'success':'warning');
-  }
-
-  async function resetAppearance() {
-    if (!confirm("Voulez-vous vraiment réinitialiser l'apparence par défaut ?")) return;
-    const next = { ...params, apparence:{ couleurPrimaire:'#FF6B00', couleurSecondaire:'#1A1A1A', logo:'', favicon:'', police:'Inter' } };
-    setParams(next);
-    await saveParams(next);
-    showNotif('✅ Apparence réinitialisée', 'success');
-  }
-
-  /* ═─ Upload image (logo / favicon) ═─ */
-  async function handleImageUpload(type, base64) {
-    const next = JSON.parse(JSON.stringify(params));
-    next.apparence[type] = base64;
-    setParams(next);
-    const ok = await saveParams(next);
-    if (type === 'favicon' && base64) {
-      showNotif('🔖 Favicon chargé — sera appliqué sur la boutique', 'info');
-    }
-    showNotif(
-      type === 'logo'
-        ? (ok ? '✅ Logo mis à jour !' : '⚠️ Logo sauvegardé localement')
-        : (ok ? '✅ Favicon sauvegardé !'  : '⚠️ Favicon sauvegardé localement'),
-      ok ? 'success' : 'warning'
-    );
-  }
-
-  /* ═─ Copier lien boutique ═─ */
-  function copierLienBoutique() {
+  function copyLink() {
     const url = `${window.location.origin}/dashboard/boutique?shop=${params.identifiant?.slug}`;
-    navigator.clipboard.writeText(url).then(() => showNotif('✅ Lien copié !', 'success'));
+    navigator.clipboard.writeText(url).then(() => toast('Lien copié', 'success'));
   }
 
-  /* ═─ Preview boutique ═─ */
   function openPreview() {
-    const slug = params.identifiant?.slug;
-    const url  = slug ? `${window.location.origin}/dashboard/boutique?shop=${slug}` : `${window.location.origin}/dashboard/boutique`;
-    setPreviewUrl(url);
-    setPreviewOpen(true);
-    if (iframeRef.current) iframeRef.current.src = url;
+    const s = params.identifiant?.slug;
+    const url = s ? `${window.location.origin}/dashboard/boutique?shop=${s}` : `${window.location.origin}/dashboard/boutique`;
+    setPrevUrl(url); setPrevOpen(true);
+    setTimeout(() => { if (iframeRef.current) iframeRef.current.src = url; }, 100);
   }
 
-  /* ═─ Nav items ═─ */
+  useEffect(() => { loadFont(params.apparence?.police); }, [params.apparence?.police]);
+
+  function changeSection(id) {
+    setPaletteOpen(false);
+    setFontOpen(false);
+    setSection(id);
+    setAnimKey(k => k + 1);
+  }
+
+  /* ── Nav config ── */
   const NAV = [
-    { id:'general',       icon:'🏪', label:'Général' },
-    { id:'identifiant',   icon:'🔖', label:'Identifiant' },
-    { id:'payment',       icon:'💳', label:'Paiement' },
-    { id:'shipping',      icon:'📦', label:'Livraison' },
-    { id:'notifications', icon:'🔔', label:'Notifications' },
-    { id:'security',      icon:'🔒', label:'Sécurité' },
-    { id:'apparence',     icon:'🎨', label:'Apparence' },
+    { id:'general',  ico:'🏪', label:'Général' },
+    { id:'slug',     ico:'🔗', label:'Identifiant' },
+    { id:'payment',  ico:'💳', label:'Paiement' },
+    { id:'shipping', ico:'📦', label:'Livraison' },
+    { id:'notifs',   ico:'🔔', label:'Notifications' },
+    { id:'security', ico:'🔒', label:'Sécurité' },
+    { id:'app',      ico:'🎨', label:'Apparence' },
   ];
 
-  const boutiqueLien = params.identifiant?.slug
+  const NAV_DESC = {
+    general:  'Informations de base de votre boutique',
+    slug:     'Identifiant unique et URL personnalisée',
+    payment:  'Méthodes de paiement acceptées',
+    shipping: 'Frais et zones de livraison',
+    notifs:   'Alertes et notifications email',
+    security: 'Mot de passe et données du compte',
+    app:      'Couleurs, polices et images de la boutique',
+  };
+
+  const linkUrl = params.identifiant?.slug
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard/boutique?shop=${params.identifiant.slug}`
     : '';
 
-  if (loading) {
-    return (
-      <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'400px', fontFamily:'var(--font)' }}>
-        <div style={{ textAlign:'center' }}>
-          <div style={{ fontSize:'2rem', marginBottom:'12px' }}>⏳️</div>
-          <p style={{ color:'var(--oda-gray-500)' }}>Chargement des paramètres...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="p-loading">
+      <div className="p-spin" />
+      <span>Chargement des paramètres…</span>
+    </div>
+  );
+
+  const currentNav = NAV.find(n => n.id === section);
 
   /* ═══════════════════════════════════════════════════════════════
      RENDER
      ═══════════════════════════════════════════════════════════════ */
   return (
-    <div style={{ fontFamily:"'Poppins',-apple-system,sans-serif", background:'var(--oda-gray-50)', minHeight:'100vh' }}>
-      <div className="prm-container">
+    <div className="p-wrap">
 
-        {/* ── SIDEBAR ── */}
-        <aside className="prm-sidebar">
-          <div className="prm-sidebar-title">PARAMÈTRES</div>
-          <nav>
-            {NAV.map(n => (
-              <button
-                key={n.id}
-                className={`prm-nav-item${activeSection===n.id?' active':''}`}
-                onClick={() => setActiveSection(n.id)}
-              >
-                <span className="prm-nav-icon">{n.icon}</span>
-                <span>{n.label}</span>
-              </button>
-            ))}
-          </nav>
-        </aside>
+      {/* ════════ SIDEBAR ════════ */}
+      <aside className="p-side">
+        <div className="p-side-brand">
+          <div className="p-side-logo">
+            <div className="p-side-logo-icon">⚙️</div>
+            <div>
+              <div className="p-side-logo-text">ODA Studio</div>
+              <div className="p-side-logo-sub">Paramètres</div>
+            </div>
+          </div>
+        </div>
 
-        {/* ── MAIN CONTENT ── */}
-        <main className="prm-main">
+        <div className="p-nav-section">Menu</div>
+        <div style={{ padding:'0 8px' }}>
+          {NAV.map(n => (
+            <button key={n.id} className={`p-nav-btn${section===n.id?' active':''}`} onClick={() => changeSection(n.id)}>
+              <span className="p-nav-ico">{n.ico}</span>
+              <span>{n.label}</span>
+              <span className="p-nav-chevron">›</span>
+            </button>
+          ))}
+        </div>
 
-          {/* ══ GÉNÉRAL ═ */}
-          {activeSection === 'general' && (
-            <section id="general" className="prm-section">
-              <div className="prm-section-header">
-                <h2 className="prm-section-title">Informations générales</h2>
-                <p className="prm-section-desc">Configurez les informations de base de votre boutique</p>
-              </div>
-              <form id="generalForm" onSubmit={handleGeneralSubmit}>
-                <div className="prm-field">
-                  <label className="prm-label">Nom de la boutique</label>
-                  <input id="shopName" className="prm-input" type="text" placeholder="Ma Boutique Élégante" value={params.general.nom} onChange={e => updateParam('general.nom', e.target.value)} />
-                </div>
-                <div className="prm-field">
-                  <label className="prm-label">Description</label>
-                  <textarea id="shopDescription" className="prm-textarea prm-input" placeholder="Décrivez votre boutique..." value={params.general.description} onChange={e => updateParam('general.description', e.target.value)} />
-                </div>
-                <div className="prm-form-grid">
-                  <div className="prm-field">
-                    <label className="prm-label">Email de contact</label>
-                    <input id="shopEmail" className="prm-input" type="email" placeholder="contact@boutique.com" value={params.general.email} onChange={e => updateParam('general.email', e.target.value)} />
-                  </div>
-                  <div className="prm-field">
-                    <label className="prm-label">Téléphone (WhatsApp)</label>
-                    <input id="shopPhone" className="prm-input" type="tel" placeholder="+237 6 XX XX XX" value={params.general.telephone} onChange={e => updateParam('general.telephone', e.target.value)} />
-                  </div>
-                </div>
-                <div className="prm-field">
-                  <label className="prm-label">Adresse</label>
-                  <input id="shopAddress" className="prm-input" type="text" placeholder="Douala, Cameroun" value={params.general.adresse} onChange={e => updateParam('general.adresse', e.target.value)} />
-                </div>
-                <button type="submit" className="prm-btn prm-btn-primary" disabled={saving}>
-                  {saving ? '⏳ Enregistrement...' : '💾 Enregistrer les modifications'}
-                </button>
-              </form>
-            </section>
-          )}
+        <div className="p-side-footer">
+          <div className="p-side-footer-tag">ODA Studio · v2.0</div>
+        </div>
+      </aside>
 
-          {/* ══ IDENTIFIANT ═ */}
-          {activeSection === 'identifiant' && (
-            <section id="identifiant" className="prm-section">
-              <div className="prm-section-header">
-                <h2 className="prm-section-title">Identifiant unique de la boutique</h2>
-                <p className="prm-section-desc">Créez un nom unique pour votre boutique (URL personnalisée)</p>
-              </div>
+      {/* ════════ MAIN ════════ */}
+      <main className="p-main" key={animKey}>
 
-              <div className="prm-alert prm-alert-info">
-                <span style={{ fontSize:'1.5rem' }}>ℹ️</span>
+        {/* Page header */}
+        <div className="p-head">
+          <div className="p-head-eyebrow">{currentNav?.ico} {currentNav?.label}</div>
+          <h1>{currentNav?.label}</h1>
+          <p>{NAV_DESC[section]}</p>
+        </div>
+
+        {/* ════ GÉNÉRAL ════ */}
+        {section === 'general' && (
+          <div className="p-section-anim">
+            <div className="p-card">
+              <div className="p-card-head">
                 <div>
-                  <strong>À quoi sert l'identifiant unique ?</strong>
-                  <p style={{ marginTop:'4px', color:'var(--oda-gray-500)', fontSize:'.9rem' }}>Cet identifiant sera utilisé dans l'URL de votre boutique et permettra à vos clients d'y accéder directement.</p>
+                  <div className="p-card-title"><span className="p-card-title-icon">🏪</span>Informations boutique</div>
+                  <div className="p-card-desc">Ces informations seront visibles par vos clients</div>
                 </div>
               </div>
-
-              {/* Identifiant actif */}
-              {params.identifiant?.slug && !showSlugForm && (
-                <div id="identifiantActuel" style={{ marginBottom:'24px', padding:'20px', background:'linear-gradient(135deg,rgba(52,199,89,.1),rgba(52,199,89,.05))', borderRadius:'var(--radius-md)', borderLeft:'4px solid var(--oda-green)' }}>
-                  <h4 style={{ marginBottom:'12px', color:'var(--oda-green)', fontWeight:600 }}>✅ Identifiant actif</h4>
-                  <div style={{ display:'flex', alignItems:'center', gap:'12px', marginBottom:'12px' }}>
-                    <span style={{ fontFamily:'monospace', fontSize:'1.1rem', fontWeight:600 }}>@</span>
-                    <span id="identifiantActif" style={{ fontFamily:'monospace', fontSize:'1.1rem', fontWeight:600, color:'var(--oda-blue)' }}>{params.identifiant.slug}</span>
+              <form onSubmit={saveGeneral}>
+                <div className="p-stack">
+                  <div className="p-field">
+                    <label className="p-lbl">Nom de la boutique</label>
+                    <input className="p-inp" value={params.general.nom} onChange={e => up('general.nom', e.target.value)} placeholder="Ma Boutique" />
                   </div>
-                  <div style={{ marginBottom:'16px' }}>
-                    <strong>Lien de votre boutique :</strong>
-                    <div className="prm-link-row">
-                      <input id="lienBoutique" type="text" readOnly value={boutiqueLien} style={{ padding:'10px', border:'1.5px solid var(--oda-gray-200)', borderRadius:'var(--radius-sm)', fontFamily:'monospace', background:'white', outline:'none' }} />
-                      <button type="button" className="prm-btn prm-btn-secondary" style={{ padding:'10px 20px', whiteSpace:'nowrap', flexShrink:0 }} onClick={copierLienBoutique}>📋 Copier</button>
+                  <div className="p-field">
+                    <label className="p-lbl">Description</label>
+                    <textarea className="p-ta" value={params.general.description} onChange={e => up('general.description', e.target.value)} placeholder="Décrivez votre boutique en quelques mots…" />
+                  </div>
+                  <div className="p-grid">
+                    <div className="p-field">
+                      <label className="p-lbl">Email de contact</label>
+                      <input className="p-inp" type="email" value={params.general.email} onChange={e => up('general.email', e.target.value)} placeholder="contact@boutique.com" />
+                    </div>
+                    <div className="p-field">
+                      <label className="p-lbl">Téléphone</label>
+                      <input className="p-inp" type="tel" value={params.general.telephone} onChange={e => up('general.telephone', e.target.value)} placeholder="+237 6XX XX XX XX" />
                     </div>
                   </div>
-                  <button type="button" className="prm-btn prm-btn-secondary" style={{ background:'transparent', color:'var(--oda-blue)', border:'1.5px solid var(--oda-blue)' }} onClick={() => setShowSlugForm(true)}>
-                    ✏️ Modifier l'identifiant
-                  </button>
+                  <div className="p-field">
+                    <label className="p-lbl">Adresse</label>
+                    <input className="p-inp" value={params.general.adresse} onChange={e => up('general.adresse', e.target.value)} placeholder="Douala, Cameroun" />
+                  </div>
+                  <div>
+                    <button type="submit" className="p-btn p-btn-primary" disabled={saving}>
+                      {saving ? 'Enregistrement…' : '✓ Enregistrer'}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ════ IDENTIFIANT ════ */}
+        {section === 'slug' && (
+          <div className="p-section-anim">
+            <div className="p-card">
+              <div className="p-card-head">
+                <div>
+                  <div className="p-card-title"><span className="p-card-title-icon">🔗</span>URL de votre boutique</div>
+                  <div className="p-card-desc">Votre lien public unique pour partager votre boutique</div>
+                </div>
+              </div>
+
+              {params.identifiant?.slug && !showSlug && (
+                <div className="p-slug-box">
+                  <div style={{ fontSize:'.75rem', fontWeight:700, color:'var(--green)', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:10 }}>
+                    ● Identifiant actif
+                  </div>
+                  <div className="p-slug-handle"><span>@</span>{params.identifiant.slug}</div>
+                  <div style={{ display:'flex', gap:'8px', alignItems:'center', marginBottom:12 }}>
+                    <input className="p-inp" readOnly value={linkUrl} style={{ fontFamily:'monospace', fontSize:'.8rem' }} />
+                    <button type="button" className="p-btn p-btn-ghost p-btn-sm" onClick={copyLink}>Copier</button>
+                  </div>
+                  <button type="button" className="p-btn p-btn-ghost p-btn-sm" onClick={() => setShowSlug(true)}>Modifier l'identifiant</button>
                 </div>
               )}
 
-              {/* Formulaire slug */}
-              {(!params.identifiant?.slug || showSlugForm) && (
-                <form id="identifiantForm" onSubmit={handleSlugSubmit}>
-                  <div className="prm-field">
-                    <label className="prm-label">Identifiant unique (slug)</label>
-                    <div className="prm-input-prefix">
-                      <span className="prm-prefix">@</span>
+              {(!params.identifiant?.slug || showSlug) && (
+                <form onSubmit={submitSlug}>
+                  <div className="p-stack">
+                    <div className="p-field">
+                      <label className="p-lbl">Identifiant unique</label>
                       <input
-                        id="shopSlug"
-                        className="prm-input"
-                        type="text"
-                        placeholder="ma-boutique-elegante"
-                        pattern="[a-z0-9-]+"
-                        maxLength={50}
-                        value={slugInput}
+                        className="p-inp"
+                        value={slugIn}
                         onChange={e => {
                           const v = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,'');
-                          setSlugInput(v);
-                          setSlugStatus(null);
+                          setSlugIn(v); setSlugSt(null);
                           if (v.length >= 3) checkSlug(v);
                         }}
+                        placeholder="ma-boutique-oda"
+                        style={{ fontFamily:'monospace' }}
                       />
+                      {slugSt && <div className={`p-slug-status ${slugSt.ok?'ok':'fail'}`}>{slugSt.msg}</div>}
+                      <div className="p-hint">Uniquement des lettres minuscules, chiffres et tirets</div>
                     </div>
-                    <small className="prm-hint">Uniquement des lettres minuscules, chiffres et tirets (minimum 3 caractères)</small>
-                    {slugStatus && <div id="slugAvailability" className={`prm-slug-status ${slugStatus.cls}`}>{slugStatus.txt}</div>}
-                  </div>
-
-                  <div style={{ marginTop:'16px', background:'var(--oda-gray-50)', padding:'16px', borderRadius:'var(--radius-md)' }}>
-                    <strong>Aperçu de votre URL :</strong>
-                    <div style={{ fontFamily:'monospace', marginTop:'8px', fontSize:'.9rem', color:'var(--oda-blue)' }}>
-                      <span>{typeof window !== 'undefined' ? window.location.origin : ''}/dashboard/boutique</span>
-                      <span>?shop=</span>
-                      <span>{slugInput || 'votre-identifiant'}</span>
+                    <div className="p-btn-group">
+                      <button type="submit" className="p-btn p-btn-primary">Définir l'identifiant</button>
+                      {showSlug && <button type="button" className="p-btn p-btn-ghost" onClick={() => setShowSlug(false)}>Annuler</button>}
                     </div>
-                  </div>
-
-                  <div style={{ display:'flex', gap:'12px', marginTop:'20px' }}>
-                    <button type="submit" className="prm-btn prm-btn-primary">🔖 Définir l'identifiant</button>
-                    {showSlugForm && <button type="button" className="prm-btn prm-btn-secondary" onClick={() => setShowSlugForm(false)}>Annuler</button>}
                   </div>
                 </form>
               )}
-            </section>
-          )}
+            </div>
+          </div>
+        )}
 
-          {/* ══ PAIEMENT ═ */}
-          {activeSection === 'payment' && (
-            <section id="payment" className="prm-section">
-              <div className="prm-section-header">
-                <h2 className="prm-section-title">Méthodes de paiement</h2>
-                <p className="prm-section-desc">Configurez vos options de paiement</p>
+        {/* ════ PAIEMENT ════ */}
+        {section === 'payment' && (
+          <div className="p-section-anim">
+
+            {/* Carte bancaire */}
+            <div className="p-card">
+              <div className="p-card-head">
+                <div>
+                  <div className="p-card-title"><span className="p-card-title-icon">💳</span>Carte bancaire</div>
+                  <div className="p-card-desc">Visa, Mastercard via Stripe</div>
+                </div>
+                <Toggle id="payCard" checked={params.paiement.carte.actif} onChange={v => up('paiement.carte.actif', v)} />
+              </div>
+              {params.paiement.carte.actif && (
+                <div className="p-stack">
+                  <div className="p-field">
+                    <label className="p-lbl">Clé API Stripe</label>
+                    <input className="p-inp" placeholder="sk_live_..." value={params.paiement.carte.cle} onChange={e => up('paiement.carte.cle', e.target.value)} style={{ fontFamily:'monospace' }} />
+                  </div>
+                  <div>
+                    <button type="button" className="p-btn p-btn-success p-btn-sm" onClick={() => confirmerPaiement('carte')}>✓ Confirmer l'intégration</button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Money */}
+            <div className="p-card">
+              <div className="p-card-head">
+                <div>
+                  <div className="p-card-title"><span className="p-card-title-icon">📱</span>Mobile Money</div>
+                  <div className="p-card-desc">MTN & Orange Money Cameroun</div>
+                </div>
+                <Toggle id="payMM" checked={params.paiement.mobile.actif} onChange={v => up('paiement.mobile.actif', v)} />
+              </div>
+              {params.paiement.mobile.actif && (
+                <div className="p-stack">
+                  {/* MTN */}
+                  <div className="p-provider-block">
+                    <div className="p-provider-head">
+                      <div className="p-provider-label">
+                        <span className="p-provider-badge p-badge-mtn">MTN</span>
+                        MTN Mobile Money
+                      </div>
+                      <Toggle id="mtnOn" checked={params.paiement.mobile.mtn?.actif ?? false} onChange={v => up('paiement.mobile.mtn.actif', v)} />
+                    </div>
+                    {params.paiement.mobile.mtn?.actif && (
+                      <div className="p-grid">
+                        <div className="p-field">
+                          <label className="p-lbl">Nom du compte</label>
+                          <input className="p-inp" placeholder="Jean Dupont" value={params.paiement.mobile.mtn?.nomCompte ?? ''} onChange={e => up('paiement.mobile.mtn.nomCompte', e.target.value)} />
+                        </div>
+                        <div className="p-field">
+                          <label className="p-lbl">Numéro</label>
+                          <input className="p-inp" type="tel" placeholder="+237 6XX XX XX" value={params.paiement.mobile.mtn?.numero ?? ''} onChange={e => up('paiement.mobile.mtn.numero', e.target.value)} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Orange */}
+                  <div className="p-provider-block">
+                    <div className="p-provider-head">
+                      <div className="p-provider-label">
+                        <span className="p-provider-badge p-badge-orange">Orange</span>
+                        Orange Money
+                      </div>
+                      <Toggle id="omOn" checked={params.paiement.mobile.orange?.actif ?? false} onChange={v => up('paiement.mobile.orange.actif', v)} />
+                    </div>
+                    {params.paiement.mobile.orange?.actif && (
+                      <div className="p-grid">
+                        <div className="p-field">
+                          <label className="p-lbl">Nom du compte</label>
+                          <input className="p-inp" placeholder="Jean Dupont" value={params.paiement.mobile.orange?.nomCompte ?? ''} onChange={e => up('paiement.mobile.orange.nomCompte', e.target.value)} />
+                        </div>
+                        <div className="p-field">
+                          <label className="p-lbl">Numéro</label>
+                          <input className="p-inp" type="tel" placeholder="+237 6XX XX XX" value={params.paiement.mobile.orange?.numero ?? ''} onChange={e => up('paiement.mobile.orange.numero', e.target.value)} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <button type="button" className="p-btn p-btn-success p-btn-sm" onClick={confirmerMM}>✓ Confirmer Mobile Money</button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Cash */}
+            <div className="p-card">
+              <div className="p-card-head">
+                <div>
+                  <div className="p-card-title"><span className="p-card-title-icon">💵</span>Paiement à la livraison</div>
+                  <div className="p-card-desc">Le client paie en espèces à la réception</div>
+                </div>
+                <Toggle id="payCash" checked={params.paiement.cash?.actif ?? false} onChange={v => up('paiement.cash.actif', v)} />
+              </div>
+              {params.paiement.cash?.actif && (
+                <div style={{ marginTop:4 }}>
+                  <button type="button" className="p-btn p-btn-success p-btn-sm" onClick={() => { up('paiement.cash.confirme', true); toast('Paiement cash activé', 'success'); }}>✓ Confirmer</button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ════ LIVRAISON ════ */}
+        {section === 'shipping' && (
+          <div className="p-section-anim">
+            <div className="p-card">
+              <div className="p-card-head">
+                <div>
+                  <div className="p-card-title"><span className="p-card-title-icon">📦</span>Tarifs de livraison</div>
+                  <div className="p-card-desc">Configurez vos zones et frais de livraison</div>
+                </div>
+              </div>
+              <form onSubmit={saveShipping}>
+                <div className="p-stack">
+                  <div className="p-grid">
+                    <div className="p-field">
+                      <label className="p-lbl">Frais Douala (FCFA)</label>
+                      <input className="p-inp" type="number" value={params.livraison.fraisDouala} onChange={e => up('livraison.fraisDouala', Number(e.target.value))} />
+                    </div>
+                    <div className="p-field">
+                      <label className="p-lbl">Autres villes (FCFA)</label>
+                      <input className="p-inp" type="number" value={params.livraison.fraisAutres} onChange={e => up('livraison.fraisAutres', Number(e.target.value))} />
+                    </div>
+                  </div>
+                  <div className="p-grid">
+                    <div className="p-field">
+                      <label className="p-lbl">Délai estimé</label>
+                      <input className="p-inp" value={params.livraison.delai} onChange={e => up('livraison.delai', e.target.value)} placeholder="2-5 jours ouvrables" />
+                    </div>
+                    <div className="p-field">
+                      <label className="p-lbl">Montant min. livraison gratuite (FCFA)</label>
+                      <input className="p-inp" type="number" value={params.livraison.montantMin} onChange={e => up('livraison.montantMin', Number(e.target.value))} />
+                    </div>
+                  </div>
+
+                  <div className="p-divider" />
+
+                  <div className="p-row" style={{ paddingTop:0 }}>
+                    <div className="p-row-info">
+                      <div className="p-row-title">Livraison gratuite</div>
+                      <div className="p-row-desc">Offrir la livraison au-dessus du montant minimum</div>
+                    </div>
+                    <Toggle id="freeShip" checked={params.livraison.gratuit} onChange={v => up('livraison.gratuit', v)} />
+                  </div>
+
+                  <div className="p-divider" />
+
+                  <div>
+                    <div style={{ fontSize:'.875rem', fontWeight:600, color:'var(--text-1)', marginBottom:12 }}>Zones personnalisées</div>
+                    {(params.livraison.zonesPersonnalisees||[]).map((z,i) => (
+                      <div key={i} className="p-zone">
+                        <input className="p-inp" placeholder="Nom de la zone" value={z.nom} onChange={e => upZone(i,'nom',e.target.value)} />
+                        <input className="p-inp" type="number" placeholder="Frais" value={z.frais} onChange={e => upZone(i,'frais',Number(e.target.value))} />
+                        <button type="button" className="p-zone-del" onClick={() => rmZone(i)} title="Supprimer la zone">
+                          <TrashIcon size={14} />
+                        </button>
+                      </div>
+                    ))}
+                    <button type="button" className="p-btn p-btn-ghost p-btn-sm" onClick={addZone} style={{ marginTop:4 }}>+ Ajouter une zone</button>
+                  </div>
+
+                  <div>
+                    <button type="submit" className="p-btn p-btn-primary">✓ Enregistrer la livraison</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ════ NOTIFICATIONS ════ */}
+        {section === 'notifs' && (
+          <div className="p-section-anim">
+            <div className="p-card">
+              <div className="p-card-head">
+                <div>
+                  <div className="p-card-title"><span className="p-card-title-icon">🔔</span>Alertes & notifications</div>
+                  <div className="p-card-desc">Choisissez ce que vous souhaitez recevoir par email</div>
+                </div>
               </div>
 
-              {/* Carte bancaire */}
-              <div className="prm-payment-card">
-                <div className="prm-payment-header">
-                  <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
-                    <div className="prm-payment-icon" style={{ background:'var(--oda-blue-light)' }}>💳</div>
-                    <div>
-                      <h4 className="prm-payment-title">Carte bancaire</h4>
-                      <p className="prm-payment-desc">Visa, Mastercard, American Express</p>
-                    </div>
+              {[
+                { key:'commandes', title:'Nouvelles commandes', desc:'Recevez une notification à chaque nouvelle commande' },
+                { key:'stock',     title:'Stock faible',        desc:'Alertes en cas de rupture de stock imminente' },
+                { key:'clients',   title:'Nouveaux clients',    desc:'Notification lors de l\'inscription d\'un client' },
+                { key:'rapports',  title:'Rapports quotidiens', desc:'Résumé de performance envoyé chaque matin' },
+              ].map(n => (
+                <div key={n.key} className="p-row">
+                  <div className="p-row-info">
+                    <div className="p-row-title">{n.title}</div>
+                    <div className="p-row-desc">{n.desc}</div>
                   </div>
-                  <Toggle id="paymentCard" checked={params.paiement.carte.actif} onChange={v => updateParam('paiement.carte.actif', v)} />
+                  <Toggle id={`n-${n.key}`} checked={params.notifications[n.key]} onChange={v => up(`notifications.${n.key}`, v)} />
                 </div>
-                {params.paiement.carte.actif && (
-                  <div id="cardDetails" style={{ marginTop:'16px', paddingTop:'16px', borderTop:'1px solid var(--oda-gray-200)' }}>
-                    <input id="stripeKey" className="prm-input" type="text" placeholder="Clé API Stripe" value={params.paiement.carte.cle} onChange={e => updateParam('paiement.carte.cle', e.target.value)} />
-                    <button type="button" className="prm-btn prm-btn-success" style={{ marginTop:'12px' }} onClick={() => confirmerPaiement('carte')}>✓ Confirmer</button>
-                  </div>
-                )}
+              ))}
+
+              <div style={{ paddingTop:16 }}>
+                <button type="button" className="p-btn p-btn-primary" onClick={saveNotifs}>✓ Enregistrer les préférences</button>
               </div>
+            </div>
+          </div>
+        )}
 
-              {/* Mobile Money */}
-              <div className="prm-payment-card">
-                <div className="prm-payment-header">
-                  <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
-                    <div className="prm-payment-icon" style={{ background:'#FFF9EB' }}>📱</div>
-                    <div>
-                      <h4 className="prm-payment-title">Mobile Money</h4>
-                      <p className="prm-payment-desc">MTN Money & Orange Money</p>
-                    </div>
-                  </div>
-                  <Toggle id="paymentMobile" checked={params.paiement.mobile.actif} onChange={v => updateParam('paiement.mobile.actif', v)} />
+        {/* ════ SÉCURITÉ ════ */}
+        {section === 'security' && (
+          <div className="p-section-anim">
+            <div className="p-card">
+              <div className="p-card-head">
+                <div>
+                  <div className="p-card-title"><span className="p-card-title-icon">🔒</span>Mot de passe</div>
+                  <div className="p-card-desc">Mettez à jour votre mot de passe de connexion</div>
                 </div>
-                {params.paiement.mobile.actif && (
-                  <div id="mobileDetails" style={{ marginTop:'16px', paddingTop:'16px', borderTop:'1px solid var(--oda-gray-200)' }}>
-                    {/* MTN */}
-                    <div className="prm-mm-section" style={{ borderLeft:'3px solid #FFCC00' }}>
-                      <div className="prm-mm-header">
-                        <div className="prm-mm-icon" style={{ background:'#FFCC00', color:'#000' }}>📞</div>
-                        <h5 style={{ flex:1, fontWeight:600, fontSize:'1rem', margin:0 }}>MTN Money</h5>
-                        <Toggle id="mtnActive" checked={params.paiement.mobile.mtn?.actif ?? false} onChange={v => updateParam('paiement.mobile.mtn.actif', v)} />
-                      </div>
-                      {params.paiement.mobile.mtn?.actif && (
-                        <div id="mtnInputs">
-                          <div className="prm-field">
-                            <label className="prm-label">Nom du compte MTN</label>
-                            <input id="mtnNomCompte" className="prm-input" type="text" placeholder="Ex: KAMGA Jean" value={params.paiement.mobile.mtn?.nomCompte ?? ''} onChange={e => updateParam('paiement.mobile.mtn.nomCompte', e.target.value)} />
-                          </div>
-                          <div className="prm-field">
-                            <label className="prm-label">Numéro MTN Money</label>
-                            <input id="mtnNumero" className="prm-input" type="tel" placeholder="+237 6 XX XX XX" value={params.paiement.mobile.mtn?.numero ?? ''} onChange={e => updateParam('paiement.mobile.mtn.numero', e.target.value)} />
-                            <small className="prm-hint">Format: +237 6XX XX XX</small>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div style={{ height:'1px', background:'linear-gradient(to right,transparent,var(--oda-gray-200) 20%,var(--oda-gray-200) 80%,transparent)', margin:'20px 0' }} />
-
-                    {/* Orange */}
-                    <div className="prm-mm-section" style={{ borderLeft:'3px solid #FF7900' }}>
-                      <div className="prm-mm-header">
-                        <div className="prm-mm-icon" style={{ background:'#FF7900', color:'#fff' }}>🍊</div>
-                        <h5 style={{ flex:1, fontWeight:600, fontSize:'1rem', margin:0 }}>Orange Money</h5>
-                        <Toggle id="orangeActive" checked={params.paiement.mobile.orange?.actif ?? false} onChange={v => updateParam('paiement.mobile.orange.actif', v)} />
-                      </div>
-                      {params.paiement.mobile.orange?.actif && (
-                        <div id="orangeInputs">
-                          <div className="prm-field">
-                            <label className="prm-label">Nom du compte Orange</label>
-                            <input id="orangeNomCompte" className="prm-input" type="text" placeholder="Ex: KAMGA Jean" value={params.paiement.mobile.orange?.nomCompte ?? ''} onChange={e => updateParam('paiement.mobile.orange.nomCompte', e.target.value)} />
-                          </div>
-                          <div className="prm-field">
-                            <label className="prm-label">Numéro Orange Money</label>
-                            <input id="orangeNumero" className="prm-input" type="tel" placeholder="+237 6 XX XX XX" value={params.paiement.mobile.orange?.numero ?? ''} onChange={e => updateParam('paiement.mobile.orange.numero', e.target.value)} />
-                            <small className="prm-hint">Format: +237 6XX XX XX</small>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <button type="button" id="confirmerMobileMoney" className="prm-btn prm-btn-success" onClick={confirmerMobileMoney} style={{ marginTop:'12px' }}>
-                      ✓ Confirmer les paramètres Mobile Money
+              </div>
+              <form onSubmit={submitPw}>
+                <div className="p-stack">
+                  <div className="p-field">
+                    <label className="p-lbl">Nouveau mot de passe</label>
+                    <input className="p-inp" type="password" value={pw.new} onChange={e => setPw(p => ({...p, new:e.target.value}))} placeholder="Minimum 6 caractères" />
+                  </div>
+                  <div className="p-field">
+                    <label className="p-lbl">Confirmer le mot de passe</label>
+                    <input className="p-inp" type="password" value={pw.confirm} onChange={e => setPw(p => ({...p, confirm:e.target.value}))} placeholder="Retapez le mot de passe" />
+                  </div>
+                  <div>
+                    <button type="submit" className="p-btn p-btn-primary" disabled={pwBusy}>
+                      {pwBusy ? 'Modification…' : '✓ Modifier le mot de passe'}
                     </button>
                   </div>
-                 )}
-                 {/* Paiement à la livraison (Cash) */}
-                 <div className="prm-setting-item" style={{ marginTop:'32px', paddingTop:'28px', borderTop:'1px solid var(--oda-gray-100)' }}>
-                   <div className="prm-setting-info">
-                     <div className="prm-setting-title">💵 Paiement à la livraison</div>
-                     <div className="prm-setting-desc">Accepter les paiements en espèces à la livraison</div>
-                   </div>
-                   <Toggle id="paymentCash" checked={params.paiement.cash?.actif ?? false} onChange={v => updateParam('paiement.cash.actif', v)} />
-                 </div>
-                 {params.paiement.cash?.actif && (
-                   <div style={{ padding:'16px 20px', background:'var(--oda-gray-50)', borderRadius:'12px', marginTop:'16px', border:'1px solid var(--oda-gray-200)' }}>
-                     <p style={{ margin:'0 0 8px', fontSize:'.88rem', color:'var(--oda-gray-500)' }}>
-                       ✅ Le client paiera en espèces à la livraison
-                     </p>
-                     <button type="button" className="prm-btn prm-btn-secondary" style={{ padding:'8px 16px', fontSize:'.85rem' }} onClick={() => { updateParam('paiement.cash.confirme', true); }}>
-                       ✅ Confirmer
-                     </button>
-                   </div>
-                 )}
-               </div>
-             </section>
-           )}
+                </div>
+              </form>
+            </div>
 
-           {/* ══ LIVRAISON ═ */}
-          {activeSection === 'shipping' && (
-            <section id="shipping" className="prm-section">
-              <div className="prm-section-header">
-                <h2 className="prm-section-title">Options de livraison</h2>
-                <p className="prm-section-desc">Configurez les frais et délais de livraison</p>
+            {/* Danger zone */}
+            <div className="p-card" style={{ borderColor:'rgba(242,69,61,.15)' }}>
+              <div className="p-card-head" style={{ marginBottom:12 }}>
+                <div>
+                  <div className="p-card-title" style={{ color:'var(--red)' }}><span className="p-card-title-icon">⚠️</span>Zone de danger</div>
+                  <div className="p-card-desc">Ces actions sont irréversibles — procédez avec précaution</div>
+                </div>
               </div>
-              <form onSubmit={handleShippingSubmit}>
-                <div className="prm-form-grid">
-                  <div className="prm-field">
-                    <label className="prm-label">Frais Douala (FCFA)</label>
-                    <input className="prm-input" type="number" value={params.livraison.fraisDouala} onChange={e => updateParam('livraison.fraisDouala', Number(e.target.value))} />
-                  </div>
-                  <div className="prm-field">
-                    <label className="prm-label">Frais autres villes (FCFA)</label>
-                    <input className="prm-input" type="number" value={params.livraison.fraisAutres} onChange={e => updateParam('livraison.fraisAutres', Number(e.target.value))} />
-                  </div>
-                </div>
-                <div className="prm-form-grid">
-                  <div className="prm-field">
-                    <label className="prm-label">Délai de livraison</label>
-                    <input className="prm-input" type="text" value={params.livraison.delai} onChange={e => updateParam('livraison.delai', e.target.value)} />
-                  </div>
-                  <div className="prm-field">
-                    <label className="prm-label">Montant min. pour livraison gratuite (FCFA)</label>
-                    <input className="prm-input" type="number" value={params.livraison.montantMin} onChange={e => updateParam('livraison.montantMin', Number(e.target.value))} />
-                  </div>
-                </div>
-                <div className="prm-setting-item" style={{ marginTop:'20px' }}>
-                  <div className="prm-setting-info">
-                    <div className="prm-setting-title">Livraison gratuite</div>
-                    <div className="prm-setting-desc">Activer la livraison gratuite au-dessus du montant minimum</div>
-                  </div>
-                  <Toggle id="freeShipping" checked={params.livraison.gratuit} onChange={v => updateParam('livraison.gratuit', v)} />
-                </div>
+              <div className="p-btn-group">
+                <button type="button" className="p-btn p-btn-ghost p-btn-sm" style={{ color:'var(--text-2)' }} onClick={() => toast('Contactez le support pour exporter vos données', 'warning')}>📥 Exporter mes données</button>
+                <button type="button" className="p-btn p-btn-danger p-btn-sm" onClick={() => { if(confirm('Supprimer définitivement votre compte ?')) toast('Contactez le support pour finaliser la suppression', 'warning'); }}>🗑️ Supprimer le compte</button>
+              </div>
+            </div>
+          </div>
+        )}
 
-                {/* Zones personnalisées */}
-                <div style={{ marginTop:'32px' }}>
-                  <h3 style={{ fontSize:'1.1rem', fontWeight:600, marginBottom:'16px' }}>Zones personnalisées</h3>
-                  {(params.livraison.zonesPersonnalisees || []).map((z, i) => (
-                    <div key={i} className="prm-zone-row">
-                      <input className="prm-input" type="text" placeholder="Nom de la zone" value={z.nom} onChange={e => updateZone(i, 'nom', e.target.value)} />
-                      <input className="prm-input" type="number" placeholder="Frais" value={z.frais} onChange={e => updateZone(i, 'frais', Number(e.target.value))} />
-                      <button type="button" className="prm-btn prm-btn-danger" style={{ padding:'8px 16px' }} onClick={() => removeZone(i)}>Supprimer</button>
+        {/* ════ APPARENCE ════ */}
+        {section === 'app' && (
+          <div className="p-section-anim">
+
+            {/* Palettes */}
+            <div className="p-card">
+              <div className="p-card-head">
+                <div>
+                  <div className="p-card-title"><span className="p-card-title-icon">🎨</span>Palette de couleurs</div>
+                  <div className="p-card-desc">Thèmes prédéfinis pour votre boutique</div>
+                </div>
+              </div>
+
+              {/* ── Dropdown palette ── */}
+              {(() => {
+                const activePal = PALETTES.find(p => p.primary === params.apparence.couleurPrimaire) || null;
+                return (
+                  <div className={`p-palette-dropdown${paletteOpen ? ' open' : ''}`} style={{ marginBottom: 20 }}>
+                    <button ref={palTriggerRef} type="button" className="p-palette-trigger" onClick={() => { setPaletteOpen(o => !o); setFontOpen(false); }}>
+                      <div className="p-pt-swatches">
+                        {activePal
+                          ? <>
+                              <div className="p-pt-swatch" style={{ background: activePal.primary }} />
+                              <div className="p-pt-swatch" style={{ background: activePal.secondary }} />
+                              <div className="p-pt-swatch" style={{ background: activePal.accent }} />
+                            </>
+                          : <>
+                              <div className="p-pt-swatch" style={{ background: params.apparence.couleurPrimaire }} />
+                              <div className="p-pt-swatch" style={{ background: params.apparence.couleurSecondaire }} />
+                              <div className="p-pt-swatch" style={{ background: params.apparence.accent }} />
+                            </>
+                        }
+                      </div>
+                      <span className="p-pt-name">{activePal ? activePal.name : 'Personnalisé'}</span>
+                      <span className="p-pt-arrow">▼</span>
+                    </button>
+                    <DropdownPortal triggerRef={palTriggerRef} open={paletteOpen} onClose={() => setPaletteOpen(false)}>
+                      {PALETTES.map(p => (
+                        <div key={p.name}
+                          className={`p-palette-option${params.apparence.couleurPrimaire === p.primary ? ' active' : ''}`}
+                          onClick={() => { applyPalette(p); setPaletteOpen(false); }}>
+                          <div className="p-po-swatches">
+                            <div className="p-po-swatch" style={{ background: p.primary }} />
+                            <div className="p-po-swatch" style={{ background: p.secondary }} />
+                            <div className="p-po-swatch" style={{ background: p.accent }} />
+                          </div>
+                          <span>{p.name}</span>
+                          {params.apparence.couleurPrimaire === p.primary && <span className="p-po-check">✓</span>}
+                        </div>
+                      ))}
+                    </DropdownPortal>
+                  </div>
+                );
+              })()}
+
+              <div className="p-divider" />
+
+              <div style={{ fontSize:'.875rem', fontWeight:600, color:'var(--text-1)', marginBottom:14 }}>Couleurs personnalisées</div>
+              <div className="p-grid">
+                <div className="p-field">
+                  <label className="p-lbl">Couleur primaire</label>
+                  <div className="p-color-row">
+                    <div className="p-color-swatch">
+                      <input type="color" value={params.apparence.couleurPrimaire} onChange={e => up('apparence.couleurPrimaire', e.target.value)} />
                     </div>
-                  ))}
-                  <button type="button" className="prm-btn prm-btn-secondary" onClick={addZone}>➕ Ajouter une zone</button>
+                    <input className="p-inp" value={params.apparence.couleurPrimaire} onChange={e => up('apparence.couleurPrimaire', e.target.value)} style={{ fontFamily:'monospace', fontSize:'.85rem' }} />
+                  </div>
                 </div>
+                <div className="p-field">
+                  <label className="p-lbl">Couleur secondaire</label>
+                  <div className="p-color-row">
+                    <div className="p-color-swatch">
+                      <input type="color" value={params.apparence.couleurSecondaire} onChange={e => up('apparence.couleurSecondaire', e.target.value)} />
+                    </div>
+                    <input className="p-inp" value={params.apparence.couleurSecondaire} onChange={e => up('apparence.couleurSecondaire', e.target.value)} style={{ fontFamily:'monospace', fontSize:'.85rem' }} />
+                  </div>
+                </div>
+              </div>
+            </div>
 
-                <button type="submit" className="prm-btn prm-btn-primary" style={{ marginTop:'24px' }}>
-                  📦 Enregistrer la livraison
-                </button>
-              </form>
-            </section>
-          )}
+            {/* Polices */}
+            <div className="p-card">
+              <div className="p-card-head">
+                <div>
+                  <div className="p-card-title"><span className="p-card-title-icon">✏️</span>Police d'écriture</div>
+                  <div className="p-card-desc">Choisissez la typographie de votre boutique</div>
+                </div>
+              </div>
 
-          {/* ══ NOTIFICATIONS ═ */}
-          {activeSection === 'notifications' && (
-            <section id="notifications" className="prm-section">
-              <div className="prm-section-header">
-                <h2 className="prm-section-title">Préférences de notifications</h2>
-                <p className="prm-section-desc">Gérez les alertes et notifications de votre boutique</p>
-              </div>
-              <div className="prm-setting-item">
-                <div className="prm-setting-info">
-                  <div className="prm-setting-title">Nouvelles commandes</div>
-                  <div className="prm-setting-desc">Recevoir une notification à chaque nouvelle commande</div>
+              {/* ── Dropdown police ── */}
+              {(() => {
+                const activeFont = FONTS.find(f => f.value === params.apparence.police) || FONTS[0];
+                return (
+                  <div className={`p-font-dropdown${fontOpen ? ' open' : ''}`}>
+                    <button ref={fontTriggerRef} type="button" className="p-font-trigger" onClick={() => { setFontOpen(o => !o); setPaletteOpen(false); }}>
+                      <span className="p-ft-preview" style={{ fontFamily: activeFont.value }}>Aa — Bb — Cc</span>
+                      <span className="p-ft-name">{activeFont.label}</span>
+                      <span className="p-ft-arrow">▼</span>
+                    </button>
+                    <DropdownPortal triggerRef={fontTriggerRef} open={fontOpen} onClose={() => setFontOpen(false)}>
+                      {FONTS.map(f => (
+                        <div key={f.value}
+                          className={`p-font-option${params.apparence.police === f.value ? ' active' : ''}`}
+                          onClick={() => { up('apparence.police', f.value); setFontOpen(false); }}>
+                          <span className="p-fo-preview" style={{ fontFamily: f.value }}>Aa — Bb — Cc</span>
+                          <span className="p-fo-name">{f.label}</span>
+                          {params.apparence.police === f.value && <span className="p-fo-check">✓</span>}
+                        </div>
+                      ))}
+                    </DropdownPortal>
+                  </div>
+                );
+              })()}
+            </div>{/* end p-card police */}
+
+            {/* Logo & Favicon */}
+            <div className="p-card">
+              <div className="p-card-head">
+                <div>
+                  <div className="p-card-title"><span className="p-card-title-icon">🖼️</span>Images de la boutique</div>
+                  <div className="p-card-desc">Logo et favicon affichés dans votre boutique</div>
                 </div>
-                <Toggle id="notifCommandes" checked={params.notifications.commandes} onChange={v => updateParam('notifications.commandes', v)} />
               </div>
-              <div className="prm-setting-item">
-                <div className="prm-setting-info">
-                  <div className="prm-setting-title">Alerte stock faible</div>
-                  <div className="prm-setting-desc">Être alerté quand un produit est presque en rupture</div>
-                </div>
-                <Toggle id="notifStock" checked={params.notifications.stock} onChange={v => updateParam('notifications.stock', v)} />
+              <div className="p-upload-grid">
+                <UpZone value={params.apparence.logo} onFile={b => upImg('logo', b)} icon="🖼️" label="Logo principal" />
+                <UpZone value={params.apparence.favicon} onFile={b => upImg('favicon', b)} icon="🔖" label="Favicon" />
               </div>
-              <div className="prm-setting-item">
-                <div className="prm-setting-info">
-                  <div className="prm-setting-title">Nouveaux clients</div>
-                  <div className="prm-setting-desc">Notification quand un nouveau client s'inscrit</div>
-                </div>
-                <Toggle id="notifClients" checked={params.notifications.clients} onChange={v => updateParam('notifications.clients', v)} />
-              </div>
-              <div className="prm-setting-item">
-                <div className="prm-setting-info">
-                  <div className="prm-setting-title">Rapports quotidiens</div>
-                  <div className="prm-setting-desc">Recevoir un résumé quotidien par email</div>
-                </div>
-                <Toggle id="notifRapports" checked={params.notifications.rapports} onChange={v => updateParam('notifications.rapports', v)} />
-              </div>
-              <button type="button" className="prm-btn prm-btn-primary" onClick={saveNotifs} style={{ marginTop:'20px' }}>
-                🔔 Enregistrer les notifications
+            </div>
+
+            {/* Actions */}
+            <div className="p-btn-group">
+              <button type="button" className="p-btn p-btn-primary" onClick={saveApp} disabled={saving}>
+                {saving ? 'Enregistrement…' : '✓ Sauvegarder l\'apparence'}
               </button>
-            </section>
-          )}
+              <button type="button" className="p-btn p-btn-ghost" onClick={openPreview}>👁 Aperçu</button>
+              <button type="button" className="p-btn p-btn-ghost" style={{ color:'var(--red)' }} onClick={resetApp}>Réinitialiser</button>
+            </div>
+          </div>
+        )}
+      </main>
 
-          {/* ══ SÉCURITÉ ═ */}
-          {activeSection === 'security' && (
-            <section id="security" className="prm-section">
-              <div className="prm-section-header">
-                <h2 className="prm-section-title">Sécurité du compte</h2>
-                <p className="prm-section-desc">Gérez votre mot de passe et la sécurité de votre boutique</p>
-              </div>
-              <form onSubmit={handlePasswordSubmit}>
-                <div className="prm-field">
-                  <label className="prm-label">Nouveau mot de passe</label>
-                  <input id="newPassword" className="prm-input" type="password" placeholder="Minimum 6 caractères" value={passwords.new} onChange={e => setPasswords(p => ({...p, new:e.target.value}))} />
-                </div>
-                <div className="prm-field">
-                  <label className="prm-label">Confirmer le mot de passe</label>
-                  <input id="confirmPassword" className="prm-input" type="password" placeholder="Retapez le mot de passe" value={passwords.confirm} onChange={e => setPasswords(p => ({...p, confirm:e.target.value}))} />
-                </div>
-                <button type="submit" className="prm-btn prm-btn-primary" disabled={pwdChanging}>
-                  {pwdChanging ? '⏳ Modification...' : '🔒 Modifier le mot de passe'}
-                </button>
-              </form>
-
-              <div className="prm-danger-zone">
-                <h3 style={{ fontSize:'1.1rem', fontWeight:600, color:'var(--oda-red)', marginBottom:'16px' }}>Zone de danger</h3>
-                <button type="button" className="prm-btn prm-btn-danger" onClick={exporterDonnees}>📥 Exporter mes données</button>
-                <button type="button" className="prm-btn prm-btn-danger" style={{ marginLeft:'12px', background:'transparent', border:'1.5px solid var(--oda-red)', color:'var(--oda-red)' }} onClick={supprimerCompte}>🗑️ Supprimer mon compte</button>
-              </div>
-            </section>
-          )}
-
-          {/* ══ APPARENCE ═ */}
-          {activeSection === 'apparence' && (
-            <section id="apparence" className="prm-section">
-              <div className="prm-section-header">
-                <h2 className="prm-section-title">Apparence de la boutique</h2>
-                <p className="prm-section-desc">Personnalisez les couleurs et images de votre boutique</p>
-              </div>
-
-              <div className="prm-form-grid">
-                <div className="prm-field">
-                  <label className="prm-label">Couleur primaire</label>
-                  <div style={{ display:'flex', gap:'10px', alignItems:'center' }}>
-                    <input type="color" value={params.apparence.couleurPrimaire} onChange={e => updateParam('apparence.couleurPrimaire', e.target.value)} style={{ width:'50px', height:'40px', border:'1.5px solid var(--oda-gray-200)', borderRadius:'var(--radius-sm)', cursor:'pointer', padding:'2px' }} />
-                    <input className="prm-input" type="text" value={params.apparence.couleurPrimaire} onChange={e => updateParam('apparence.couleurPrimaire', e.target.value)} />
-                  </div>
-                </div>
-                <div className="prm-field">
-                  <label className="prm-label">Couleur secondaire</label>
-                  <div style={{ display:'flex', gap:'10px', alignItems:'center' }}>
-                    <input type="color" value={params.apparence.couleurSecondaire} onChange={e => updateParam('apparence.couleurSecondaire', e.target.value)} style={{ width:'50px', height:'40px', border:'1.5px solid var(--oda-gray-200)', borderRadius:'var(--radius-sm)', cursor:'pointer', padding:'2px' }} />
-                    <input className="prm-input" type="text" value={params.apparence.couleurSecondaire} onChange={e => updateParam('apparence.couleurSecondaire', e.target.value)} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="prm-form-grid" style={{ marginTop:'24px' }}>
-                <div className="prm-field">
-                  <label className="prm-label">Logo de la boutique</label>
-                  <UploadZone
-                    type="logo"
-                    value={params.apparence.logo}
-                    onUpload={handleImageUpload}
-                    icon="🖼️"
-                    title="Logo de la boutique"
-                    hint="Affiché en haut de votre boutique"
-                    accept="image/png,image/jpeg,image/svg+xml"
-                  />
-                </div>
-                <div className="prm-field">
-                  <label className="prm-label">Favicon (icône onglet)</label>
-                  <UploadZone
-                    type="favicon"
-                    value={params.apparence.favicon}
-                    onUpload={handleImageUpload}
-                    icon="🔖"
-                    title="Favicon"
-                    hint="Petite icône affichée dans l'onglet"
-                    accept="image/png,image/x-icon"
-                  />
-                </div>
-              </div>
-
-              <div style={{ marginTop:'32px', display:'flex', gap:'12px' }}>
-                <button type="button" className="prm-btn prm-btn-primary" onClick={saveAppearance} disabled={saving}>
-                  {saving ? '⏳ Enregistrement...' : '🎨 Sauvegarder l’apparence'}
-                </button>
-                <button type="button" className="prm-btn prm-btn-secondary" onClick={resetAppearance}>
-                  ↩️ Réinitialiser
-                </button>
-                <button type="button" className="prm-btn prm-btn-secondary" onClick={openPreview}>
-                  👁️ Aperçu de la boutique
-                </button>
-              </div>
-            </section>
-          )}
-
-        </main>
-      </div>
-
-      {/* ── MOBILE MENU ── */}
-      <nav id="prm-mobile-menu" className="prm-mobile-menu">
+      {/* ════ MOBILE BAR ════ */}
+      <nav className="p-mob">
         {NAV.map(n => (
-          <button
-            key={n.id}
-            className={`prm-mob-btn${activeSection===n.id?' active':''}`}
-            onClick={() => setActiveSection(n.id)}
-          >
-            <span className="prm-mob-icon">{n.icon}</span>
-            <span className="prm-mob-label">{n.label}</span>
-            {activeSection===n.id && <span className="prm-mob-dot" />}
+          <button key={n.id} className={`p-mob-btn${section===n.id?' active':''}`} onClick={() => changeSection(n.id)}>
+            <span className="p-mob-ico">{n.ico}</span>
+            <span>{n.label}</span>
           </button>
         ))}
       </nav>
 
-      {/* ── PREVIEW MODAL ── */}
-      <div className={`prm-modal-overlay${previewOpen?' active':''}`} onClick={e => { if(e.target === e.currentTarget) setPreviewOpen(false); }}>
-        <div className="prm-modal-box">
-          <div className="prm-modal-bar">
-            <div className="prm-modal-dots">
-              <span></span><span></span><span></span>
+      {/* ════ PREVIEW MODAL ════ */}
+      <div className={`p-modal-bg${prevOpen?' open':''}`} onClick={e => { if(e.target===e.currentTarget) setPrevOpen(false); }}>
+        <div className="p-modal-box">
+          <div className="p-modal-bar">
+            <div className="p-modal-dots">
+              <i style={{ background:'#FF5F56' }} />
+              <i style={{ background:'#FFBD2E' }} />
+              <i style={{ background:'#27C93F' }} />
             </div>
-            <div className="prm-modal-url">{previewUrl}</div>
-            <button className="prm-btn prm-btn-secondary" style={{ padding:'6px 14px', fontSize:'.82rem' }} onClick={() => setPreviewOpen(false)}>✕</button>
+            <div className="p-modal-url">{prevUrl}</div>
+            <button className="p-btn p-btn-ghost p-btn-sm" onClick={() => setPrevOpen(false)}>✕</button>
           </div>
-          <iframe className="prm-modal-iframe" ref={iframeRef} title="Aperçu boutique" />
-          <div className="prm-modal-footer">
-            <span style={{ fontSize:'.82rem', color:'var(--oda-gray-500)' }}>Aperçu de votre boutique</span>
-            <a href={previewUrl} target="_blank" rel="noopener" className="prm-btn prm-btn-primary" style={{ padding:'8px 16px', fontSize:'.82rem' }}>🔗 Ouvrir dans un nouvel onglet</a>
-          </div>
+          <iframe className="p-modal-iframe" ref={iframeRef} title="Aperçu boutique" />
         </div>
       </div>
-
     </div>
   );
 }

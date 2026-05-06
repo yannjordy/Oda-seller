@@ -597,15 +597,15 @@ export default function TableauDeBord() {
         catch (err) { console.error(`❌ desc image ${i + 1}:`, err); }
       }
 
-       const produitData = {
-         nom, description, prix, stock, categorie,
-         prix_promo: productPromoPrice && Number(productPromoPrice) > 0 && Number(productPromoPrice) < prix ? Number(productPromoPrice) : null,
-         prix_initial: productInitialPrice && Number(productInitialPrice) > 0 ? Number(productInitialPrice) : null,
-         statut: statutFinal,
-         main_image: mainImageUrl,
-         description_images: descUrls,
-         date_draft: statutFinal === 'draft' ? new Date().toISOString() : null,
-       };
+        const produitData = {
+           nom, description, prix, stock, categorie,
+           prix_initial: productInitialPrice && Number(productInitialPrice) > 0 ? Number(productInitialPrice) : null,
+           prix_promo: productPromoPrice && Number(productPromoPrice) > 0 && Number(productPromoPrice) < prix ? Number(productPromoPrice) : null,
+           statut: statutFinal,
+           main_image: mainImageUrl,
+           description_images: descUrls,
+           date_draft: statutFinal === 'draft' ? new Date().toISOString() : null,
+         };
 
       setSubmitLabel('Sauvegarde...');
       if (produitEnEdition) {
@@ -1813,17 +1813,7 @@ export default function TableauDeBord() {
                       style={{ marginTop: 10 }}
                       onChange={e => setProductPrice(e.target.value)}
                     />
-                   </div>
-                   <div className="oda-fgroup">
-                     <label className="oda-flabel">Prix avant promo <span className="oda-req" style={{color:'var(--oda-muted)',fontWeight:400,fontSize:'.75rem'}}> (optionnel)</span></label>
-                     <input
-                       type="number"
-                       className="oda-finput"
-                       placeholder="Ex: 8000"
-                       value={productInitialPrice}
-                       onChange={e => setProductInitialPrice(e.target.value)}
-                     />
-                   </div>
+                    </div>
                    <div className="oda-fgroup">
                      <label className="oda-flabel">Prix promotionnel <span className="oda-req" style={{color:'var(--oda-muted)',fontWeight:400,fontSize:'.75rem'}}> (optionnel)</span></label>
                      <input
@@ -1977,16 +1967,9 @@ export default function TableauDeBord() {
                     <span style={{color:'var(--oda-primary)',fontWeight:700}}>
                       {(Number(productPromoPrice)).toLocaleString('fr-FR')} FCFA
                     </span>
-                    {productInitialPrice && (
-                      <span style={{textDecoration:'line-through',color:'var(--oda-muted)',fontSize:'.82rem',marginLeft:8}}>
-                        {Number(productInitialPrice).toLocaleString('fr-FR')} FCFA
-                      </span>
-                    )}
-                    {!productInitialPrice && productPrice && (
-                      <span style={{textDecoration:'line-through',color:'var(--oda-muted)',fontSize:'.82rem',marginLeft:8}}>
-                        {(Number(productPrice)).toLocaleString('fr-FR')} FCFA
-                      </span>
-                    )}
+                    <span style={{textDecoration:'line-through',color:'var(--oda-muted)',fontSize:'.82rem',marginLeft:8}}>
+                      {(Number(productPrice)).toLocaleString('fr-FR')} FCFA
+                    </span>
                     <span style={{background:'var(--oda-success)',color:'white',fontSize:'.65rem',padding:'2px 6px',borderRadius:10,marginLeft:8,fontWeight:600}}>
                       -{Math.round((1 - Number(productPromoPrice)/Number(productPrice)) * 100)}%
                     </span>

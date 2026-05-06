@@ -11,8 +11,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 // ==================== ÉTAT INITIAL DES PARAMÈTRES ====================
 const PARAMS_DEFAUT = {
-  general: { nom: 'Ma Boutique', description: 'Les meilleurs produits au meilleur prix', telephone: '+237 6XX XX XX XX', email: '', adresse: '' },
-  apparence: { couleurPrimaire: '#FF6B00', couleurSecondaire: '#1A1A1A', logo: 'oda.jpg', favicon: 'oda.jpg', police: 'Inter' },
+  general: { nom: '', description: '', telephone: '+237 6XX XX XX XX', email: '', adresse: '' },
+  apparence: { couleurPrimaire: '#FF6B00', couleurSecondaire: '#1A1A1A', accent: '#FF9A3C', logo: 'oda.jpg', favicon: 'oda.jpg', police: 'Outfit' },
   paiement: {
     carte: { actif: false, cle: '', confirme: false },
     mobile: { actif: false, confirme: false, mtn: { actif: false, numero: '', nomCompte: '', confirme: false }, orange: { actif: false, numero: '', nomCompte: '', confirme: false } },
@@ -101,7 +101,13 @@ export default function BoutiquePage() {
   }, [])
 
   const chargerGoogleFont = (police) => {
-    const policesDisponibles = ['Inter','Poppins','Nunito','DM Sans','Plus Jakarta Sans','Outfit','Montserrat','Raleway','Josefin Sans','Lato','Open Sans','Roboto','Playfair Display','Cormorant Garamond','Libre Baskerville','DM Serif Display','Pacifico','Righteous','Bebas Neue','Abril Fatface']
+    // Polices synchronisées avec parametres.js (Outfit par défaut)
+    const policesDisponibles = [
+      'Outfit','Sora','Figtree','Nunito','DM Sans','Plus Jakarta Sans','Lexend','Manrope',
+      'Inter','Poppins','Montserrat','Raleway','Josefin Sans','Lato','Open Sans','Roboto',
+      'Playfair Display','Cormorant Garamond','Libre Baskerville','DM Serif Display',
+      'Pacifico','Righteous','Bebas Neue','Abril Fatface'
+    ]
     if (!policesDisponibles.includes(police)) return
     const linkId = 'google-font-' + police.replace(/\s/g, '-')
     if (document.getElementById(linkId)) return
@@ -225,9 +231,9 @@ export default function BoutiquePage() {
 
   // ==================== PRODUITS DE DÉMONSTRATION ====================
   const creerProduitsDemonstration = () => [
-    { id: 1, nom: 'Produit Exemple 1', description: 'Description du produit exemple', prix: 15000, stock: 10, categorie: 'Électronique', statut: 'published', mainImage: 'https://via.placeholder.com/300x300?text=Produit+1', descriptionImages: [], dateCreation: new Date().toISOString() },
-    { id: 2, nom: 'Produit Exemple 2', description: 'Un autre produit de démonstration', prix: 25000, stock: 5, categorie: 'Mode', statut: 'published', mainImage: 'https://via.placeholder.com/300x300?text=Produit+2', descriptionImages: [], dateCreation: new Date().toISOString() },
-    { id: 3, nom: 'Produit Exemple 3', description: 'Troisième produit exemple', prix: 35000, stock: 8, categorie: 'Maison', statut: 'published', mainImage: 'https://via.placeholder.com/300x300?text=Produit+3', descriptionImages: [], dateCreation: new Date().toISOString() }
+    { id: 1, nom: 'Produit Exemple 1', description: 'Description du produit exemple', prix: 15000, prixPromotion: null, stock: 10, categorie: 'Électronique', statut: 'published', mainImage: 'https://via.placeholder.com/300x300?text=Produit+1', descriptionImages: [], dateCreation: new Date().toISOString() },
+    { id: 2, nom: 'Produit Exemple 2', description: 'Un autre produit de démonstration', prix: 25000, prixPromotion: 18500, stock: 5, categorie: 'Mode', statut: 'published', mainImage: 'https://via.placeholder.com/300x300?text=Produit+2', descriptionImages: [], dateCreation: new Date().toISOString() },
+    { id: 3, nom: 'Produit Exemple 3', description: 'Troisième produit exemple', prix: 35000, prixPromotion: 27000, stock: 8, categorie: 'Maison', statut: 'published', mainImage: 'https://via.placeholder.com/300x300?text=Produit+3', descriptionImages: [], dateCreation: new Date().toISOString() }
   ]
 
   // ==================== CHARGEMENT DES PRODUITS ====================
@@ -241,7 +247,7 @@ export default function BoutiquePage() {
         try {
           const { data, error } = await supabase.from('produits').select('*').eq('user_id', user.id).eq('statut', 'published').gt('stock', 0)
           if (data && !error && data.length > 0) {
-            prods = data.map(p => ({ id: p.id, nom: p.nom, description: p.description, prix: p.prix, stock: p.stock, categorie: p.categorie, statut: p.statut, mainImage: p.main_image, descriptionImages: p.description_images || [], dateCreation: p.created_at }))
+            prods = data.map(p => ({ id: p.id, nom: p.nom, description: p.description, prix: p.prix, prixPromotion: p.prix_promotion || null, stock: p.stock, categorie: p.categorie, statut: p.statut, mainImage: p.main_image, descriptionImages: p.description_images || [], dateCreation: p.created_at }))
             if (shopId) localStorage.setItem(`produits_cache_${shopId}`, JSON.stringify(prods))
             console.log(`✅ ${prods.length} produits chargés depuis Supabase`)
             setProduits(prods); setFilteredProduits(prods); produitsRef.current = prods
@@ -280,18 +286,26 @@ export default function BoutiquePage() {
   const appliquerTheme = (params) => {
     const root = document.documentElement
     try {
-      const primaire = params.apparence?.couleurPrimaire || '#FF6B00'
+      const primaire  = params.apparence?.couleurPrimaire  || '#FF6B00'
       const secondaire = params.apparence?.couleurSecondaire || '#1A1A1A'
-      root.style.setProperty('--primary-color', primaire)
+      const accent    = params.apparence?.accent            || '#FF9A3C'
+      root.style.setProperty('--primary-color',   primaire)
       root.style.setProperty('--secondary-color', secondaire)
-      const rgbPrimaire = hexToRgb(primaire)
+      root.style.setProperty('--accent-color',    accent)
+      const rgbPrimaire  = hexToRgb(primaire)
       const rgbSecondaire = hexToRgb(secondaire)
+      const rgbAccent    = hexToRgb(accent)
       if (rgbPrimaire) {
         const darker = `rgb(${Math.max(0, rgbPrimaire.r-20)}, ${Math.max(0, rgbPrimaire.g-20)}, ${Math.max(0, rgbPrimaire.b-20)})`
-        root.style.setProperty('--primary-dark', darker)
+        root.style.setProperty('--primary-dark',  darker)
         root.style.setProperty('--primary-light', `rgba(${rgbPrimaire.r}, ${rgbPrimaire.g}, ${rgbPrimaire.b}, 0.1)`)
+        root.style.setProperty('--primary-glow',  `rgba(${rgbPrimaire.r}, ${rgbPrimaire.g}, ${rgbPrimaire.b}, 0.22)`)
       }
       if (rgbSecondaire) root.style.setProperty('--secondary-light', `rgba(${rgbSecondaire.r}, ${rgbSecondaire.g}, ${rgbSecondaire.b}, 0.1)`)
+      if (rgbAccent) {
+        root.style.setProperty('--accent-light', `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.15)`)
+        root.style.setProperty('--accent-glow',  `rgba(${rgbAccent.r}, ${rgbAccent.g}, ${rgbAccent.b}, 0.35)`)
+      }
 
       const whatsappNum = params.general?.telephone?.replace(/\s/g, '')
       if (whatsappNum) {
@@ -305,7 +319,7 @@ export default function BoutiquePage() {
           root.style.setProperty('--font-family', `'${params.apparence.police}', -apple-system, BlinkMacSystemFont, sans-serif`)
         })
       }
-      console.log('🎨 Thème appliqué')
+      console.log('🎨 Thème appliqué — Primary:', primaire, '| Accent:', accent)
     } catch (error) { console.error('❌ Erreur thème:', error) }
   }
 
@@ -390,7 +404,7 @@ export default function BoutiquePage() {
         afficherNotification('✅ Quantité mise à jour', 'success')
       } else { afficherNotification('⚠️ Stock insuffisant', 'warning'); return }
     } else {
-      panier.push({ id: produit.id, nom: produit.nom, prix: produit.prix, image: produit.mainImage, quantite: 1, stock: produit.stock })
+      panier.push({ id: produit.id, nom: produit.nom, prix: produit.prixPromotion || produit.prix, prixOriginal: produit.prixPromotion ? produit.prix : null, image: produit.mainImage, quantite: 1, stock: produit.stock })
       afficherNotification('✅ Produit ajouté au panier', 'success')
     }
     sauvegarderPanier(panier)
@@ -931,16 +945,68 @@ export default function BoutiquePage() {
     <>
       <style>{GLOBAL_STYLES}</style>
 
-      {/* ===== LOADER ===== */}
+      {/* ===== LOADER PROFESSIONNEL ===== */}
       {showLoader && (
-        <div style={{ position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(255,255,255,0.95)',backdropFilter:'blur(10px)',zIndex:9999,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'20px',animation:'fadeIn 0.3s ease' }}>
-          <div style={{ position:'relative',width:'80px',height:'80px' }}>
-            {[0, -0.3, -0.6].map((delay, i) => (
-              <div key={i} style={{ position:'absolute',top:0,left:0,width:'80px',height:'80px',border:'4px solid transparent',borderTopColor:'var(--primary-color)',borderRadius:'50%',animation:`spin 1.2s cubic-bezier(0.5,0,0.5,1) ${delay}s infinite` }} />
+        <div className="loader-screen">
+          {/* Particules d'arrière-plan */}
+          <div className="loader-particles">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className={`loader-particle loader-particle-${i+1}`} />
             ))}
           </div>
-          <div style={{ fontSize:'1.2rem',fontWeight:600,color:'var(--primary-color)',animation:'pulse 1.5s infinite' }}>Chargement...</div>
-          <div style={{ fontSize:'0.9rem',color:'var(--text-secondary)',textAlign:'center',maxWidth:'300px' }}>{loaderStatus}</div>
+
+          {/* Contenu central */}
+          <div className="loader-center">
+
+            {/* Icône panier SVG arrondie */}
+            <div className="loader-icon-wrap">
+              <div className="loader-icon-ring" />
+              <div className="loader-icon-ring loader-icon-ring-2" />
+              <div className="loader-cart-bubble">
+                <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  {/* Poignée */}
+                  <path d="M8 10C8 10 10 10 11 10L15 28H32L36 15H14" stroke="white" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/>
+                  {/* Roue gauche */}
+                  <circle cx="17" cy="33" r="2.8" fill="white"/>
+                  {/* Roue droite */}
+                  <circle cx="29" cy="33" r="2.8" fill="white"/>
+                  {/* Plus au centre */}
+                  <path d="M23 18V24" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M20 21H26" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </div>
+            </div>
+
+            {/* Message de bienvenue */}
+            <div className="loader-shop-name">
+              {parametres.general?.nom
+                ? <>Bienvenue chez <span style={{ color:'var(--accent-color)' }}>{parametres.general.nom}</span></>
+                : <span className="loader-name-shimmer" />
+              }
+            </div>
+
+            {/* Tagline */}
+            <div className="loader-tagline">
+              {parametres.general?.description || 'Préparation de votre expérience…'}
+            </div>
+
+            {/* Barre de progression élégante */}
+            <div className="loader-bar-wrap">
+              <div className="loader-bar-track">
+                <div className="loader-bar-fill" />
+                <div className="loader-bar-glow" />
+              </div>
+            </div>
+
+            {/* Statut */}
+            <div className="loader-status">{loaderStatus}</div>
+
+            {/* Points animés */}
+            <div className="loader-dots">
+              {[0,1,2].map(i => <div key={i} className="loader-dot" style={{ animationDelay:`${i*0.18}s` }} />)}
+            </div>
+
+          </div>
         </div>
       )}
 
@@ -1050,6 +1116,9 @@ export default function BoutiquePage() {
                   const isLeft = index % 2 === 0
                   const delay = Math.floor(index / 2) * 0.09
                   const anim = isLeft ? 'slideInLeft' : 'slideInRight'
+                  const hasPromo = produit.prixPromotion && produit.prixPromotion < produit.prix
+                  const prixEffectif = hasPromo ? produit.prixPromotion : produit.prix
+                  const remise = hasPromo ? Math.round((1 - produit.prixPromotion / produit.prix) * 100) : 0
                   return (
                     <div key={produit.id} className="product-card"
                       style={{ opacity:0, animation:`${anim} 0.45s cubic-bezier(0.25,0.46,0.45,0.94) ${delay}s forwards`, willChange:'transform, opacity' }}
@@ -1058,11 +1127,23 @@ export default function BoutiquePage() {
                         <img src={produit.mainImage || 'https://via.placeholder.com/300'} className="product-image" alt={produit.nom} loading="lazy"
                           onError={e => { e.target.src = 'https://via.placeholder.com/300?text=Produit' }} />
                         {produit.stock < 5 && <span className="product-badge">Stock limité</span>}
+                        {hasPromo && (
+                          <span className="promo-badge">-{remise}%</span>
+                        )}
                         <button className="btn-mention-chat" title="Discuter de ce produit" onClick={e => { e.stopPropagation(); mentionnerProduitDansChat(produit.id) }}>💬</button>
                       </div>
                       <div className="product-info">
                         <h3 className="product-name">{produit.nom}</h3>
-                        <div className="product-price">{prixFormate(produit.prix)}</div>
+                        <div className="product-price-block">
+                          {hasPromo ? (
+                            <>
+                              <div className="product-price-promo">{prixFormate(prixEffectif)}</div>
+                              <div className="product-price-original">{prixFormate(produit.prix)}</div>
+                            </>
+                          ) : (
+                            <div className="product-price">{prixFormate(produit.prix)}</div>
+                          )}
+                        </div>
                         <div className="product-stock">Stock: {produit.stock}</div>
                         <button className="btn-add-cart" onClick={e => { e.stopPropagation(); ajouterAuPanier(produit.id) }}>
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 2L7.17 4M15 2l1.83 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><path d="M7.17 4H20l-2 9H9L7.17 4zm0 0L6 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -1145,7 +1226,30 @@ export default function BoutiquePage() {
               </div>
               <h2 style={{ fontSize:'1.3rem',fontWeight:700,marginBottom:'8px' }}>{productModal.produit.nom}</h2>
               <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'16px' }}>
-                <div style={{ fontSize:'1.5rem',fontWeight:800,color:'var(--primary-color)' }}>{prixFormate(productModal.produit.prix)}</div>
+                <div>
+                  {productModal.produit.prixPromotion && productModal.produit.prixPromotion < productModal.produit.prix ? (
+                    <div style={{ display:'flex',flexDirection:'column',gap:'4px' }}>
+                      <div style={{ display:'flex',alignItems:'center',gap:'10px' }}>
+                        <div style={{ fontSize:'1.6rem',fontWeight:800,color:'var(--accent-color)',textShadow:'0 2px 8px var(--accent-glow)' }}>
+                          {prixFormate(productModal.produit.prixPromotion)}
+                        </div>
+                        <span className="promo-badge-modal">
+                          -{Math.round((1 - productModal.produit.prixPromotion / productModal.produit.prix) * 100)}%
+                        </span>
+                      </div>
+                      <div style={{ display:'flex',alignItems:'center',gap:'8px' }}>
+                        <span style={{ fontSize:'1rem',color:'var(--text-secondary)',textDecoration:'line-through',fontWeight:500 }}>
+                          {prixFormate(productModal.produit.prix)}
+                        </span>
+                        <span style={{ fontSize:'0.8rem',background:'var(--accent-light)',color:'var(--accent-color)',padding:'2px 8px',borderRadius:'8px',fontWeight:700 }}>
+                          Économisez {prixFormate(productModal.produit.prix - productModal.produit.prixPromotion)}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize:'1.5rem',fontWeight:800,color:'var(--primary-color)' }}>{prixFormate(productModal.produit.prix)}</div>
+                  )}
+                </div>
                 <div style={{ fontSize:'0.9rem',color:'var(--text-secondary)' }}>Stock: <strong>{productModal.produit.stock}</strong></div>
               </div>
               <div style={{ background:'var(--bg-secondary)',padding:'12px',borderRadius:'8px',marginBottom:'16px' }}>
@@ -1498,17 +1602,20 @@ export default function BoutiquePage() {
 
 // ==================== STYLES GLOBAUX ====================
 const GLOBAL_STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
   :root {
     --primary-color: #FF6B00; --primary-dark: #E55D00; --secondary-color: #1A1A1A;
+    --accent-color: #FF9A3C; --accent-light: rgba(255,154,60,0.15); --accent-glow: rgba(255,154,60,0.35);
     --bg-primary: #FFFFFF; --bg-secondary: #F8F9FA; --text-primary: #1A1A1A;
     --text-secondary: #6B7280; --border-color: #E5E7EB;
     --success-color: #10B981; --error-color: #EF4444;
     --shadow-sm: 0 1px 2px rgba(0,0,0,0.05); --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
     --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
     --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
-    --transition: 0.3s ease; --font-family: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    --transition: 0.3s ease; --font-family: 'Outfit',-apple-system,BlinkMacSystemFont,sans-serif;
     --chat-primary: #007AFF; --chat-shadow: 0 8px 24px rgba(0,0,0,0.15); --chat-shadow-lg: 0 12px 40px rgba(0,0,0,0.2);
     --secondary-lighter: rgba(26,26,26,0.1); --secondary-light: rgba(26,26,26,0.3); --secondary-medium: rgba(26,26,26,0.6);
+    --primary-light: rgba(255,107,0,0.1); --primary-glow: rgba(255,107,0,0.22);
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   body{font-family:var(--font-family);background:var(--bg-secondary);color:var(--text-primary);line-height:1.6;overflow-x:hidden;padding-top:140px;padding-bottom:80px}
@@ -1565,11 +1672,18 @@ const GLOBAL_STYLES = `
   .product-card{background:var(--bg-primary);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);transition:all 0.3s ease;cursor:pointer;position:relative;will-change:transform,opacity}
   .product-card::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,var(--primary-color),var(--secondary-color));opacity:0;transition:opacity 0.3s ease;border-radius:var(--radius-md);z-index:-1}
   .product-card:hover::before{opacity:0.1}
-  .product-card:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 12px 30px rgba(0,0,0,0.15),0 0 20px var(--primary-light),0 0 30px var(--secondary-light)}
+  .product-card:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 12px 30px rgba(0,0,0,0.15),0 0 20px var(--primary-light),0 0 30px var(--accent-light)}
   .product-card:active{transform:scale(0.98)}
   .product-image-container{position:relative;width:100%;padding-top:100%;background:var(--bg-secondary);overflow:hidden}
   .product-image{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
   .product-badge{position:absolute;top:8px;right:8px;background:var(--error-color);color:white;font-size:0.7rem;font-weight:700;padding:4px 8px;border-radius:12px;animation:glow 2s ease infinite,pulse 2s ease infinite}
+  .promo-badge{position:absolute;top:8px;left:8px;background:linear-gradient(135deg,var(--accent-color),var(--primary-color));color:white;font-size:0.72rem;font-weight:800;padding:4px 10px;border-radius:20px;letter-spacing:0.03em;box-shadow:0 2px 10px var(--accent-glow);animation:promoPop 0.4s cubic-bezier(.34,1.56,.64,1),promoShimmer 3s ease 0.4s infinite;z-index:5}
+  .promo-badge-modal{display:inline-flex;align-items:center;background:linear-gradient(135deg,var(--accent-color),var(--primary-color));color:white;font-size:0.8rem;font-weight:800;padding:4px 12px;border-radius:20px;letter-spacing:0.03em;box-shadow:0 2px 12px var(--accent-glow);animation:promoPop 0.4s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes promoPop{0%{transform:scale(0) rotate(-10deg);opacity:0}60%{transform:scale(1.15) rotate(2deg)}100%{transform:scale(1) rotate(0deg);opacity:1}}
+  @keyframes promoShimmer{0%,100%{box-shadow:0 2px 10px var(--accent-glow)}50%{box-shadow:0 4px 20px var(--accent-glow),0 0 0 3px var(--accent-light)}}
+  .product-price-block{margin-bottom:8px;display:flex;flex-direction:column;gap:2px}
+  .product-price-promo{font-size:1.1rem;font-weight:800;color:var(--accent-color);text-shadow:0 1px 4px var(--accent-light);background:linear-gradient(135deg,var(--accent-color),var(--primary-color));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 200%;animation:shimmer 3s ease infinite;display:inline-block}
+  .product-price-original{font-size:0.82rem;color:var(--text-secondary);text-decoration:line-through;font-weight:500;opacity:0.8}
   .product-info{padding:12px}
   .product-name{font-size:0.9rem;font-weight:600;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .product-price{font-size:1.1rem;font-weight:800;color:var(--primary-color);margin-bottom:8px;background:linear-gradient(135deg,var(--primary-color),var(--secondary-color));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 200%;animation:shimmer 3s ease infinite;display:inline-block}
@@ -1722,5 +1836,178 @@ const GLOBAL_STYLES = `
   @media(max-width:480px){.chat-window{width:100%;height:100vh;height:100dvh;top:0;left:0;bottom:0;right:0;border-radius:0;z-index:3000}.chat-toggle-btn{bottom:90px;right:20px;width:56px;height:56px}.c-message{max-width:85%}}
   @media(max-width:768px){.hero-section::before,.menu-header::after{animation-duration:30s}.product-card:hover{transform:translateY(-4px) scale(1.01)}}
   @media(prefers-reduced-motion:reduce){*{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}}
-`
 
+  /* ══════════════════════════════════════
+     LOADER PROFESSIONNEL
+  ══════════════════════════════════════ */
+  .loader-screen{
+    position:fixed;inset:0;z-index:9999;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,
+      #0f0f1a 0%,
+      #1a0a00 35%,
+      #0a0a1a 65%,
+      #0f0f1a 100%);
+    background-size:400% 400%;
+    animation:loaderBgShift 6s ease infinite;
+    overflow:hidden;
+  }
+  @keyframes loaderBgShift{
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+  }
+
+  /* ── Particules flottantes ── */
+  .loader-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .loader-particle{
+    position:absolute;border-radius:50%;
+    background:radial-gradient(circle,var(--accent-color),transparent);
+    opacity:0;animation:loaderFloat linear infinite;
+  }
+  .loader-particle-1{width:120px;height:120px;left:10%;top:20%;animation-duration:8s;animation-delay:0s}
+  .loader-particle-2{width:80px;height:80px;right:15%;top:10%;animation-duration:10s;animation-delay:-2s}
+  .loader-particle-3{width:160px;height:160px;left:60%;bottom:15%;animation-duration:12s;animation-delay:-4s}
+  .loader-particle-4{width:60px;height:60px;left:30%;bottom:25%;animation-duration:7s;animation-delay:-1s}
+  .loader-particle-5{width:100px;height:100px;right:5%;bottom:40%;animation-duration:9s;animation-delay:-3s}
+  .loader-particle-6{width:50px;height:50px;left:5%;top:60%;animation-duration:11s;animation-delay:-5s}
+  @keyframes loaderFloat{
+    0%{opacity:0;transform:translateY(0) scale(0.8)}
+    20%{opacity:0.12}
+    80%{opacity:0.06}
+    100%{opacity:0;transform:translateY(-80px) scale(1.2)}
+  }
+
+  /* ── Centre ── */
+  .loader-center{
+    position:relative;z-index:1;
+    display:flex;flex-direction:column;
+    align-items:center;gap:20px;
+    animation:loaderEnter 0.7s cubic-bezier(.34,1.56,.64,1);
+    text-align:center;padding:0 32px;
+  }
+  @keyframes loaderEnter{
+    from{opacity:0;transform:translateY(24px) scale(0.92)}
+    to{opacity:1;transform:none}
+  }
+
+  /* ── Icône panier ── */
+  .loader-icon-wrap{
+    position:relative;
+    width:100px;height:100px;
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:4px;
+  }
+  .loader-icon-ring{
+    position:absolute;inset:0;border-radius:50%;
+    border:2px solid transparent;
+    border-top-color:var(--primary-color);
+    border-right-color:var(--accent-color);
+    animation:loaderRingSpin 1.4s cubic-bezier(.4,0,.2,1) infinite;
+  }
+  .loader-icon-ring-2{
+    inset:10px;border-width:1.5px;
+    border-top-color:var(--accent-color);
+    border-right-color:transparent;
+    border-bottom-color:var(--primary-color);
+    animation-duration:2s;animation-direction:reverse;
+  }
+  @keyframes loaderRingSpin{to{transform:rotate(360deg)}}
+
+  .loader-cart-bubble{
+    width:64px;height:64px;border-radius:20px;
+    background:linear-gradient(145deg,var(--primary-color),var(--accent-color));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 28px var(--primary-glow),0 2px 8px rgba(0,0,0,0.3);
+    animation:loaderCartBounce 1.6s cubic-bezier(.34,1.56,.64,1) infinite;
+  }
+  @keyframes loaderCartBounce{
+    0%,100%{transform:translateY(0) scale(1)}
+    45%{transform:translateY(-7px) scale(1.07)}
+    65%{transform:translateY(-2px) scale(0.97)}
+  }
+
+  /* ── Textes ── */
+  .loader-shop-name{
+    font-size:1.65rem;font-weight:800;letter-spacing:-0.02em;
+    color:#ffffff;
+    text-shadow:0 2px 20px var(--primary-glow);
+    animation:loaderFadeUp 0.6s ease 0.3s both;
+    line-height:1.2;min-height:2rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;
+  }
+  .loader-name-shimmer{
+    display:inline-block;width:180px;height:1.65rem;border-radius:8px;
+    background:linear-gradient(90deg,rgba(255,255,255,0.06) 25%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.06) 75%);
+    background-size:400% 100%;
+    animation:loaderShimmerSlide 1.4s ease infinite;
+  }
+  @keyframes loaderShimmerSlide{
+    0%{background-position:100% 0}
+    100%{background-position:-100% 0}
+  }
+  .loader-tagline{
+    font-size:0.88rem;font-weight:400;
+    color:rgba(255,255,255,0.5);letter-spacing:0.02em;
+    animation:loaderFadeUp 0.6s ease 0.45s both;
+    max-width:260px;line-height:1.5;
+  }
+  @keyframes loaderFadeUp{
+    from{opacity:0;transform:translateY(10px)}
+    to{opacity:1;transform:none}
+  }
+
+  /* ── Barre de progression ── */
+  .loader-bar-wrap{
+    width:220px;
+    animation:loaderFadeUp 0.5s ease 0.6s both;
+  }
+  .loader-bar-track{
+    height:3px;border-radius:99px;
+    background:rgba(255,255,255,0.1);
+    overflow:visible;position:relative;
+  }
+  .loader-bar-fill{
+    height:100%;border-radius:99px;
+    background:linear-gradient(90deg,var(--primary-color),var(--accent-color),var(--primary-color));
+    background-size:200% 100%;
+    animation:loaderBarSlide 2s ease infinite;
+    box-shadow:0 0 8px var(--primary-glow);
+  }
+  .loader-bar-glow{
+    position:absolute;top:50%;left:0;
+    width:40px;height:12px;
+    background:radial-gradient(ellipse,var(--accent-color) 0%,transparent 70%);
+    transform:translateY(-50%);
+    animation:loaderGlowSlide 2s ease infinite;
+    pointer-events:none;
+  }
+  @keyframes loaderBarSlide{
+    0%{width:0%;background-position:0%}
+    50%{width:100%;background-position:100%}
+    100%{width:100%;opacity:0}
+  }
+  @keyframes loaderGlowSlide{
+    0%{left:0%;opacity:0}
+    20%{opacity:1}
+    80%{opacity:0.6}
+    100%{left:calc(100% - 40px);opacity:0}
+  }
+
+  /* ── Statut + dots ── */
+  .loader-status{
+    font-size:0.8rem;color:rgba(255,255,255,0.4);
+    letter-spacing:0.04em;font-weight:500;
+    animation:loaderFadeUp 0.5s ease 0.7s both;
+    min-height:18px;
+  }
+  .loader-dots{display:flex;gap:6px;animation:loaderFadeUp 0.5s ease 0.8s both}
+  .loader-dot{
+    width:5px;height:5px;border-radius:50%;
+    background:var(--accent-color);
+    animation:loaderDotPulse 1.1s ease infinite;
+  }
+  @keyframes loaderDotPulse{
+    0%,100%{opacity:0.25;transform:scale(0.8)}
+    50%{opacity:1;transform:scale(1.3)}
+  }
+`

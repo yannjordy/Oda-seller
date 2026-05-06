@@ -241,7 +241,7 @@ export default function BoutiqueClient() {
         try {
           const { data, error } = await supabase.from('produits').select('*').eq('user_id', user.id).eq('statut', 'published').gt('stock', 0)
           if (data && !error && data.length > 0) {
-            prods = data.map(p => ({ id: p.id, nom: p.nom, description: p.description, prix: p.prix, stock: p.stock, categorie: p.categorie, statut: p.statut, mainImage: p.main_image, descriptionImages: p.description_images || [], dateCreation: p.created_at }))
+            prods = data.map(p => ({ id: p.id, nom: p.nom, description: p.description, prix: p.prix, prix_initial: p.prix_initial, prix_promo: p.prix_promo, stock: p.stock, categorie: p.categorie, statut: p.statut, mainImage: p.main_image, descriptionImages: p.description_images || [], dateCreation: p.created_at }))
             if (shopId) localStorage.setItem(`produits_cache_${shopId}`, JSON.stringify(prods))
             console.log(`✅ ${prods.length} produits chargés depuis Supabase`)
             setProduits(prods); setFilteredProduits(prods); produitsRef.current = prods
@@ -431,7 +431,7 @@ export default function BoutiqueClient() {
         afficherNotification('✅ Quantité mise à jour', 'success')
       } else { afficherNotification('⚠️ Stock insuffisant', 'warning'); return }
     } else {
-      panier.push({ id: produit.id, nom: produit.nom, prix: produit.prix, image: produit.mainImage, quantite: 1, stock: produit.stock })
+      panier.push({ id: produit.id, nom: produit.nom, prix: produit.prix_promo && Number(produit.prix_promo) > 0 && Number(produit.prix_promo) < Number(produit.prix) ? Number(produit.prix_promo) : produit.prix, prixOriginal: produit.prix, image: produit.mainImage, quantite: 1, stock: produit.stock })
       afficherNotification('✅ Produit ajouté au panier', 'success')
     }
     sauvegarderPanier(panier)
@@ -474,8 +474,16 @@ export default function BoutiqueClient() {
       return matchCategorie && matchRecherche
     })
     switch (sort) {
-      case 'price-asc': filtered.sort((a, b) => a.prix - b.prix); break
-      case 'price-desc': filtered.sort((a, b) => b.prix - a.prix); break
+      case 'price-asc': filtered.sort((a, b) => {
+          const prixA = (a.prix_promo && Number(a.prix_promo) > 0 && Number(a.prix_promo) < Number(a.prix)) ? Number(a.prix_promo) : Number(a.prix);
+          const prixB = (b.prix_promo && Number(b.prix_promo) > 0 && Number(b.prix_promo) < Number(b.prix)) ? Number(b.prix_promo) : Number(b.prix);
+          return prixA - prixB;
+        }); break
+      case 'price-desc': filtered.sort((a, b) => {
+          const prixA = (a.prix_promo && Number(a.prix_promo) > 0 && Number(a.prix_promo) < Number(a.prix)) ? Number(a.prix_promo) : Number(a.prix);
+          const prixB = (b.prix_promo && Number(b.prix_promo) > 0 && Number(b.prix_promo) < Number(b.prix)) ? Number(b.prix_promo) : Number(b.prix);
+          return prixB - prixA;
+        }); break
       case 'popular': filtered.sort((a, b) => a.stock - b.stock); break
       default: filtered.sort((a, b) => new Date(b.dateCreation) - new Date(a.dateCreation)); break
     }
