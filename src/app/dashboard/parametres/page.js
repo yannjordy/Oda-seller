@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { getSupabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { Icons } from '@/components/icons';
 
 /* ═══════════════════════════════════════════════════════════════
    PALETTE & FONTS
@@ -206,6 +207,7 @@ const CSS = `
   .p-nav-btn.active .p-nav-ico {
     background: var(--primary);
     box-shadow: 0 4px 10px rgba(0,122,255,.32);
+    color: #fff;
   }
   .p-nav-btn:active .p-nav-ico { transform: scale(.9); }
   .p-nav-chevron {
@@ -1075,7 +1077,7 @@ function UpZone({ value, onFile, icon, label, accept }) {
   return (
     <div className={`p-upload${has ? ' has-img' : ''}`} onClick={() => ref.current?.click()}>
       {has
-        ? (<><img className="p-upload-img" src={value} alt="" /><span style={{ fontSize:'.68rem', color:'var(--green)', fontWeight:600 }}>✓ Chargé</span></>)
+        ? (<><img className="p-upload-img" src={value} alt="" /><span style={{ fontSize:'.68rem', color:'var(--green)', fontWeight:600 }}>{Icons.check} Chargé</span></>)
         : (<><span className="p-upload-icon">{icon}</span><span className="p-upload-label">{label}</span><span style={{ fontSize:'.65rem', color:'var(--text-3)' }}>max 2 MB</span></>)
       }
       <input ref={ref} type="file" accept={accept || 'image/*'} hidden onChange={e => pick(e.target.files[0])} />
@@ -1179,7 +1181,7 @@ export default function ParametresPage() {
     try {
       const { data } = await supabase.from('parametres_boutique').select('user_id').eq('config->identifiant->>slug', s).neq('user_id', user.id).single();
       const ok = !data;
-      setSlugSt({ ok, msg: ok ? '✓ Disponible' : '✕ Déjà utilisé' });
+      setSlugSt({ ok, msg: ok ? <>{Icons.check} Disponible</> : <>{Icons.close} Déjà utilisé</> });
       return ok;
     } catch { return false; }
   }
@@ -1270,13 +1272,13 @@ export default function ParametresPage() {
 
   /* ── Nav config ── */
   const NAV = [
-    { id:'general',  ico:'🏪', label:'Général' },
-    { id:'slug',     ico:'🔗', label:'Identifiant' },
-    { id:'payment',  ico:'💳', label:'Paiement' },
-    { id:'shipping', ico:'📦', label:'Livraison' },
-    { id:'notifs',   ico:'🔔', label:'Notifications' },
-    { id:'security', ico:'🔒', label:'Sécurité' },
-    { id:'app',      ico:'🎨', label:'Apparence' },
+    { id:'general',  ico: Icons.general,  label:'Général' },
+    { id:'slug',     ico: Icons.link,     label:'Identifiant' },
+    { id:'payment',  ico: Icons.card,     label:'Paiement' },
+    { id:'shipping', ico: Icons.shipping, label:'Livraison' },
+    { id:'notifs',   ico: Icons.bell,     label:'Notifications' },
+    { id:'security', ico: Icons.lock,     label:'Sécurité' },
+    { id:'app',      ico: Icons.palette,  label:'Apparence' },
   ];
 
   const NAV_DESC = {
@@ -1312,7 +1314,7 @@ export default function ParametresPage() {
       <aside className="p-side">
         <div className="p-side-brand">
           <div className="p-side-logo">
-            <div className="p-side-logo-icon">⚙️</div>
+            <div className="p-side-logo-icon">{Icons.settings}</div>
             <div>
               <div className="p-side-logo-text">ODA Studio</div>
               <div className="p-side-logo-sub">Paramètres</div>
@@ -1352,7 +1354,7 @@ export default function ParametresPage() {
             <div className="p-card">
               <div className="p-card-head">
                 <div>
-                  <div className="p-card-title"><span className="p-card-title-icon">🏪</span>Informations boutique</div>
+                  <div className="p-card-title"><span className="p-card-title-icon">{Icons.general}</span>Informations boutique</div>
                   <div className="p-card-desc">Ces informations seront visibles par vos clients</div>
                 </div>
               </div>
@@ -1382,7 +1384,7 @@ export default function ParametresPage() {
                   </div>
                   <div>
                     <button type="submit" className="p-btn p-btn-primary" disabled={saving}>
-                      {saving ? 'Enregistrement…' : '✓ Enregistrer'}
+                      {saving ? 'Enregistrement…' : <>{Icons.check} Enregistrer</>}
                     </button>
                   </div>
                 </div>
@@ -1397,7 +1399,7 @@ export default function ParametresPage() {
             <div className="p-card">
               <div className="p-card-head">
                 <div>
-                  <div className="p-card-title"><span className="p-card-title-icon">🔗</span>URL de votre boutique</div>
+                  <div className="p-card-title"><span className="p-card-title-icon">{Icons.link}</span>URL de votre boutique</div>
                   <div className="p-card-desc">Votre lien public unique pour partager votre boutique</div>
                 </div>
               </div>
@@ -1454,7 +1456,7 @@ export default function ParametresPage() {
             <div className="p-card">
               <div className="p-card-head">
                 <div>
-                  <div className="p-card-title"><span className="p-card-title-icon">💳</span>Carte bancaire</div>
+                  <div className="p-card-title"><span className="p-card-title-icon">{Icons.card}</span>Carte bancaire</div>
                   <div className="p-card-desc">Visa, Mastercard via Stripe</div>
                 </div>
                 <Toggle id="payCard" checked={params.paiement.carte.actif} onChange={v => up('paiement.carte.actif', v)} />
@@ -1466,7 +1468,7 @@ export default function ParametresPage() {
                     <input className="p-inp" placeholder="sk_live_..." value={params.paiement.carte.cle} onChange={e => up('paiement.carte.cle', e.target.value)} style={{ fontFamily:'monospace' }} />
                   </div>
                   <div>
-                    <button type="button" className="p-btn p-btn-success p-btn-sm" onClick={() => confirmerPaiement('carte')}>✓ Confirmer l'intégration</button>
+                    <button type="button" className="p-btn p-btn-success p-btn-sm" onClick={() => confirmerPaiement('carte')}>{Icons.check} Confirmer l'intégration</button>
                   </div>
                 </div>
               )}
@@ -1476,7 +1478,7 @@ export default function ParametresPage() {
             <div className="p-card">
               <div className="p-card-head">
                 <div>
-                  <div className="p-card-title"><span className="p-card-title-icon">📱</span>Mobile Money</div>
+                  <div className="p-card-title"><span className="p-card-title-icon">{Icons.mobile}</span>Mobile Money</div>
                   <div className="p-card-desc">MTN & Orange Money Cameroun</div>
                 </div>
                 <Toggle id="payMM" checked={params.paiement.mobile.actif} onChange={v => up('paiement.mobile.actif', v)} />
@@ -1530,7 +1532,7 @@ export default function ParametresPage() {
                   </div>
 
                   <div>
-                    <button type="button" className="p-btn p-btn-success p-btn-sm" onClick={confirmerMM}>✓ Confirmer Mobile Money</button>
+                    <button type="button" className="p-btn p-btn-success p-btn-sm" onClick={confirmerMM}>{Icons.check} Confirmer Mobile Money</button>
                   </div>
                 </div>
               )}
@@ -1540,14 +1542,14 @@ export default function ParametresPage() {
             <div className="p-card">
               <div className="p-card-head">
                 <div>
-                  <div className="p-card-title"><span className="p-card-title-icon">💵</span>Paiement à la livraison</div>
+                  <div className="p-card-title"><span className="p-card-title-icon">{Icons.cash}</span>Paiement à la livraison</div>
                   <div className="p-card-desc">Le client paie en espèces à la réception</div>
                 </div>
                 <Toggle id="payCash" checked={params.paiement.cash?.actif ?? false} onChange={v => up('paiement.cash.actif', v)} />
               </div>
               {params.paiement.cash?.actif && (
                 <div style={{ marginTop:4 }}>
-                  <button type="button" className="p-btn p-btn-success p-btn-sm" onClick={() => { up('paiement.cash.confirme', true); toast('Paiement cash activé', 'success'); }}>✓ Confirmer</button>
+                  <button type="button" className="p-btn p-btn-success p-btn-sm" onClick={() => { up('paiement.cash.confirme', true); toast('Paiement cash activé', 'success'); }}>{Icons.check} Confirmer</button>
                 </div>
               )}
             </div>
@@ -1560,7 +1562,7 @@ export default function ParametresPage() {
             <div className="p-card">
               <div className="p-card-head">
                 <div>
-                  <div className="p-card-title"><span className="p-card-title-icon">📦</span>Tarifs de livraison</div>
+                  <div className="p-card-title"><span className="p-card-title-icon">{Icons.shipping}</span>Tarifs de livraison</div>
                   <div className="p-card-desc">Configurez vos zones et frais de livraison</div>
                 </div>
               </div>
@@ -1614,7 +1616,7 @@ export default function ParametresPage() {
                   </div>
 
                   <div>
-                    <button type="submit" className="p-btn p-btn-primary">✓ Enregistrer la livraison</button>
+                    <button type="submit" className="p-btn p-btn-primary">{Icons.check} Enregistrer la livraison</button>
                   </div>
                 </div>
               </form>
@@ -1628,7 +1630,7 @@ export default function ParametresPage() {
             <div className="p-card">
               <div className="p-card-head">
                 <div>
-                  <div className="p-card-title"><span className="p-card-title-icon">🔔</span>Alertes & notifications</div>
+                  <div className="p-card-title"><span className="p-card-title-icon">{Icons.bell}</span>Alertes & notifications</div>
                   <div className="p-card-desc">Choisissez ce que vous souhaitez recevoir par email</div>
                 </div>
               </div>
@@ -1649,7 +1651,7 @@ export default function ParametresPage() {
               ))}
 
               <div style={{ paddingTop:16 }}>
-                <button type="button" className="p-btn p-btn-primary" onClick={saveNotifs}>✓ Enregistrer les préférences</button>
+                <button type="button" className="p-btn p-btn-primary" onClick={saveNotifs}>{Icons.check} Enregistrer les préférences</button>
               </div>
             </div>
           </div>
@@ -1661,7 +1663,7 @@ export default function ParametresPage() {
             <div className="p-card">
               <div className="p-card-head">
                 <div>
-                  <div className="p-card-title"><span className="p-card-title-icon">🔒</span>Mot de passe</div>
+                  <div className="p-card-title"><span className="p-card-title-icon">{Icons.lock}</span>Mot de passe</div>
                   <div className="p-card-desc">Mettez à jour votre mot de passe de connexion</div>
                 </div>
               </div>
@@ -1677,7 +1679,7 @@ export default function ParametresPage() {
                   </div>
                   <div>
                     <button type="submit" className="p-btn p-btn-primary" disabled={pwBusy}>
-                      {pwBusy ? 'Modification…' : '✓ Modifier le mot de passe'}
+                      {pwBusy ? 'Modification…' : <>{Icons.check} Modifier le mot de passe</>}
                     </button>
                   </div>
                 </div>
@@ -1688,13 +1690,13 @@ export default function ParametresPage() {
             <div className="p-card" style={{ borderColor:'rgba(242,69,61,.15)' }}>
               <div className="p-card-head" style={{ marginBottom:12 }}>
                 <div>
-                  <div className="p-card-title" style={{ color:'var(--red)' }}><span className="p-card-title-icon">⚠️</span>Zone de danger</div>
+                  <div className="p-card-title" style={{ color:'var(--red)' }}><span className="p-card-title-icon">{Icons.warn}</span>Zone de danger</div>
                   <div className="p-card-desc">Ces actions sont irréversibles — procédez avec précaution</div>
                 </div>
               </div>
               <div className="p-btn-group">
-                <button type="button" className="p-btn p-btn-ghost p-btn-sm" style={{ color:'var(--text-2)' }} onClick={() => toast('Contactez le support pour exporter vos données', 'warning')}>📥 Exporter mes données</button>
-                <button type="button" className="p-btn p-btn-danger p-btn-sm" onClick={() => { if(confirm('Supprimer définitivement votre compte ?')) toast('Contactez le support pour finaliser la suppression', 'warning'); }}>🗑️ Supprimer le compte</button>
+                <button type="button" className="p-btn p-btn-ghost p-btn-sm" style={{ color:'var(--text-2)' }} onClick={() => toast('Contactez le support pour exporter vos données', 'warning')}>{Icons.download} Exporter mes données</button>
+                <button type="button" className="p-btn p-btn-danger p-btn-sm" onClick={() => { if(confirm('Supprimer définitivement votre compte ?')) toast('Contactez le support pour finaliser la suppression', 'warning'); }}>{Icons.trash} Supprimer le compte</button>
               </div>
             </div>
           </div>
@@ -1708,7 +1710,7 @@ export default function ParametresPage() {
             <div className="p-card">
               <div className="p-card-head">
                 <div>
-                  <div className="p-card-title"><span className="p-card-title-icon">🎨</span>Palette de couleurs</div>
+                  <div className="p-card-title"><span className="p-card-title-icon">{Icons.palette}</span>Palette de couleurs</div>
                   <div className="p-card-desc">Thèmes prédéfinis pour votre boutique</div>
                 </div>
               </div>
@@ -1747,7 +1749,7 @@ export default function ParametresPage() {
                             <div className="p-po-swatch" style={{ background: p.accent }} />
                           </div>
                           <span>{p.name}</span>
-                          {params.apparence.couleurPrimaire === p.primary && <span className="p-po-check">✓</span>}
+                          {params.apparence.couleurPrimaire === p.primary && <span className="p-po-check">{Icons.check}</span>}
                         </div>
                       ))}
                     </DropdownPortal>
@@ -1784,7 +1786,7 @@ export default function ParametresPage() {
             <div className="p-card">
               <div className="p-card-head">
                 <div>
-                  <div className="p-card-title"><span className="p-card-title-icon">✏️</span>Police d'écriture</div>
+                  <div className="p-card-title"><span className="p-card-title-icon">{Icons.type}</span>Police d'écriture</div>
                   <div className="p-card-desc">Choisissez la typographie de votre boutique</div>
                 </div>
               </div>
@@ -1806,7 +1808,7 @@ export default function ParametresPage() {
                           onClick={() => { up('apparence.police', f.value); setFontOpen(false); }}>
                           <span className="p-fo-preview" style={{ fontFamily: f.value }}>Aa — Bb — Cc</span>
                           <span className="p-fo-name">{f.label}</span>
-                          {params.apparence.police === f.value && <span className="p-fo-check">✓</span>}
+                          {params.apparence.police === f.value && <span className="p-fo-check">{Icons.check}</span>}
                         </div>
                       ))}
                     </DropdownPortal>
@@ -1819,22 +1821,22 @@ export default function ParametresPage() {
             <div className="p-card">
               <div className="p-card-head">
                 <div>
-                  <div className="p-card-title"><span className="p-card-title-icon">🖼️</span>Images de la boutique</div>
+                  <div className="p-card-title"><span className="p-card-title-icon">{Icons.image}</span>Images de la boutique</div>
                   <div className="p-card-desc">Logo et favicon affichés dans votre boutique</div>
                 </div>
               </div>
               <div className="p-upload-grid">
-                <UpZone value={params.apparence.logo} onFile={b => upImg('logo', b)} icon="🖼️" label="Logo principal" />
-                <UpZone value={params.apparence.favicon} onFile={b => upImg('favicon', b)} icon="🔖" label="Favicon" />
+                <UpZone value={params.apparence.logo} onFile={b => upImg('logo', b)} icon={Icons.image} label="Logo principal" />
+                <UpZone value={params.apparence.favicon} onFile={b => upImg('favicon', b)} icon={Icons.type} label="Favicon" />
               </div>
             </div>
 
             {/* Actions */}
             <div className="p-btn-group">
               <button type="button" className="p-btn p-btn-primary" onClick={saveApp} disabled={saving}>
-                {saving ? 'Enregistrement…' : '✓ Sauvegarder l\'apparence'}
+                {saving ? 'Enregistrement…' : <>{Icons.check} Sauvegarder l'apparence</>}
               </button>
-              <button type="button" className="p-btn p-btn-ghost" onClick={openPreview}>👁 Aperçu</button>
+              <button type="button" className="p-btn p-btn-ghost" onClick={openPreview}>{Icons.eye} Aperçu</button>
               <button type="button" className="p-btn p-btn-ghost" style={{ color:'var(--red)' }} onClick={resetApp}>Réinitialiser</button>
             </div>
           </div>
@@ -1861,7 +1863,7 @@ export default function ParametresPage() {
               <i style={{ background:'#27C93F' }} />
             </div>
             <div className="p-modal-url">{prevUrl}</div>
-            <button className="p-btn p-btn-ghost p-btn-sm" onClick={() => setPrevOpen(false)}>✕</button>
+            <button className="p-btn p-btn-ghost p-btn-sm" onClick={() => setPrevOpen(false)}>{Icons.close}</button>
           </div>
           <iframe className="p-modal-iframe" ref={iframeRef} title="Aperçu boutique" />
         </div>

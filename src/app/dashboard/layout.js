@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import PageLoader from '@/components/PageLoader';
+import { Icons } from '@/components/icons';
 
 
 export const LanguageContext = createContext({ lang: 'fr', setLang: () => {}, t: (k) => k });
@@ -573,18 +574,18 @@ export default function DashboardLayout({ children }) {
   const t = (key) => TRANSLATIONS[lang]?.[key] ?? TRANSLATIONS['fr'][key] ?? key;
 
   const NAV_LINKS = [
-    { href: '/dashboard',              icon: '📊', labelKey: 'dashboard',  color: 'blue'   },
-    { href: '/dashboard/produits',     icon: '📦', labelKey: 'products',   color: 'orange' },
-    { href: '/dashboard/commandes',    icon: '📋', labelKey: 'orders',     color: 'green'  },
-    { href: '/dashboard/clients',      icon: '👥', labelKey: 'clients',    color: 'purple' },
-    { href: '/dashboard/messages',     icon: '💬', labelKey: 'messages',   color: 'pink'   },
-     { href: '/dashboard/marketing',     icon: '🌐', labelKey: 'oda-ADS',   color: 'red'   },
+    { href: '/dashboard',              icon: Icons.dashboard,  labelKey: 'dashboard',  color: 'blue'   },
+    { href: '/dashboard/produits',     icon: Icons.products,   labelKey: 'products',   color: 'orange' },
+    { href: '/dashboard/commandes',    icon: Icons.orders,     labelKey: 'orders',     color: 'green'  },
+    { href: '/dashboard/clients',      icon: Icons.clients,    labelKey: 'clients',    color: 'purple' },
+    { href: '/dashboard/messages',     icon: Icons.messages,   labelKey: 'messages',   color: 'pink'   },
+     { href: '/dashboard/marketing',     icon: Icons.marketing,   labelKey: 'oda-ADS',   color: 'red'   },
   ];
 
   const NAV_LINKS_SECONDARY = [
-    { href: '/dashboard/statistiques', icon: '📈', labelKey: 'statistics', color: 'teal'   },
-    { href: '/dashboard/parametres',   icon: '⚙️', labelKey: 'settings',   color: 'indigo' },
-    { href: '/dashboard/boutique',     icon: '🏪', labelKey: 'myShop',     color: 'red'    },
+    { href: '/dashboard/statistiques', icon: Icons.statistics, labelKey: 'statistics', color: 'teal'   },
+    { href: '/dashboard/parametres',   icon: Icons.settings,   labelKey: 'settings',   color: 'indigo' },
+    { href: '/dashboard/boutique',     icon: Icons.shop,       labelKey: 'myShop',     color: 'red'    },
   ];
 
   /* Redirect si non authentifié */
@@ -653,11 +654,11 @@ export default function DashboardLayout({ children }) {
           <div className="oda-menu-hero">
             <div className="oda-hero-top">
               <div className="oda-hero-logo">
-                <div className="oda-hero-logo-icon">📝</div>
+                <div className="oda-hero-logo-icon">{Icons.edit}</div>
                 <span className="oda-hero-logo-text">ODA</span>
               </div>
               <button className="oda-hero-close" onClick={closeMenu} aria-label={t('closeMenu')}>
-                ✕
+                {Icons.close}
               </button>
             </div>
             <div className="oda-hero-profile">
