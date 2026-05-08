@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#7C3AED" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>OdaMarket - Hors connexion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(160deg, #0F0A1E 0%, #1A1035 50%, #0F0A1E 100%);
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      padding: 24px;
+    }
+    .container {
+      text-align: center;
+      max-width: 380px;
+      width: 100%;
+    }
+    .icon-wrap {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 32px;
+      background: rgba(124, 58, 237, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid rgba(124, 58, 237, 0.2);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    .icon-wrap img {
+      width: 72px;
+      height: 72px;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); border-color: rgba(124, 58, 237, 0.2); }
+      50% { transform: scale(1.05); border-color: rgba(124, 58, 237, 0.4); }
+    }
+    .dots {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #7C3AED;
+      opacity: 0.2;
+      animation: dotBounce 1.4s ease-in-out infinite;
+    }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dotBounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.2; }
+      30% { transform: translateY(-8px); opacity: 0.8; }
+    }
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 900;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #A78BFA, #7C3AED);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    p {
+      font-size: 0.92rem;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .btn-retry {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #7C3AED, #6D28D9);
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 8px 32px rgba(124, 58, 237, 0.3);
+    }
+    .btn-retry:active {
+      transform: scale(0.97);
+    }
+    .btn-retry:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-retry .spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+    .btn-retry.loading .spinner {
+      display: block;
+    }
+    .btn-retry.loading .label {
+      display: none;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .tips {
+      margin-top: 28px;
+      padding: 20px;
+      background: rgba(124, 58, 237, 0.06);
+      border: 1px solid rgba(124, 58, 237, 0.12);
+      border-radius: 16px;
+      text-align: left;
+    }
+    .tips-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 12px;
+    }
+    .tip-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.5;
+    }
+    .tip-item:last-child { margin-bottom: 0; }
+    .tip-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      background: rgba(124, 58, 237, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.75rem;
+    }
+    .brand {
+      margin-top: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      opacity: 0.3;
+    }
+    .brand-name {
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .brand-name span { color: #A78BFA; }
+  </style>
+</head>
+<body>
+  <div class="container" role="alert">
+    <div class="icon-wrap">
+      <img src="/images/offline.svg" alt="Hors connexion" />
+    </div>
+
+    <div class="dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+
+    <h1>Vous &ecirc;tes hors ligne</h1>
+
+    <p>
+      Aucune connexion internet d&eacute;tect&eacute;e.<br />
+      V&eacute;rifiez vos donn&eacute;es mobiles ou votre Wi-Fi pour continuer &agrave; utiliser OdaMarket.
+    </p>
+
+    <div class="actions">
+      <button class="btn-retry" id="retryBtn" onclick="retryConnection()">
+        <span class="label">🔄 R&eacute;essayer</span>
+        <div class="spinner"></div>
+      </button>
+    </div>
+
+    <div class="tips">
+      <div class="tips-title">Conseils</div>
+      <div class="tip-item">
+        <div class="tip-icon">📶</div>
+        <span>Activez vos donn&eacute;es mobiles dans les param&egrave;tres</span>
+      </div>
+      <div class="tip-item">
+        <div class="tip-icon">📡</div>
+        <span>V&eacute;rifiez que votre Wi-Fi est allum&eacute; et connect&eacute;</span>
+      </div>
+      <div class="tip-item">
+        <div class="tip-icon">✈️</div>
+        <span>Assurez-vous que le mode Avion est d&eacute;sactiv&eacute;</span>
+      </div>
+    </div>
+
+    <div class="brand">
+      <span class="brand-name">ODA<span>MARKET</span></span>
+    </div>
+  </div>
+
+  <script>
+    function retryConnection() {
+      var btn = document.getElementById('retryBtn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      fetch(window.location.origin + '/ping.txt?_=' + Date.now(), { mode: 'no-cors' })
+        .then(function() {
+          window.location.reload();
+        })
+        .catch(function() {
+          setTimeout(function() {
+            btn.classList.remove('loading');
+            btn.disabled = false;
+          }, 2000);
+        });
+    }
+
+    document.addEventListener('online', function() {
+      window.location.reload();
+    });
+
+    if (navigator.onLine) {
+      window.location.reload();
+    }
+  </script>
+</body>
+</html>

@@ -3,12 +3,14 @@ const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000;
 
 const STATIC_ASSETS = [
     '/',
+    '/offline.html',
     '/manifest.json',
     '/icons/oda-192.png',
     '/icons/oda-512.png',
     '/icons/oda-maskable-192.png',
     '/icons/oda-maskable-512.png',
     '/images/logo.png',
+    '/images/offline.svg',
 ];
 
 self.addEventListener('install', (event) => {
@@ -58,6 +60,15 @@ self.addEventListener('fetch', (event) => {
                     return response;
                 });
             })
+        );
+    } else if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request).then((response) => {
+                if (response && response.status === 200) {
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
+                }
+                return response;
+            }).catch(() => caches.match('/offline.html'))
         );
     } else {
         event.respondWith(

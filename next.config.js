@@ -11,6 +11,12 @@ const nextConfig = {
   async headers() {
     return [
       {
+        source: '/offline.html',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
+        ],
+      },
+      {
         source: '/service-worker.js',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
