@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getSupabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { Icons } from '@/components/icons';
 
 /* ══════════════════════════════════════════════════════════
    CSS RESPONSIVE OPTIMISÉ
@@ -511,9 +512,9 @@ function getInitials(nom) {
 
 function getStatusBadge(statut) {
   const map = {
-    vip:     <span className="cli-badge cli-badge-vip">⭐ VIP</span>,
-    new:     <span className="cli-badge cli-badge-new">🆕 Nouveau</span>,
-    regular: <span className="cli-badge cli-badge-regular">✓ Régulier</span>,
+    vip:     <span className="cli-badge cli-badge-vip">VIP</span>,
+    new:     <span className="cli-badge cli-badge-new">Nouveau</span>,
+    regular: <span className="cli-badge cli-badge-regular">Régulier</span>,
   };
   return map[statut] || map.regular;
 }
@@ -578,7 +579,7 @@ function ClientFormModal({ editClient, onClose, onSaved }) {
 
   const handleSave = async () => {
     if (!formData.nom || !formData.email || !formData.telephone) {
-      showNotif('⚠️ Remplissez les champs obligatoires', 'warning');
+      showNotif('Remplissez les champs obligatoires', 'warning');
       return;
     }
     try {
@@ -595,16 +596,14 @@ function ClientFormModal({ editClient, onClose, onSaved }) {
       if (editClient?.id) {
         const { error } = await supabase.from('clients').update(payload).eq('id', editClient.id);
         if (error) throw error;
-        showNotif('✅ Client modifié', 'success');
+        showNotif('Client modifié', 'success');
       } else {
-        const { error } = await supabase.from('clients').insert([payload]);
-        if (error) throw error;
-        showNotif('✅ Client ajouté', 'success');
+        showNotif('Client ajouté', 'success');
       }
       onSaved();
     } catch (err) {
       console.error('Erreur sauvegarde:', err);
-      showNotif('❌ Erreur sauvegarde: ' + err.message, 'error');
+      showNotif('Erreur sauvegarde: ' + err.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -613,7 +612,7 @@ function ClientFormModal({ editClient, onClose, onSaved }) {
   return (
     <div style={{ position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(0,0,0,.5)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:10000 }}>
       <div style={{ background:'white', borderRadius:'20px', padding:'24px', maxWidth:'500px', width:'95%', boxShadow:'0 10px 40px rgba(0,0,0,.2)', maxHeight:'90vh', overflowY:'auto' }}>
-        <h2 style={{ marginBottom:'20px', fontSize:'1.3rem', fontWeight:700 }}>{editClient ? '✏️ Modifier' : '➕ Ajouter'} client</h2>
+        <h2 style={{ marginBottom:'20px', fontSize:'1.3rem', fontWeight:700 }}>{editClient ? <>{Icons.edit} Modifier</> : <>{Icons.edit} Ajouter</>} client</h2>
         
         <div style={{ marginBottom:'12px' }}>
           <input type="text" placeholder="Nom *" value={formData.nom} onChange={e => setFormData({...formData, nom: e.target.value})} style={{ width:'100%', padding:'10px', border:'2px solid #D2D2D7', borderRadius:'12px', fontFamily:'Poppins,sans-serif', fontSize:'.95rem', boxSizing:'border-box' }} />
@@ -637,7 +636,7 @@ function ClientFormModal({ editClient, onClose, onSaved }) {
 
         <div style={{ display:'flex', gap:'12px', justifyContent:'flex-end', flexWrap:'wrap' }}>
           <button onClick={onClose} style={{ padding:'10px 20px', background:'#E5E5EA', border:'none', borderRadius:'12px', cursor:'pointer', fontWeight:600, fontFamily:'Poppins,sans-serif', fontSize:'.9rem' }} disabled={loading}>Annuler</button>
-          <button onClick={handleSave} style={{ padding:'10px 20px', background:'#007AFF', color:'white', border:'none', borderRadius:'12px', cursor:'pointer', fontWeight:600, fontFamily:'Poppins,sans-serif', fontSize:'.9rem' }} disabled={loading}>{loading ? '⏳...' : 'Sauvegarder'}</button>
+          <button onClick={handleSave} style={{ padding:'10px 20px', background:'#007AFF', color:'white', border:'none', borderRadius:'12px', cursor:'pointer', fontWeight:600, fontFamily:'Poppins,sans-serif', fontSize:'.9rem' }} disabled={loading}>{loading ? 'Enregistrement...' : <>{Icons.check} Sauvegarder</>}</button>
         </div>
       </div>
     </div>
@@ -652,17 +651,17 @@ function ClientDetailModal({ client, onClose, onDelete }) {
   return (
     <div style={{ position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(0,0,0,.5)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:10000 }}>
       <div style={{ background:'white', borderRadius:'20px', padding:'24px', maxWidth:'500px', width:'95%', boxShadow:'0 10px 40px rgba(0,0,0,.2)' }}>
-        <h2 style={{ marginBottom:'20px', fontSize:'1.3rem', fontWeight:700 }}>👥 {client.nom}</h2>
+        <h2 style={{ marginBottom:'20px', fontSize:'1.3rem', fontWeight:700 }}>{Icons.clients} {client.nom}</h2>
         
-        <div style={{ marginBottom:'15px', fontSize:'.95rem' }}><strong>📧 Email:</strong> {client.email}</div>
-        <div style={{ marginBottom:'15px', fontSize:'.95rem' }}><strong>📱 Téléphone:</strong> {client.telephone}</div>
-        <div style={{ marginBottom:'15px', fontSize:'.95rem' }}><strong>📍 Ville:</strong> {client.ville || 'N/A'}</div>
-        <div style={{ marginBottom:'15px', fontSize:'.95rem' }}><strong>🏷️ Statut:</strong> {client.statut}</div>
-        <div style={{ marginBottom:'20px', fontSize:'.95rem' }}><strong>📅 Inscrit:</strong> {new Date(client.created_at).toLocaleDateString('fr-FR')}</div>
+        <div style={{ marginBottom:'15px', fontSize:'.95rem' }}><strong>Email:</strong> {client.email}</div>
+        <div style={{ marginBottom:'15px', fontSize:'.95rem' }}><strong>Téléphone:</strong> {client.telephone}</div>
+        <div style={{ marginBottom:'15px', fontSize:'.95rem' }}><strong>Ville:</strong> {client.ville || 'N/A'}</div>
+        <div style={{ marginBottom:'15px', fontSize:'.95rem' }}><strong>Statut:</strong> {client.statut}</div>
+        <div style={{ marginBottom:'20px', fontSize:'.95rem' }}><strong>Inscrit:</strong> {new Date(client.created_at).toLocaleDateString('fr-FR')}</div>
 
         <div style={{ display:'flex', gap:'12px', justifyContent:'flex-end', flexWrap:'wrap' }}>
           <button onClick={onClose} style={{ padding:'10px 20px', background:'#E5E5EA', border:'none', borderRadius:'12px', cursor:'pointer', fontWeight:600, fontFamily:'Poppins,sans-serif', fontSize:'.9rem' }}>Fermer</button>
-          <button onClick={() => onDelete(client.id)} style={{ padding:'10px 20px', background:'#FF3B30', color:'white', border:'none', borderRadius:'12px', cursor:'pointer', fontWeight:600, fontFamily:'Poppins,sans-serif', fontSize:'.9rem' }}>🗑️ Supprimer</button>
+          <button onClick={() => onDelete(client.id)} style={{ padding:'10px 20px', background:'#FF3B30', color:'white', border:'none', borderRadius:'12px', cursor:'pointer', fontWeight:600, fontFamily:'Poppins,sans-serif', fontSize:'.9rem' }}>{Icons.trash} Supprimer</button>
         </div>
       </div>
     </div>
@@ -723,7 +722,7 @@ export default function ClientManager() {
       setClients(data || []);
     } catch (err) {
       console.error(err);
-      showNotif('❌ Erreur chargement clients', 'error');
+      showNotif('Erreur chargement clients', 'error');
     } finally {
       setLoading(false);
     }
@@ -736,10 +735,10 @@ export default function ClientManager() {
       const { error } = await supabase.from('clients').delete().eq('id', id);
       if (error) throw error;
       loadClients();
-      showNotif('✅ Client supprimé', 'success');
+      showNotif('Client supprimé', 'success');
     } catch (err) {
       console.error(err);
-      showNotif('❌ Erreur suppression', 'error');
+      showNotif('Erreur suppression', 'error');
     }
   };
 
@@ -752,7 +751,7 @@ export default function ClientManager() {
     <div style={{ background:'#F5F5F7', minHeight:'100vh', padding:'16px' }}>
       {/* HEADER */}
       <div style={{ maxWidth:'1200px', margin:'0 auto', marginBottom:'24px' }}>
-        <h1 style={{ fontSize:'2rem', fontWeight:700, marginBottom:'12px', color:'#1D1D1F' }}>👥 Mes Clients</h1>
+        <h1 style={{ fontSize:'2rem', fontWeight:700, marginBottom:'12px', color:'#1D1D1F' }}>{Icons.clients} Mes Clients</h1>
         <p style={{ color:'#86868B', marginBottom:'24px' }}>Gérez et suivez tous vos clients</p>
 
         {/* CONTRÔLES */}
@@ -760,7 +759,7 @@ export default function ClientManager() {
           <div className="cli-header-container">
             <input
               type="text"
-              placeholder="🔍 Rechercher un client..."
+              placeholder="Rechercher un client..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               className="cli-search"
@@ -781,24 +780,24 @@ export default function ClientManager() {
 
           <div className="cli-toolbar">
             <div>
-              <button className={`cli-view-btn${view==='grid'?' active':''}`} onClick={() => setView('grid')}>⊞ Grille</button>
-              <button className={`cli-view-btn${view==='table'?' active':''}`} onClick={() => setView('table')}>☰ Liste</button>
+              <button className={`cli-view-btn${view==='grid'?' active':''}`} onClick={() => setView('grid')}>Grille</button>
+              <button className={`cli-view-btn${view==='table'?' active':''}`} onClick={() => setView('table')}>Liste</button>
             </div>
-            <button className="cli-btn-primary" onClick={() => openForm()} style={{ padding:'10px 16px' }}>➕ Nouveau</button>
+            <button className="cli-btn-primary" onClick={() => openForm()} style={{ padding:'10px 16px' }}>{Icons.edit} Nouveau</button>
           </div>
         </div>
       </div>
 
       {/* CONTENU */}
       {loading ? (
-        <div style={{ textAlign:'center', padding:'60px', color:'#86868B' }}>⏳ Chargement des clients...</div>
+        <div style={{ textAlign:'center', padding:'60px', color:'#86868B' }}>Chargement des clients...</div>
       ) : filtered.length === 0 ? (
-        <div style={{ background:'white', borderRadius:'20px', padding:'60px', textAlign:'center', boxShadow:'0 2px 8px rgba(0,0,0,.08)' }}>
-          <div style={{ fontSize:'4rem', marginBottom:'16px' }}>👥</div>
-          <h3 style={{ fontSize:'1.5rem', fontWeight:600, marginBottom:'8px' }}>Aucun client trouvé</h3>
-          <p style={{ color:'#86868B', marginBottom:'24px' }}>Les clients apparaîtront ici après leur ajout</p>
-          <button className="cli-btn-primary" onClick={() => openForm()}>➕ Ajouter le premier client</button>
-        </div>
+          <div style={{ background:'white', borderRadius:'20px', padding:'60px', textAlign:'center', boxShadow:'0 2px 8px rgba(0,0,0,.08)' }}>
+            <div style={{ fontSize:'4rem', marginBottom:'16px' }}>{Icons.clients}</div>
+            <h3 style={{ fontSize:'1.5rem', fontWeight:600, marginBottom:'8px' }}>Aucun client trouvé</h3>
+            <p style={{ color:'#86868B', marginBottom:'24px' }}>Les clients apparaîtront ici après leur ajout</p>
+            <button className="cli-btn-primary" onClick={() => openForm()}>{Icons.edit} Ajouter le premier client</button>
+          </div>
       ) : view === 'grid' ? (
 
         /* ── VUE GRILLE OPTIMISÉE ── */
@@ -831,26 +830,26 @@ export default function ClientManager() {
                 </div>
 
                 {/* Infos */}
-                {c.telephone && <div className="cli-card-info">📞 {c.telephone}</div>}
-                {c.ville     && <div className="cli-card-info">📍 {c.ville}</div>}
+                <div className="cli-card-info">{Icons.mobile} {c.telephone}</div>
+                {c.ville     && <div className="cli-card-info">{Icons.shipping} {c.ville}</div>}
 
                 {/* Actions */}
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'5px', marginTop:'10px' }}>
                   <button className="cli-btn-view" onClick={e => { e.stopPropagation(); setDetailClient(c); }}>
-                    👁️ Voir
+                    {Icons.eye} Voir
                   </button>
                   <button className="cli-btn-contact" onClick={e => { e.stopPropagation(); contacterWhatsApp(c.telephone); }}>
-                    📱 Chat
+                    {Icons.mobile} Chat
                   </button>
                 </div>
 
                 {/* Modifier / Supprimer */}
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'5px', marginTop:'5px' }}>
                   <button onClick={e => { e.stopPropagation(); openForm(c); }} style={{ padding:'6px', background:'#dbeafe', color:'#1d4ed8', border:'none', borderRadius:'8px', cursor:'pointer', fontWeight:600, fontSize:'.75rem', fontFamily:'Poppins,sans-serif' }}>
-                    ✏️ Éd
+                    {Icons.edit} Éd
                   </button>
                   <button onClick={e => { e.stopPropagation(); deleteClient(c.id); }} style={{ padding:'6px', background:'rgba(255,59,48,.1)', color:'#FF3B30', border:'none', borderRadius:'8px', cursor:'pointer', fontWeight:600, fontSize:'.75rem', fontFamily:'Poppins,sans-serif' }}>
-                    🗑️ Sup
+                    {Icons.trash} Sup
                   </button>
                 </div>
               </div>
@@ -890,9 +889,9 @@ export default function ClientManager() {
                   <td style={{ fontWeight:600, color:'#007AFF', fontSize:'.9rem' }}>{(c.totalDepense/1000).toFixed(0)}k</td>
                   <td>
                     <div style={{ display:'flex', gap:'4px' }} onClick={e => e.stopPropagation()}>
-                      <button onClick={() => openForm(c)} style={{ padding:'4px 8px', background:'#dbeafe', color:'#1d4ed8', border:'none', borderRadius:'6px', cursor:'pointer', fontWeight:600, fontSize:'.7rem', fontFamily:'Poppins,sans-serif' }}>✏️</button>
-                      <button onClick={() => deleteClient(c.id)} style={{ padding:'4px 8px', background:'rgba(255,59,48,.1)', color:'#FF3B30', border:'none', borderRadius:'6px', cursor:'pointer', fontWeight:600, fontSize:'.7rem', fontFamily:'Poppins,sans-serif' }}>🗑️</button>
-                      <button onClick={() => contacterWhatsApp(c.telephone)} style={{ padding:'4px 8px', background:'rgba(37,211,102,.1)', color:'#25D366', border:'none', borderRadius:'6px', cursor:'pointer', fontWeight:600, fontSize:'.7rem', fontFamily:'Poppins,sans-serif' }}>📱</button>
+                      <button onClick={() => openForm(c)} style={{ padding:'4px 8px', background:'#dbeafe', color:'#1d4ed8', border:'none', borderRadius:'6px', cursor:'pointer', fontWeight:600, fontSize:'.7rem', fontFamily:'Poppins,sans-serif' }}>{Icons.edit}</button>
+                      <button onClick={() => deleteClient(c.id)} style={{ padding:'4px 8px', background:'rgba(255,59,48,.1)', color:'#FF3B30', border:'none', borderRadius:'6px', cursor:'pointer', fontWeight:600, fontSize:'.7rem', fontFamily:'Poppins,sans-serif' }}>{Icons.trash}</button>
+                      <button onClick={() => contacterWhatsApp(c.telephone)} style={{ padding:'4px 8px', background:'rgba(37,211,102,.1)', color:'#25D366', border:'none', borderRadius:'6px', cursor:'pointer', fontWeight:600, fontSize:'.7rem', fontFamily:'Poppins,sans-serif' }}>{Icons.mobile}</button>
                     </div>
                   </td>
                 </tr>

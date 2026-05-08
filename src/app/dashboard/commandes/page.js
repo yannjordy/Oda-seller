@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getSupabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { Icons } from '@/components/icons';
 
 /* ══════════════════════════════════════════════════════════
    CSS
@@ -360,13 +361,13 @@ function ConfirmDeleteModal({ commande, onConfirm, onCancel }) {
   return (
     <div className="cmd-confirm-overlay" onClick={e => e.target === e.currentTarget && onCancel()}>
       <div className="cmd-confirm-box">
-        <div style={{ fontSize:'3rem', marginBottom:'12px' }}>🗑️</div>
+        <div style={{ fontSize:'3rem', marginBottom:'12px', color:'#FF3B30' }}>{Icons.trash}</div>
         <h3 style={{ color:'#1D1D1F', fontWeight:700, marginBottom:'8px' }}>Supprimer la commande ?</h3>
         <p style={{ color:'#6E6E73', marginBottom:'4px' }}>
           <strong style={{ color:'#007AFF' }}>{commande.numero || '#' + commande.id}</strong> — {commande.client_nom || 'Client inconnu'}
         </p>
         <p style={{ color:'#FF3B30', fontSize:'.85rem', marginBottom:'24px' }}>
-          ⚠️ Cette action est irréversible.
+          {Icons.warn} Cette action est irréversible.
         </p>
         <div style={{ display:'flex', gap:'12px', justifyContent:'center' }}>
           <button
@@ -381,7 +382,7 @@ function ConfirmDeleteModal({ commande, onConfirm, onCancel }) {
             style={{ flex:1 }}
             onClick={() => onConfirm(commande.id)}
           >
-            🗑️ Supprimer
+              {Icons.download} Supprimer
           </button>
         </div>
       </div>
@@ -505,7 +506,7 @@ function OrderDetailModal({ commande, onClose, onStatusChange, onDelete }) {
 
         {/* Produits */}
         <div style={{ marginBottom:'20px' }}>
-          <h4 style={{ color:'#007AFF', marginBottom:'14px', fontSize:'1.05rem' }}>📦 Produits commandés</h4>
+          <h4 style={{ color:'#007AFF', marginBottom:'14px', fontSize:'1.05rem' }}>{Icons.products} Produits commandés</h4>
           {produits.length === 0
             ? <p style={{ color:'#6E6E73', textAlign:'center', padding:'16px' }}>Aucun produit renseigné</p>
             : produits.map((p, i) => (
@@ -531,7 +532,7 @@ function OrderDetailModal({ commande, onClose, onStatusChange, onDelete }) {
         <div style={{ display:'flex', gap:'12px', paddingTop:'16px', borderTop:'2px solid #E3F2FD', flexWrap:'wrap' }}>
           {canAdvance && (
             <button className="cmd-btn-primary" style={{ flex:1 }} onClick={() => { onStatusChange(commande.id, STATUTS[commande.statut].next); onClose(); }}>
-              ✅ {getStatutLabel(STATUTS[commande.statut].next)}
+              {Icons.check} {getStatutLabel(STATUTS[commande.statut].next)}
             </button>
           )}
           {canCancel && (
@@ -540,7 +541,7 @@ function OrderDetailModal({ commande, onClose, onStatusChange, onDelete }) {
               onStatusChange(commande.id, nextCancel);
               onClose();
             }}>
-              ❌ Annuler
+              {Icons.close} Annuler
             </button>
           )}
 
@@ -567,7 +568,7 @@ function OrderDetailModal({ commande, onClose, onStatusChange, onDelete }) {
               onMouseEnter={e => { e.currentTarget.style.background = '#FF3B30'; e.currentTarget.style.color = 'white'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#FF3B30'; }}
             >
-              🗑️ Supprimer
+            {Icons.download} Supprimer
             </button>
           )}
 
@@ -611,7 +612,7 @@ function NewOrderModal({ produits, onClose, onCreated, commandesCount }) {
 
   function addLigne() { setLignes(prev => [...prev, { produitId:'', quantite:1, prix:0, nom:'' }]); }
   function removeLigne(idx) {
-    if (lignes.length <= 1) { showNotif('⚠️ Au moins un produit requis', 'warning'); return; }
+    if (lignes.length <= 1) { showNotif('Au moins un produit requis', 'warning'); return; }
     setLignes(prev => prev.filter((_, i) => i !== idx));
   }
 
@@ -619,8 +620,8 @@ function NewOrderModal({ produits, onClose, onCreated, commandesCount }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!form.nom || !form.telephone || !form.adresse) { showNotif('❌ Remplissez tous les champs obligatoires', 'error'); return; }
-    if (lignes.some(l => !l.produitId || !l.quantite)) { showNotif('❌ Vérifiez les produits', 'error'); return; }
+    if (!form.nom || !form.telephone || !form.adresse) { showNotif('Remplissez tous les champs obligatoires', 'error'); return; }
+    if (lignes.some(l => !l.produitId || !l.quantite)) { showNotif('Vérifiez les produits', 'error'); return; }
 
     setSubmitting(true);
     try {
@@ -637,9 +638,9 @@ function NewOrderModal({ produits, onClose, onCreated, commandesCount }) {
         statut:            'en_attente',
       }]);
       if (error) throw error;
-      showNotif('✨ Commande créée avec succès !', 'success');
+      showNotif('Commande créée avec succès !', 'success');
       onCreated();
-    } catch (err) { showNotif(`❌ Erreur : ${err.message}`, 'error'); }
+    } catch (err) { showNotif(`Erreur : ${err.message}`, 'error'); }
     finally { setSubmitting(false); }
   }
 
@@ -651,7 +652,7 @@ function NewOrderModal({ produits, onClose, onCreated, commandesCount }) {
       <div style={{ background:'white', borderRadius:'20px', maxWidth:'800px', width:'100%', maxHeight:'90vh', overflowY:'auto', padding:'32px', animation:'cmd-slideUp .5s ease' }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'24px', paddingBottom:'16px', borderBottom:'2px solid #E3F2FD' }}>
           <h2 style={{ fontSize:'1.5rem', fontWeight:700, background:'linear-gradient(135deg,#007AFF,#00C6FF)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text', margin:0 }}>
-            ➕ Nouvelle commande
+            {Icons.edit} Nouvelle commande
           </h2>
           <button onClick={onClose} style={{ background:'none', border:'none', fontSize:'1.5rem', cursor:'pointer', color:'#6E6E73' }}>×</button>
         </div>
@@ -659,7 +660,7 @@ function NewOrderModal({ produits, onClose, onCreated, commandesCount }) {
         <form onSubmit={handleSubmit}>
           {/* Infos client */}
           <div style={{ marginBottom:'24px' }}>
-            <h4 style={{ color:'#007AFF', marginBottom:'14px' }}>👤 Informations client</h4>
+            <h4 style={{ color:'#007AFF', marginBottom:'14px' }}>{Icons.clients} Informations client</h4>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'14px' }}>
               {[
                 { key:'nom',       label:'Nom complet *',       type:'text',  ph:'Jean Dupont' },
@@ -678,7 +679,7 @@ function NewOrderModal({ produits, onClose, onCreated, commandesCount }) {
           {/* Produits */}
           <div style={{ marginBottom:'24px' }}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'14px' }}>
-              <h4 style={{ color:'#007AFF', margin:0 }}>📦 Produits</h4>
+              <h4 style={{ color:'#007AFF', margin:0 }}>{Icons.products} Produits</h4>
               <button type="button" className="cmd-btn-secondary" style={{ padding:'8px 14px', fontSize:'.85rem' }} onClick={addLigne}>+ Ajouter</button>
             </div>
             {lignes.map((l, i) => (
@@ -689,7 +690,7 @@ function NewOrderModal({ produits, onClose, onCreated, commandesCount }) {
                 </select>
                 <input className="cmd-input" type="number" min="1" placeholder="Qté" value={l.quantite} onChange={e => setLigne(i, 'quantite', e.target.value)} required />
                 <input className="cmd-input" value={l.prix ? `${Number(l.prix).toLocaleString('fr-FR')} FCFA` : ''} readOnly placeholder="Prix" />
-                <button type="button" onClick={() => removeLigne(i)} style={{ padding:'8px 12px', background:'rgba(255,59,48,.10)', color:'#FF3B30', border:'none', borderRadius:'10px', cursor:'pointer', fontWeight:700 }}>🗑️</button>
+                <button type="button" onClick={() => removeLigne(i)} style={{ padding:'8px 12px', background:'rgba(255,59,48,.10)', color:'#FF3B30', border:'none', borderRadius:'10px', cursor:'pointer', fontWeight:700 }}>{Icons.trash}</button>
               </div>
             ))}
             <div style={{ textAlign:'right', marginTop:'10px', fontWeight:700, color:'#007AFF', fontSize:'1.05rem' }}>
@@ -700,7 +701,7 @@ function NewOrderModal({ produits, onClose, onCreated, commandesCount }) {
           <div style={{ display:'flex', gap:'12px', justifyContent:'flex-end', paddingTop:'16px', borderTop:'2px solid #E3F2FD', flexWrap:'wrap' }}>
             <button type="button" className="cmd-btn-secondary" onClick={onClose}>Annuler</button>
             <button type="submit" className="cmd-btn-primary" disabled={submitting}>
-              {submitting ? '⏳ Création...' : '✅ Créer la commande'}
+              {submitting ? 'Création...' : <>{Icons.check} Créer la commande</>}
             </button>
           </div>
         </form>
@@ -737,7 +738,7 @@ export default function CommandesPage() {
         .order('created_at', { ascending:false });
       if (error) throw error;
       setCommandes(data || []);
-    } catch { showNotif('❌ Erreur de chargement', 'error'); }
+    } catch { showNotif('Erreur de chargement', 'error'); }
     finally { setLoading(false); }
   }
 
@@ -750,8 +751,8 @@ export default function CommandesPage() {
 
   async function updateStatus(id, status) {
     const { error } = await supabase.from('commandes').update({ statut:status }).eq('id', id).eq('user_id', user.id);
-    if (error) { showNotif('❌ Erreur mise à jour statut', 'error'); return; }
-    showNotif(`✅ Statut mis à jour : ${getStatutLabel(status)}`, 'success');
+    if (error) { showNotif('Erreur mise à jour statut', 'error'); return; }
+    showNotif(`Statut mis à jour : ${getStatutLabel(status)}`, 'success');
     setCommandes(prev => prev.map(c => c.id === id ? {...c, statut:status} : c));
     if (selected?.id === id) setSelected(prev => ({...prev, statut:status}));
   }
@@ -759,8 +760,8 @@ export default function CommandesPage() {
   /* ── Suppression d'une commande ── */
   async function deleteOrder(id) {
     const { error } = await supabase.from('commandes').delete().eq('id', id).eq('user_id', user.id);
-    if (error) { showNotif('❌ Erreur lors de la suppression', 'error'); return; }
-    showNotif('🗑️ Commande supprimée', 'success');
+    if (error) { showNotif('Erreur lors de la suppression', 'error'); return; }
+    showNotif('Commande supprimée', 'success');
     setCommandes(prev => prev.filter(c => c.id !== id));
     setToDelete(null);
   }
@@ -849,7 +850,7 @@ export default function CommandesPage() {
           {/* En-tête */}
           <div style={{ marginBottom:'24px' }}>
             <h1 style={{ fontSize:'2rem', fontWeight:700, background:'linear-gradient(135deg,#007AFF,#00C6FF)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text', marginBottom:'4px' }}>
-              📋 Commandes
+              {Icons.orders} Commandes
             </h1>
             <p style={{ color:'#6E6E73', margin:0 }}>{commandes.length} commande{commandes.length !== 1 ? 's' : ''} au total</p>
           </div>
@@ -873,14 +874,14 @@ export default function CommandesPage() {
 
           {/* Barre recherche + bouton */}
           <div style={{ background:'white', padding:'16px', borderRadius:'16px', boxShadow:'0 2px 12px rgba(0,122,255,.08)', marginBottom:'16px', display:'flex', gap:'12px', flexWrap:'wrap', alignItems:'center' }}>
-            <input className="cmd-search" type="text" placeholder="🔍 Rechercher par nom, numéro..." value={search} onChange={e => setSearch(e.target.value)} />
+            <input className="cmd-search" type="text" placeholder="Rechercher par nom, numéro..." value={search} onChange={e => setSearch(e.target.value)} />
             <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>
               {CHIP_FILTERS.slice(0, 6).map(f => (
                 <button key={f.key} className={`cmd-chip${filter===f.key?' active':''}`} onClick={() => setFilter(f.key)}>{f.label}</button>
               ))}
             </div>
             <button className="cmd-btn-primary" style={{ marginLeft:'auto', padding:'10px 18px' }} onClick={() => setShowNew(true)}>
-              ➕ Nouvelle commande
+              {Icons.edit} Nouvelle commande
             </button>
           </div>
 
@@ -890,7 +891,7 @@ export default function CommandesPage() {
               <div style={{ padding:'48px', textAlign:'center', color:'#6E6E73' }}>⏳ Chargement...</div>
             ) : filtered.length === 0 ? (
               <div style={{ padding:'60px', textAlign:'center' }}>
-                <div style={{ fontSize:'3rem', marginBottom:'12px' }}>📦</div>
+                <div style={{ fontSize:'3rem', marginBottom:'12px' }}>{Icons.products}</div>
                 <p style={{ color:'#6E6E73', fontWeight:600 }}>Aucune commande trouvée</p>
               </div>
             ) : (
@@ -930,7 +931,7 @@ export default function CommandesPage() {
                           <td onClick={e => e.stopPropagation()}>
                             <div style={{ display:'flex', gap:'6px', alignItems:'center', flexWrap:'wrap' }}>
                               <button onClick={() => setSelected(c)} style={{ padding:'6px 10px', background:'rgba(0,122,255,.10)', color:'#007AFF', border:'none', borderRadius:'8px', cursor:'pointer', fontSize:'.8rem', fontWeight:600, fontFamily:'Poppins,sans-serif' }}>
-                                👁️ Voir
+                                {Icons.eye} Voir
                               </button>
                               {/* Bouton WhatsApp rapide avec message pré-rempli */}
                               {c.client_telephone && (
@@ -952,7 +953,7 @@ export default function CommandesPage() {
                                   onClick={e => { e.stopPropagation(); setToDelete(c); }}
                                   title="Supprimer cette commande"
                                 >
-                                  🗑️
+                                  {Icons.trash}
                                 </button>
                               )}
                               <select className="cmd-select-status" value={c.statut} onClick={e => e.stopPropagation()} onChange={e => { e.stopPropagation(); updateStatus(c.id, e.target.value); }}>
@@ -972,10 +973,10 @@ export default function CommandesPage() {
           {/* Cards (mobile) */}
           <div className="cmd-mobile-cards">
             {loading ? (
-              <div style={{ padding:'48px', textAlign:'center', color:'#6E6E73' }}>⏳ Chargement...</div>
+              <div style={{ padding:'48px', textAlign:'center', color:'#6E6E73' }}>Chargement...</div>
             ) : filtered.length === 0 ? (
               <div style={{ padding:'48px', textAlign:'center' }}>
-                <div style={{ fontSize:'3rem', marginBottom:'12px' }}>📦</div>
+                <div style={{ fontSize:'3rem', marginBottom:'12px' }}>{Icons.products}</div>
                 <p style={{ color:'#6E6E73', fontWeight:600 }}>Aucune commande trouvée</p>
               </div>
             ) : filtered.map((c, i) => {
@@ -1001,7 +1002,7 @@ export default function CommandesPage() {
                     <span style={{ fontSize:'1.1rem', fontWeight:700, color:'#007AFF' }}>{(c.montant_total||0).toLocaleString('fr-FR')} FCFA</span>
                     <div style={{ display:'flex', gap:'6px', alignItems:'center' }}>
                       <button onClick={() => setSelected(c)} style={{ padding:'8px 12px', background:'rgba(0,122,255,.10)', color:'#007AFF', border:'none', borderRadius:'10px', cursor:'pointer', fontWeight:600, fontSize:'.85rem', fontFamily:'Poppins,sans-serif' }}>
-                        👁️ Voir
+                        {Icons.eye} Voir
                       </button>
                       {c.client_telephone && (
                         <a
@@ -1020,7 +1021,7 @@ export default function CommandesPage() {
                           onClick={() => setToDelete(c)}
                           title="Supprimer"
                         >
-                          🗑️
+                          {Icons.trash}
                         </button>
                       )}
                     </div>
@@ -1035,7 +1036,7 @@ export default function CommandesPage() {
         <aside className="cmd-sidebar-right" style={{ height:'fit-content', position:'sticky', top:'24px' }}>
           {/* Graphique */}
           <div style={{ background:'rgba(255,255,255,.7)', backdropFilter:'blur(10px)', padding:'20px', borderRadius:'20px', marginBottom:'16px', boxShadow:'0 2px 12px rgba(0,122,255,.08)', border:'1px solid rgba(0,122,255,.10)' }}>
-            <h3 style={{ color:'#007AFF', fontSize:'1.05rem', fontWeight:600, marginBottom:'14px' }}>📊 Ventes de la semaine</h3>
+            <h3 style={{ color:'#007AFF', fontSize:'1.05rem', fontWeight:600, marginBottom:'14px' }}>{Icons.statistics} Ventes de la semaine</h3>
             <div style={{ background:'linear-gradient(135deg,#007AFF,#00C6FF)', borderRadius:'12px', padding:'12px' }}>
               <SalesChart commandes={commandes} />
             </div>
@@ -1043,7 +1044,7 @@ export default function CommandesPage() {
 
           {/* Activité récente */}
           <div style={{ background:'rgba(255,255,255,.7)', backdropFilter:'blur(10px)', padding:'20px', borderRadius:'20px', boxShadow:'0 2px 12px rgba(0,122,255,.08)', border:'1px solid rgba(0,122,255,.10)' }}>
-            <h3 style={{ color:'#007AFF', fontSize:'1.05rem', fontWeight:600, marginBottom:'14px' }}>⚡ Activité récente</h3>
+            <h3 style={{ color:'#007AFF', fontSize:'1.05rem', fontWeight:600, marginBottom:'14px' }}>{Icons.bell} Activité récente</h3>
             {recents.length === 0
               ? <p style={{ color:'#6E6E73', textAlign:'center' }}>Aucune activité</p>
               : recents.map((c, i) => (
