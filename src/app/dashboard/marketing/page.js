@@ -90,6 +90,7 @@ const MOBILE_NAV_SECTIONS = [
   { key:'analytics',  icon:'📈', label:'Analytics &\nPerformance',        color:'rgba(52,199,89,.12)',   accent:'#34C759' },
   { key:'preferences', icon:'⚙️', label:'Préférences\nPublicitaires',      color:'rgba(0,122,255,.12)',   accent:'#007AFF' },
   { key:'interne',     icon:'🏪', label:'Publicité Interne\nODA Marketplace', color:'rgba(255,107,0,.12)', accent:'#FF6B00' },
+  { key:'storie',      icon:'⭕',  label:'Stories 24h',   color:'rgba(255,107,0,.12)', accent:'#FF9500' },
 ];
 
 // ─── SVG Icon helper ────────────────────────────────────────────
@@ -2272,9 +2273,9 @@ export default function OdaMarketingCenter() {
         )}
 
         {/* ══════════════════════════════════════
-            STATUS / STORIES (24h)
+            STORIE — Status 24h
         ══════════════════════════════════════ */}
-        {showSection('interne') && (
+        {showSection('storie') && (
           <div className="mkt-section mkt-status-section">
             <div className="mkt-section-head">
               <div className="mkt-section-title">
