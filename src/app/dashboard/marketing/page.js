@@ -533,12 +533,15 @@ const MKT_STYLES = `
 
   /* ── STATUS (Stories) ── */
   .mkt-status-section { margin-bottom:20px; }
-  .mkt-status-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:12px; }
+  .mkt-status-grid { display:flex; gap:12px; overflow-x:auto; padding:4px 0 8px; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; }
+  .mkt-status-grid::-webkit-scrollbar { height:4px; }
+  .mkt-status-grid::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+  .mkt-status-grid::-webkit-scrollbar-track { background:transparent; }
   .mkt-status-card {
     border-radius:16px; overflow:hidden; position:relative;
-    aspect-ratio:9/16; background:var(--bg); cursor:pointer;
-    border:2px solid var(--border); transition:all .2s;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    width:110px; flex-shrink:0; background:var(--bg); cursor:pointer;
+    border:2px solid var(--border); transition:all .2s; scroll-snap-align:start;
+    aspect-ratio:9/16; display:flex; flex-direction:column; align-items:center; justify-content:center;
     background-size:cover; background-position:center;
   }
   .mkt-status-card:hover { transform:translateY(-3px); border-color:var(--sb-orange); box-shadow:0 6px 20px rgba(255,107,0,.25); }

@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS shop_status_comments (
   user_id text,
   author_name text DEFAULT 'Anonyme',
   content text NOT NULL,
+  reply_to uuid REFERENCES shop_status_comments,
   created_at timestamptz DEFAULT now()
 );
 
