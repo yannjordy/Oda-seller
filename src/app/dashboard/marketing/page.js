@@ -92,6 +92,59 @@ const MOBILE_NAV_SECTIONS = [
   { key:'interne',     icon:'🏪', label:'Publicité Interne\nODA Marketplace', color:'rgba(255,107,0,.12)', accent:'#FF6B00' },
 ];
 
+// ─── SVG Icon helper ────────────────────────────────────────────
+const iconSvg = (emoji, size = 20) => {
+  const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', style: { verticalAlign: 'middle' } };
+  switch (emoji) {
+    case '🌱': return <svg {...p}><path d="M12 22V12"/><path d="M12 12c0-4 4-6 8-6 0 4-2 6-8 6z"/><path d="M12 12c0-4-4-6-8-6 0 4 2 6 8 6z"/></svg>;
+    case '✅': return <svg {...p}><polyline points="20 6 9 17 4 12"/></svg>;
+    case '❌': return <svg {...p}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+    case '👑': return <svg {...p}><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M12 22v-6"/></svg>;
+    case '📡': return <svg {...p}><path d="M12 2v4"/><path d="M8 12a4 4 0 018 0"/><path d="M4 8a8 8 0 0116 0"/><path d="M12 22v-6"/><path d="M8 22h8"/></svg>;
+    case '⚡': return <svg {...p}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>;
+    case '📈': return <svg {...p}><polyline points="23 6 13.5 15.5 8.5 10.5 3.5 15.5"/><polyline points="17 6 23 6 23 12"/></svg>;
+    case '⚙️': return <svg {...p}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>;
+    case '🏪': return <svg {...p}><path d="M3 9l2-7h14l2 7"/><path d="M5 9v10a2 2 0 002 2h10a2 2 0 002-2V9"/><path d="M9 21V13h6v8"/></svg>;
+    case '🇨🇲': return <svg {...p}><rect x="1" y="4" width="22" height="16" rx="2" fill="currentColor" opacity=".15"/><line x1="12" y1="4" x2="12" y2="20"/><circle cx="12" cy="12" r="3" fill="currentColor" opacity=".3"/></svg>;
+    case '📱': return <svg {...p}><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>;
+    case '🔗': return <svg {...p}><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>;
+    case '👆': return <svg {...p}><path d="M14 15V5a2 2 0 00-4 0v10"/><path d="M8 11V3a2 2 0 00-4 0v12"/><path d="M14 8V5a2 2 0 014 0v10l-1.83 2.56A4 4 0 0010.5 21H9a4 4 0 01-4-4v-3"/></svg>;
+    case '💡': return <svg {...p}><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0018 8 6 6 0 006 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 018.91 14"/></svg>;
+    case '📦': return <svg {...p}><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>;
+    case '💰': return <svg {...p}><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>;
+    case '💸': return <svg {...p}><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/><line x1="18" y1="19" x2="21" y2="22"/><line x1="21" y1="16" x2="18" y2="19"/></svg>;
+    case '📍': return <svg {...p}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>;
+    case '📅': return <svg {...p}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
+    case '🤖': return <svg {...p}><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><circle cx="15" cy="10" r="2"/><path d="M9 16a3 3 0 006 0"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/></svg>;
+    case '🕐': return <svg {...p}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
+    case '📉': return <svg {...p}><polyline points="23 18 13.5 8.5 8.5 13.5 3.5 8.5"/><polyline points="17 18 23 18 23 12"/></svg>;
+    case '🔄': return <svg {...p}><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>;
+    case '📊': return <svg {...p}><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>;
+    case '👁️': return <svg {...p}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>;
+    case '👁': return <svg {...p}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>;
+    case '💵': return <svg {...p}><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>;
+    case '🏆': return <svg {...p}><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 22v-5.17A7 7 0 007 11"/><path d="M12 11a4 4 0 00-4-4H6v3a4 4 0 004 4h4a4 4 0 004-4V7h-2a4 4 0 00-4 4z"/></svg>;
+    case '🔒': return <svg {...p}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>;
+    case '🗑️': return <svg {...p}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>;
+    case '🎯': return <svg {...p}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>;
+    case '🏠': return <svg {...p}><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
+    case '🔍': return <svg {...p}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
+    case '🔥': return <svg {...p}><path d="M12 23c-4 0-7-2.5-7-8 0-3.5 2.5-6 4-7 0 2 1.5 3 3 3s3-1 3-3c1.5 1 4 3.5 4 7 0 5.5-3 8-7 8z"/></svg>;
+    case '✏️': return <svg {...p}><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>;
+    case '💳': return <svg {...p}><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>;
+    case '🚀': return <svg {...p}><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>;
+    case '🎵': return <svg {...p}><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>;
+    case '💬': return <svg {...p}><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>;
+    case '📘': return <svg {...p}><rect x="3" y="2" width="18" height="20" rx="2"/><path d="M12 16h4"/><path d="M12 12h4"/><path d="M12 8h4"/><line x1="8" y1="8" x2="8.01" y2="8"/><line x1="8" y1="12" x2="8.01" y2="12"/><line x1="8" y1="16" x2="8.01" y2="16"/></svg>;
+    case '▶️': return <svg {...p}><polygon points="5 3 19 12 5 21 5 3"/></svg>;
+    case '🏁': return <svg {...p}><path d="M4 21V3h14l-2 5 2 5H4"/></svg>;
+    case '⚠️': return <svg {...p}><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>;
+    case '⏸': return <svg {...p}><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>;
+    case '🔔': return <svg {...p}><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>;
+    default: return <span style={{fontSize:size > 16 ? undefined : '.85rem'}}>{emoji}</span>;
+  }
+};
+
 // ─── CSS Global ────────────────────────────────────────────────
 const MKT_STYLES = `
   :root {
@@ -119,6 +172,8 @@ const MKT_STYLES = `
   .mkt-help-tagline-dot { width:6px; height:6px; border-radius:50%;
     background:var(--sb-orange); animation:mktPulse 1.8s ease-in-out infinite; }
   @keyframes mktPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.7)} }
+  .mkt-spinner { animation:mktSpin .6s linear infinite; }
+  @keyframes mktSpin { to{transform:rotate(360deg)} }
   .mkt-help-open-btn {
     display:flex; align-items:center; gap:7px;
     background:linear-gradient(135deg,var(--sb-orange),#FF9500);
@@ -526,6 +581,13 @@ const MKT_STYLES = `
   }
   .mkt-status-card:hover .mkt-status-delete { opacity:1; }
   .mkt-status-delete:hover { transform:scale(1.15); }
+  .mkt-status-video-badge {
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:1;
+    width:36px; height:36px; border-radius:50%; background:rgba(0,0,0,.65); backdrop-filter:blur(4px);
+    display:flex; align-items:center; justify-content:center;
+    color:white; font-size:.85rem; border:2px solid rgba(255,255,255,.3);
+  }
+  .mkt-status-preview.has-video { position:relative; width:100%; aspect-ratio:9/16; border-radius:14px; overflow:hidden; background:#000; margin-bottom:12px; }
   .mkt-status-create-modal {
     position:fixed; inset:0; z-index:10000;
     background:rgba(0,0,0,.6); backdrop-filter:blur(8px);
@@ -547,8 +609,17 @@ const MKT_STYLES = `
     border:2px dashed var(--border);
   }
   .mkt-status-preview.has-image { border-color:var(--sb-orange); }
-  .mkt-status-preview-placeholder { color:var(--text-3); text-align:center; font-size:.8rem; font-weight:500; }
-  .mkt-status-preview-placeholder span { font-size:2.5rem; display:block; margin-bottom:6px; }
+  .mkt-status-preview-placeholder { color:var(--text-3); text-align:center; font-size:.8rem; font-weight:500; padding:20px; transition:background .15s; border-radius:inherit; }
+  .mkt-status-preview-placeholder:hover { background:rgba(255,255,255,.04); }
+  .mkt-status-preview-placeholder svg { display:block; margin:0 auto 6px; }
+  .mkt-preview-remove {
+    position:absolute; top:8px; right:8px; z-index:2;
+    width:28px; height:28px; border-radius:50%; border:none;
+    background:rgba(0,0,0,.55); backdrop-filter:blur(4px); color:white;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    font-size:.75rem; transition:transform .15s;
+  }
+  .mkt-preview-remove:active { transform:scale(.88); }
   .mkt-status-upload-btn {
     display:inline-flex; align-items:center; gap:8px;
     padding:10px 20px; border-radius:12px; border:1.5px solid var(--border);
@@ -571,6 +642,27 @@ const MKT_STYLES = `
   }
   .mkt-status-submit:active { transform:scale(.97); }
   .mkt-status-submit:disabled { opacity:.5; cursor:not-allowed; }
+  /* ── Video Trimmer — WhatsApp style ── */
+  .mkt-trimmer { border-top:1px solid var(--border); padding-top:16px; margin-bottom:12px; }
+  .mkt-trimmer-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .mkt-trimmer-label { font-size:.82rem; font-weight:700; color:var(--text-1); }
+  .mkt-trimmer-dur { font-size:.75rem; font-weight:600; color:var(--sb-orange); background:rgba(255,107,0,.1); padding:2px 10px; border-radius:6px; }
+  .mkt-trimmer-preview { margin-bottom:10px; }
+  .mkt-trimmer-strip-wrap { position:relative; height:90px; border-radius:10px; overflow:hidden; background:#1A1A1A; margin-bottom:8px; user-select:none; -webkit-user-select:none; }
+  .mkt-trimmer-strip { display:flex; height:100%; overflow-x:auto; scrollbar-width:none; }
+  .mkt-trimmer-strip::-webkit-scrollbar { display:none; }
+  .mkt-trim-frame { flex-shrink:0; width:48px; height:100%; background-size:cover; background-position:center; }
+  .mkt-trimmer-shade { position:absolute; top:0; bottom:0; background:rgba(0,0,0,.6); z-index:2; pointer-events:none; }
+  .mkt-trimmer-shade.left { left:0; }
+  .mkt-trimmer-shade.right { right:0; }
+  .mkt-trimmer-region { position:absolute; top:0; bottom:0; background:rgba(255,107,0,.15); z-index:3; pointer-events:none; border-left:2px solid var(--sb-orange); border-right:2px solid var(--sb-orange); }
+  .mkt-trimmer-handle { position:absolute; top:0; bottom:0; width:28px; z-index:4; cursor:ew-resize; touch-action:none; display:flex; flex-direction:column; align-items:center; justify-content:center; transform:translateX(-50%); }
+  .mkt-trimmer-handle.right { transform:translateX(50%); }
+  .mkt-trimmer-handle-line { width:3px; height:100%; background:var(--sb-orange); border-radius:2px; box-shadow:0 0 8px rgba(255,107,0,.6); }
+  .mkt-trimmer-time { position:absolute; top:-22px; font-size:.6rem; font-weight:700; color:white; background:rgba(0,0,0,.7); padding:2px 6px; border-radius:4px; white-space:nowrap; }
+  .mkt-trimmer-handle.right .mkt-trimmer-time { right:0; }
+  .mkt-trimmer-info { text-align:center; font-size:.78rem; color:var(--text-2); margin-bottom:12px; padding:6px; background:rgba(255,255,255,.04); border-radius:8px; }
+  .mkt-trimmer-actions { display:flex; gap:10px; }
   .mkt-status-cancel {
     width:100%; padding:12px; border:none; border-radius:14px;
     background:transparent; color:var(--text-2); font-size:.85rem; font-weight:600;
@@ -755,7 +847,7 @@ function HelpCenter() {
             </div>
             <div className="mkt-help-content">
               <div className="mkt-help-page-icon-wrap" style={{ background: current.bg, marginTop:8 }}>
-                {current.icon}
+                {iconSvg(current.icon, 40)}
               </div>
               <div style={{ textAlign:'center' }}>
                 {current.step ? (
@@ -774,7 +866,7 @@ function HelpCenter() {
               <div className="mkt-help-tips">
                 {current.tips.map((tip, i) => (
                   <div className="mkt-help-tip" key={i}>
-                    <div className="mkt-help-tip-icon">{tip.icon}</div>
+                    <div className="mkt-help-tip-icon">{iconSvg(tip.icon, 18)}</div>
                     <span>{tip.text}</span>
                   </div>
                 ))}
@@ -790,7 +882,7 @@ function HelpCenter() {
                 }
                 onClick={() => isLast ? close() : setPage(p => p+1)}
               >
-                {isLast ? '✅ Compris, allons-y !' : 'Suivant →'}
+                {isLast ? <>{iconSvg('✅', 16)} Compris, allons-y !</> : 'Suivant →'}
               </button>
             </div>
           </div>
@@ -875,6 +967,15 @@ export default function OdaMarketingCenter() {
   const [statusPreview, setStatusPreview] = useState(null);
   const [statusCaption, setStatusCaption] = useState('');
   const [statusUploading, setStatusUploading] = useState(false);
+  const [statusType, setStatusType] = useState('image'); // 'image' | 'video'
+  const [showVideoTrimmer, setShowVideoTrimmer] = useState(false);
+  const [videoTrimStart, setVideoTrimStart] = useState(0);
+  const [videoTrimEnd, setVideoTrimEnd] = useState(0);
+  const [videoDuration, setVideoDuration] = useState(0);
+  const [originalFile, setOriginalFile] = useState(null);
+  const [trimmingVideo, setTrimmingVideo] = useState(false);
+  const trimmerRef = useRef(null);
+  const framesCache = useRef(null);
 
   // ─── Détection mobile
   useEffect(() => {
@@ -1004,19 +1105,21 @@ export default function OdaMarketingCenter() {
     if (!statusFile || statusUploading) return;
     setStatusUploading(true);
     try {
+      const isVideo = statusType === 'video';
       const fd = new FormData();
       fd.append('file', statusFile);
       fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
       fd.append('folder', `status/${user.id}`);
-      fd.append('quality', 'auto:good');
-      const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
+      if (!isVideo) fd.append('quality', 'auto:good');
+      const endpoint = isVideo ? 'video' : 'image';
+      const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${endpoint}/upload`, { method: 'POST', body: fd });
       if (!resp.ok) throw new Error('Upload échoué');
       const result = await resp.json();
       const { error } = await sb().from('shop_statuses').insert({
         user_id: user.id,
         media_url: result.secure_url,
         caption: statusCaption.trim(),
-        type: 'image',
+        type: statusType,
         expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       });
       if (error) throw error;
@@ -1025,6 +1128,7 @@ export default function OdaMarketingCenter() {
       setStatusFile(null);
       setStatusPreview(null);
       setStatusCaption('');
+      setStatusType('image');
       chargerStatus();
     } catch (err) {
       toast('❌ Erreur: ' + err.message, 'error');
@@ -1044,15 +1148,293 @@ export default function OdaMarketingCenter() {
     }
   }
 
+  function handleClearStatusFile() {
+    setStatusFile(null);
+    setStatusPreview(null);
+    setStatusType('image');
+    setOriginalFile(null);
+    setShowVideoTrimmer(false);
+    framesCache.current = null;
+    const input = document.getElementById('statusFileInput');
+    if (input) input.value = '';
+  }
+
   function handleStatusFile(e) {
     const file = e.target.files[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) { toast('Veuillez sélectionner une image', 'error'); return; }
-    if (file.size > 10 * 1024 * 1024) { toast("L'image ne doit pas dépasser 10 MB", 'error'); return; }
-    setStatusFile(file);
-    const reader = new FileReader();
-    reader.onload = ev => setStatusPreview(ev.target.result);
-    reader.readAsDataURL(file);
+    const isVideo = file.type.startsWith('video/');
+    if (!file.type.startsWith('image/') && !isVideo) { toast('Veuillez sélectionner une image ou une vidéo', 'error'); return; }
+    if (isVideo) {
+      if (file.size > 50 * 1024 * 1024) { toast('La vidéo ne doit pas dépasser 50 MB', 'error'); return; }
+      const videoEl = document.createElement('video');
+      videoEl.preload = 'metadata';
+      videoEl.onloadedmetadata = () => {
+        setVideoDuration(videoEl.duration);
+        setOriginalFile(file);
+        const maxEnd = Math.min(videoEl.duration, 80);
+        setVideoTrimStart(0);
+        setVideoTrimEnd(maxEnd);
+        setShowVideoTrimmer(true);
+        URL.revokeObjectURL(videoEl.src);
+      };
+      videoEl.onerror = () => { toast('Impossible de lire cette vidéo', 'error'); };
+      videoEl.src = URL.createObjectURL(file);
+    } else {
+      if (file.size > 10 * 1024 * 1024) { toast("L'image ne doit pas dépasser 10 MB", 'error'); return; }
+      setStatusFile(file);
+      setStatusType('image');
+      const reader = new FileReader();
+      reader.onload = ev => setStatusPreview(ev.target.result);
+      reader.readAsDataURL(file);
+    }
+  }
+
+  async function handleTrimVideo() {
+    if (!originalFile) return;
+    const start = videoTrimStart;
+    const end = Math.min(videoTrimEnd, start + 80);
+    if (end - start < 1) { toast('La durée minimale est de 1 seconde', 'error'); return; }
+    setTrimmingVideo(true);
+    try {
+      const isFullVideo = start <= 0.5 && end >= Math.min(videoDuration - 0.5, 79.5);
+      if (isFullVideo) {
+        setStatusFile(originalFile);
+        setStatusType('video');
+        setStatusPreview(URL.createObjectURL(originalFile));
+        setShowVideoTrimmer(false);
+        setOriginalFile(null);
+        framesCache.current = null;
+        toast('✅ Vidéo prête', 'success');
+        setTrimmingVideo(false);
+        return;
+      }
+      const blob = await trimVideoFile(originalFile, start, end);
+      if (blob.size === 0) throw new Error('La coupe a produit un fichier vide');
+      const trimmedFile = new File([blob], originalFile.name.replace(/\.[^.]+$/, '_trimmed.webm'), { type: 'video/webm' });
+      setStatusFile(trimmedFile);
+      setStatusType('video');
+      setStatusPreview(URL.createObjectURL(trimmedFile));
+      setShowVideoTrimmer(false);
+      setOriginalFile(null);
+      framesCache.current = null;
+      toast('✅ Vidéo coupée avec succès', 'success');
+    } catch (err) {
+      toast('❌ Erreur lors de la coupe: ' + err.message, 'error');
+    } finally {
+      setTrimmingVideo(false);
+    }
+  }
+
+  /* ── Extraire les frames pour la filmstrip ── */
+  function extractFrames(videoUrl, duration, maxFrames = 50) {
+    return new Promise(resolve => {
+      if (framesCache.current) { resolve(framesCache.current); return; }
+      const video = document.createElement('video');
+      video.preload = 'auto';
+      video.muted = true;
+      video.playsInline = true;
+      const interval = Math.max(0.5, duration / maxFrames);
+      const total = Math.min(maxFrames, Math.ceil(duration / interval));
+      const frames = [];
+      let captured = 0;
+      const canvas = document.createElement('canvas');
+      canvas.width = 80;
+      canvas.height = 142;
+      const ctx = canvas.getContext('2d');
+      video.onloadeddata = () => {
+        const grab = (t) => {
+          if (captured >= total) { video.pause(); URL.revokeObjectURL(videoUrl); framesCache.current = frames; resolve(frames); return; }
+          video.currentTime = t;
+          video.onseeked = () => {
+            ctx.drawImage(video, 0, 0, 80, 142);
+            frames.push(canvas.toDataURL('image/jpeg', 0.5));
+            captured++;
+            grab(t + interval);
+          };
+        };
+        grab(0);
+      };
+      video.onerror = () => resolve([]);
+      video.src = videoUrl;
+    });
+  }
+
+  /* ── Initialiser le trimmer WhatsApp-style ── */
+  useEffect(() => {
+    if (!showVideoTrimmer || !originalFile) return;
+    const url = URL.createObjectURL(originalFile);
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.muted = true;
+    video.onloadedmetadata = async () => {
+      const dur = video.duration;
+      setVideoDuration(dur);
+      setVideoTrimStart(0);
+      setVideoTrimEnd(Math.min(80, dur));
+      const frames = await extractFrames(url, dur);
+      renderFilmstrip(frames, dur);
+    };
+    video.src = url;
+    return () => { URL.revokeObjectURL(url); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showVideoTrimmer]);
+
+  /* ── Rendu de la filmstrip + handles ── */
+  function renderFilmstrip(frames, dur) {
+    const container = document.getElementById('trimmerStrip');
+    if (!container || !frames.length) return;
+    container.innerHTML = frames.map(f => `<div class="mkt-trim-frame" style="background-image:url('${f}')"></div>`).join('');
+    initHandles(dur);
+  }
+
+  function initHandles(dur) {
+    const wrap = document.getElementById('trimmerWrap');
+    if (!wrap) return;
+    const region = document.getElementById('trimRegion');
+    const hLeft = document.getElementById('trimHandleLeft');
+    const hRight = document.getElementById('trimHandleRight');
+    const timeL = document.getElementById('trimTimeLeft');
+    const timeR = document.getElementById('trimTimeRight');
+    const info = document.getElementById('trimInfo');
+    const maxDur = Math.min(80, dur);
+    let dragging = null;
+
+    function fmt(t) {
+      const m = Math.floor(t / 60);
+      const s = Math.floor(t % 60);
+      return `${m}:${s.toString().padStart(2,'0')}`;
+    }
+
+    function px(val) { return (val / dur) * 100; }
+
+    function updateUI() {
+      const pl = px(videoTrimStart);
+      const pr = px(videoTrimEnd);
+      region.style.left = pl + '%';
+      region.style.width = (pr - pl) + '%';
+      hLeft.style.left = pl + '%';
+      hRight.style.left = pr + '%';
+      timeL.textContent = fmt(videoTrimStart);
+      timeR.textContent = fmt(videoTrimEnd);
+      if (info) info.innerHTML = `✂️ <b>${(videoTrimEnd - videoTrimStart).toFixed(1)}s</b> sélectionnées sur ${fmt(dur)}`;
+    }
+
+    function posFromEvent(e) {
+      const rect = wrap.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      return Math.max(0, Math.min(1, x / rect.width)) * dur;
+    }
+
+    function onStart(e, side) { e.preventDefault(); dragging = side; updateUI(); }
+    function onMove(e) {
+      if (!dragging) return;
+      const t = posFromEvent(e);
+      if (dragging === 'left') {
+        const max = Math.min(videoTrimEnd - 0.5, videoTrimStart + maxDur);
+        setVideoTrimStart(Math.max(0, Math.min(t, max)));
+      } else {
+        const min = Math.max(videoTrimStart + 0.5, videoTrimEnd - maxDur);
+        setVideoTrimEnd(Math.min(dur, Math.max(t, min)));
+      }
+    }
+    function onEnd() { dragging = null; }
+
+    const opts = { passive: false };
+    hLeft.addEventListener('touchstart', e => onStart(e, 'left'), opts);
+    hRight.addEventListener('touchstart', e => onStart(e, 'right'), opts);
+    hLeft.addEventListener('mousedown', e => onStart(e, 'left'), opts);
+    hRight.addEventListener('mousedown', e => onStart(e, 'right'), opts);
+    document.addEventListener('touchmove', onMove, opts);
+    document.addEventListener('touchend', onEnd);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onEnd);
+    updateUI();
+  }
+
+  /* ── Mise à jour UI quand les state trim changent ── */
+  useEffect(() => {
+    if (!showVideoTrimmer) return;
+    const region = document.getElementById('trimRegion');
+    const hLeft = document.getElementById('trimHandleLeft');
+    const hRight = document.getElementById('trimHandleRight');
+    const timeL = document.getElementById('trimTimeLeft');
+    const timeR = document.getElementById('trimTimeRight');
+    if (!region) return;
+    const dur = videoDuration || 1;
+    const pl = (videoTrimStart / dur) * 100;
+    const pr = (videoTrimEnd / dur) * 100;
+    region.style.left = pl + '%';
+    region.style.width = (pr - pl) + '%';
+    if (hLeft) hLeft.style.left = pl + '%';
+    if (hRight) hRight.style.left = pr + '%';
+    if (timeL) {
+      const m = Math.floor(videoTrimStart / 60);
+      const s = Math.floor(videoTrimStart % 60);
+      timeL.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    }
+    if (timeR) {
+      const m = Math.floor(videoTrimEnd / 60);
+      const s = Math.floor(videoTrimEnd % 60);
+      timeR.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    }
+    const info = document.getElementById('trimInfo');
+    if (info) {
+      const durFmt = (() => { const m = Math.floor(videoDuration / 60); const s = Math.floor(videoDuration % 60); return `${m}:${s.toString().padStart(2,'0')}`; })();
+      info.innerHTML = `✂️ <b>${(videoTrimEnd - videoTrimStart).toFixed(1)}s</b> sélectionnées sur ${durFmt}`;
+    }
+  }, [videoTrimStart, videoTrimEnd, showVideoTrimmer, videoDuration]);
+
+  /* ── La preview ne joue que la zone délimitée ── */
+  useEffect(() => {
+    if (!showVideoTrimmer) return;
+    const video = document.getElementById('trimmerVideo');
+    if (!video) return;
+    const onPlay = () => { video.currentTime = videoTrimStart; };
+    const onTimeUpdate = () => { if (video.currentTime >= videoTrimEnd) video.pause(); };
+    video.addEventListener('play', onPlay);
+    video.addEventListener('timeupdate', onTimeUpdate);
+    return () => {
+      video.removeEventListener('play', onPlay);
+      video.removeEventListener('timeupdate', onTimeUpdate);
+    };
+  }, [showVideoTrimmer, videoTrimStart, videoTrimEnd]);
+
+  function trimVideoFile(file, startSec, endSec) {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video');
+      video.preload = 'auto';
+      video.muted = true;
+      video.playsInline = true;
+      video.onloadedmetadata = () => {
+        if (!video.captureStream) { reject(new Error('La coupe vidéo n\'est pas supportée par ce navigateur')); return; }
+        const stream = video.captureStream(30);
+        const mimeTypes = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+        const mimeType = mimeTypes.find(m => MediaRecorder.isTypeSupported(m)) || '';
+        if (!mimeType) { reject(new Error('Aucun format de capture supporté')); return; }
+        const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+        const chunks = [];
+        recorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+        recorder.onstop = () => {
+          stream.getTracks().forEach(t => t.stop());
+          resolve(new Blob(chunks, { type: mimeType || 'video/webm' }));
+        };
+        recorder.onerror = () => { reject(new Error('Erreur d\'enregistrement')); };
+        video.currentTime = startSec;
+        video.play().catch(reject);
+        recorder.start();
+        const checkEnd = () => {
+          if (video.currentTime >= endSec || video.ended) {
+            video.pause();
+            recorder.stop();
+          } else {
+            requestAnimationFrame(checkEnd);
+          }
+        };
+        checkEnd();
+      };
+      video.onerror = reject;
+      video.src = URL.createObjectURL(file);
+    });
   }
 
   function getTimeRemaining(expiresAt) {
@@ -1376,7 +1758,7 @@ export default function OdaMarketingCenter() {
           <div className="mkt-hero">
             <div className="mkt-hero-grid">
               <div>
-                <h1 className="mkt-hero-title">ODA Marketing Center 🚀</h1>
+                <h1 className="mkt-hero-title">ODA Marketing Center {iconSvg('🚀', 22)}</h1>
                 <p className="mkt-hero-sub">
                   Boostez vos ventes partout au Cameroun — Facebook, Instagram, WhatsApp, TikTok &amp; ODA SmartBoost™
                   {nbConnectees > 0 && (
@@ -1402,7 +1784,7 @@ export default function OdaMarketingCenter() {
                     {metaStatus.facebook ? '✓ Meta connecté' : 'Se connecter Meta'}
                   </button>
                   <button className="mkt-btn-create" onClick={() => router.push('/dashboard/campagnes/new')}>
-                    ✏️ Créer une campagne
+                    {iconSvg('✏️', 16)} Créer une campagne
                   </button>
                   <button
                     className="mkt-btn-sb"
@@ -1414,7 +1796,7 @@ export default function OdaMarketingCenter() {
                       }
                     }}
                   >
-                    ⚡ Booster un produit
+                    {iconSvg('⚡', 16)} Booster un produit
                   </button>
                 </div>
               </div>
@@ -1429,7 +1811,7 @@ export default function OdaMarketingCenter() {
                   { label:'Revenus',       value:'680 000 F', delta:'+28%', up:true, icon:'💰' },
                 ].map(k => (
                   <div className="mkt-kpi-card" key={k.label}>
-                    <div className="mkt-kpi-label">{k.icon} {k.label}</div>
+                    <div className="mkt-kpi-label">{iconSvg(k.icon, 18)} {k.label}</div>
                     <div className="mkt-kpi-value">{k.value}</div>
                     <div className={`mkt-kpi-delta ${k.up ? 'mkt-kpi-up' : 'mkt-kpi-down'}`}>
                       {k.up ? '↑' : '↓'} {k.delta} ce mois
@@ -1453,7 +1835,7 @@ export default function OdaMarketingCenter() {
                   background:section.color, borderRadius:14, width:52, height:52,
                   display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.6rem',
                 }}>
-                  {section.icon}
+                  {iconSvg(section.icon, 24)}
                 </div>
                 <div className="mkt-mobile-nav-label">{section.label}</div>
               </button>
@@ -1476,14 +1858,14 @@ export default function OdaMarketingCenter() {
           <div className="mkt-section">
             <div className="mkt-section-head">
               <div className="mkt-section-title">
-                <span style={{ background:'rgba(24,119,242,.1)', borderRadius:8, padding:'4px 8px' }}>📡</span>
+                <span style={{ background:'rgba(24,119,242,.1)', borderRadius:8, padding:'4px 8px' }}>{iconSvg('📡', 18)}</span>
                 Connexions Plateformes
               </div>
               <button className="mkt-section-link">Tout gérer →</button>
             </div>
             {/* Bandeau info Meta */}
             <div style={{ background:'rgba(24,119,242,.06)', border:'1px solid rgba(24,119,242,.15)', borderRadius:12, padding:'12px 16px', marginBottom:14, fontSize:'.8rem', color:'#1877F2', fontWeight:500 }}>
-              💡 Connecter Facebook active automatiquement : Instagram, Business Manager, Ad Account et Meta Pixel en un seul clic.
+              {iconSvg('💡', 16)} Connecter Facebook active automatiquement : Instagram, Business Manager, Ad Account et Meta Pixel en un seul clic.
             </div>
             <div className="mkt-card">
               <div className="mkt-meta-grid">
@@ -1528,7 +1910,7 @@ export default function OdaMarketingCenter() {
           <div className="mkt-section">
             <div className="mkt-section-head">
               <div className="mkt-section-title">
-                <span style={{ background:'rgba(255,107,0,.1)', borderRadius:8, padding:'4px 8px' }}>⚡</span>
+                <span style={{ background:'rgba(255,107,0,.1)', borderRadius:8, padding:'4px 8px' }}>{iconSvg('⚡', 18)}</span>
                 Produits Boostables
                 {!loadingProducts && products.length > 0 && (
                   <span style={{ fontSize:'.72rem', background:'rgba(52,199,89,.1)', color:'#34C759', padding:'2px 8px', borderRadius:20, fontWeight:600 }}>
@@ -1592,7 +1974,7 @@ export default function OdaMarketingCenter() {
           <div className="mkt-section">
             <div className="mkt-section-head">
               <div className="mkt-section-title">
-                <span style={{ background:'rgba(88,86,214,.1)', borderRadius:8, padding:'4px 8px' }}>👑</span>
+                <span style={{ background:'rgba(88,86,214,.1)', borderRadius:8, padding:'4px 8px' }}>{iconSvg('👑', 18)}</span>
                 Packs Publicitaires
               </div>
               <span style={{ fontSize:'.72rem', color:'var(--text-2)' }}>Paiement Mobile Money · CB</span>
@@ -1602,14 +1984,14 @@ export default function OdaMarketingCenter() {
                 <div key={pack.id} className={`mkt-pack${pack.popular ? ' popular' : ''}`}
                   style={pack.dark ? { background:'linear-gradient(135deg,#0a1628,#1a1035)', color:'white', border:'2px solid rgba(255,255,255,.1)' } : {}}
                 >
-                  {pack.popular && <div className="mkt-pack-badge">⚡ LE PLUS POPULAIRE</div>}
-                  <div className="mkt-pack-icon">{pack.icon}</div>
+                  {pack.popular && <div className="mkt-pack-badge">{iconSvg('⚡', 14)} LE PLUS POPULAIRE</div>}
+                  <div className="mkt-pack-icon">{iconSvg(pack.icon, 28)}</div>
                   <div className="mkt-pack-name" style={pack.dark ? { color:'white' } : {}}>{pack.name}</div>
                   <div className="mkt-pack-price" style={{ color:pack.color }}>{pack.price.toLocaleString('fr-FR')} F</div>
                   <div className="mkt-pack-period" style={pack.dark ? { color:'rgba(255,255,255,.5)' } : {}}>{pack.period}</div>
                   {pack.features.map(([icon,txt], i) => (
                     <div className="mkt-pack-feature" key={i} style={pack.dark ? { color:'rgba(255,255,255,.85)' } : {}}>
-                      <span>{icon}</span>
+                      {iconSvg(icon, 16)}
                       <span style={{ opacity: icon === '❌' ? .45 : 1 }}>{txt}</span>
                     </div>
                   ))}
@@ -1636,7 +2018,7 @@ export default function OdaMarketingCenter() {
           <div className="mkt-section">
             <div className="mkt-section-head">
               <div className="mkt-section-title">
-                <span style={{ background:'rgba(52,199,89,.1)', borderRadius:8, padding:'4px 8px' }}>📈</span>
+                <span style={{ background:'rgba(52,199,89,.1)', borderRadius:8, padding:'4px 8px' }}>{iconSvg('📈', 18)}</span>
                 Analytics & Performance
               </div>
               <button className="mkt-section-link">Rapport complet →</button>
@@ -1723,7 +2105,7 @@ export default function OdaMarketingCenter() {
               <div className="mkt-prefs-grid">
                 <div className="mkt-pref-item">
                   <div>
-                    <div className="mkt-pref-label">💸 Budget quotidien max</div>
+                    <div className="mkt-pref-label">{iconSvg('💸', 16)} Budget quotidien max</div>
                     <div className="mkt-pref-sub">Limite de dépense par jour</div>
                   </div>
                   <div style={{ display:'flex', alignItems:'center', gap:6 }}>
@@ -1736,7 +2118,7 @@ export default function OdaMarketingCenter() {
                 </div>
                 <div className="mkt-pref-item">
                   <div>
-                    <div className="mkt-pref-label">📅 Budget mensuel max</div>
+                    <div className="mkt-pref-label">{iconSvg('📅', 16)} Budget mensuel max</div>
                     <div className="mkt-pref-sub">Plafond de dépense par mois</div>
                   </div>
                   <div style={{ display:'flex', alignItems:'center', gap:6 }}>
@@ -1749,21 +2131,21 @@ export default function OdaMarketingCenter() {
                 </div>
                 <div className="mkt-pref-item" style={{ cursor:'pointer' }} onClick={() => handlePrefToggle('autoBoost')}>
                   <div>
-                    <div className="mkt-pref-label">🤖 Auto-Boost</div>
+                    <div className="mkt-pref-label">{iconSvg('🤖', 16)} Auto-Boost</div>
                     <div className="mkt-pref-sub">Booster auto vos top produits</div>
                   </div>
                   <Toggle on={prefs.autoBoost} onToggle={() => handlePrefToggle('autoBoost')} />
                 </div>
                 <div className="mkt-pref-item" style={{ cursor:'pointer' }} onClick={() => handlePrefToggle('smartBoostAuto')}>
                   <div>
-                    <div className="mkt-pref-label">⚡ SmartBoost™ Auto</div>
+                    <div className="mkt-pref-label">{iconSvg('⚡', 16)} SmartBoost™ Auto</div>
                     <div className="mkt-pref-sub">Optimisation IA continue (+5%)</div>
                   </div>
                   <Toggle on={prefs.smartBoostAuto} onToggle={() => handlePrefToggle('smartBoostAuto')} />
                 </div>
                 <div className="mkt-pref-item" style={{ cursor:'pointer' }} onClick={() => handlePrefToggle('notifs')}>
                   <div>
-                    <div className="mkt-pref-label">🔔 Notifications</div>
+                    <div className="mkt-pref-label">{iconSvg('🔔', 16)} Notifications</div>
                     <div className="mkt-pref-sub">Alertes performance et ROI</div>
                   </div>
                   <Toggle on={prefs.notifs} onToggle={() => handlePrefToggle('notifs')} />
@@ -1807,7 +2189,7 @@ export default function OdaMarketingCenter() {
                   <div className="mkt-status-empty-sub">Publiez une photo qui restera visible 24h sur ODA Marketplace</div>
                   <button
                     onClick={() => setShowCreateStatus(true)}
-                    style={{ marginTop:14, padding:'10px 24px', background:'linear-gradient(135deg,var(--sb-orange),#FF9500)', color:'white', border:'none', borderRadius:12, fontWeight:700, fontSize:.85rem, cursor:'pointer', fontFamily:'Poppins,sans-serif' }}
+                    style={{ marginTop:14, padding:'10px 24px', background:'linear-gradient(135deg,var(--sb-orange),#FF9500)', color:'white', border:'none', borderRadius:12, fontWeight:700, fontSize:'0.85rem', cursor:'pointer', fontFamily:'Poppins,sans-serif' }}
                   >
                     + Créer un status
                   </button>
@@ -1826,6 +2208,7 @@ export default function OdaMarketingCenter() {
                       onClick={() => window.open(s.media_url, '_blank')}
                     >
                       <div className="mkt-status-overlay" />
+                      {s.type === 'video' && <div className="mkt-status-video-badge">▶</div>}
                       <button
                         className="mkt-status-delete"
                         onClick={e => { e.stopPropagation(); handleDeleteStatus(s.id); }}
@@ -1850,13 +2233,13 @@ export default function OdaMarketingCenter() {
           <div className="mkt-section">
             <div className="mkt-section-head">
               <div className="mkt-section-title">
-                <span style={{ background:'rgba(255,107,0,.1)', borderRadius:8, padding:'4px 8px' }}>🏪</span>
+                <span style={{ background:'rgba(255,107,0,.1)', borderRadius:8, padding:'4px 8px' }}>{iconSvg('🏪', 18)}</span>
                 Publicité Interne ODA Marketplace
               </div>
               <button className="mkt-section-link">Gérer mes emplacements →</button>
             </div>
             <div className="mkt-card" style={{ marginBottom:14 }}>
-              <div style={{ fontSize:'.9rem', fontWeight:700, marginBottom:14 }}>📍 Emplacements disponibles</div>
+              <div style={{ fontSize:'.9rem', fontWeight:700, marginBottom:14 }}>{iconSvg('📍', 16)} Emplacements disponibles</div>
               <div style={{ display:'grid', gridTemplateColumns:'repeat(1,1fr)', gap:10 }}>
                 {[
                   { icon:'🏠', name:"Page d'accueil ODA",    desc:'Bannière principale — 2 000+ visiteurs/jour', prix:'15 000 FCFA/sem', active:true,  badge:'🔥 TOP' },
@@ -1865,7 +2248,7 @@ export default function OdaMarketingCenter() {
                   { icon:'📱', name:'Notifications push ODA', desc:'Notification directe aux acheteurs',          prix:'12 000 FCFA/sem', active:false, badge:'⚡ NOUVEAU' },
                 ].map(slot => (
                   <div key={slot.name} style={{ display:'flex', alignItems:'center', gap:12, padding:'14px', borderRadius:12, border:`1.5px solid ${slot.active ? 'rgba(255,107,0,.35)' : 'var(--border)'}`, background:slot.active ? 'rgba(255,107,0,.04)' : '#FAFAFA' }}>
-                    <span style={{ fontSize:'1.4rem', flexShrink:0 }}>{slot.icon}</span>
+                    {iconSvg(slot.icon, 28)}
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:2 }}>
                         <span style={{ fontWeight:700, fontSize:'.85rem' }}>{slot.name}</span>
@@ -1889,7 +2272,7 @@ export default function OdaMarketingCenter() {
               </div>
             </div>
             <div className="mkt-card">
-              <div style={{ fontSize:'.9rem', fontWeight:700, marginBottom:14 }}>👁 Aperçu — Produits Sponsorisés dans ODA</div>
+              <div style={{ fontSize:'.9rem', fontWeight:700, marginBottom:14 }}>{iconSvg('👁', 18)} Aperçu — Produits Sponsorisés dans ODA</div>
               {loadingProducts ? (
                 <div className="mkt-internal-grid">
                   {[1,2,3,4].map(i => <div key={i} className="mkt-skeleton" style={{ borderRadius:14, aspectRatio:'1' }} />)}
@@ -1931,18 +2314,18 @@ export default function OdaMarketingCenter() {
                 onError={e => { e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56"><rect fill="%23F2F2F7" width="56" height="56"/></svg>'; }}
               />
               <div>
-                <div className="mkt-modal-title">⚡ SmartBoost™</div>
+                <div className="mkt-modal-title">{iconSvg('⚡', 20)} SmartBoost™</div>
                 <div className="mkt-modal-sub">{boostProduct.nom} — {boostProduct.prix.toLocaleString('fr-FR')} FCFA</div>
               </div>
             </div>
 
             {/* ── Sélection des plateformes ── */}
             <div className="mkt-form-group">
-              <label className="mkt-form-label">📡 Plateformes de diffusion</label>
+              <label className="mkt-form-label">{iconSvg('📡', 16)} Plateformes de diffusion</label>
 
               {nbConnectees === 0 && (
                 <div className="mkt-no-platform-alert">
-                  ⚠️ Aucune plateforme connectée. Connectez au moins une plateforme dans la section "Connexions" pour booster votre produit.
+                  {iconSvg('⚠️', 16)} Aucune plateforme connectée. Connectez au moins une plateforme dans la section "Connexions" pour booster votre produit.
                 </div>
               )}
 
@@ -1957,7 +2340,7 @@ export default function OdaMarketingCenter() {
                       onClick={() => connected && togglePlateforme(pf.key)}
                     >
                       {connected && <div className="mkt-platform-check-badge">✓</div>}
-                      <div className="mkt-platform-check-icon">{pf.emoji}</div>
+                      <div className="mkt-platform-check-icon">{iconSvg(pf.emoji, 22)}</div>
                       <div className="mkt-platform-check-name">{pf.label}</div>
                       <div className="mkt-platform-check-price">
                         {connected
@@ -1978,7 +2361,7 @@ export default function OdaMarketingCenter() {
 
             {/* ── Durée ── */}
             <div className="mkt-form-group">
-              <label className="mkt-form-label">📅 Durée de la campagne</label>
+              <label className="mkt-form-label">{iconSvg('📅', 16)} Durée de la campagne</label>
               <div className="mkt-budget-pills">
                 {[
                   { val:'3',  label:'3 jours' },
@@ -1996,7 +2379,7 @@ export default function OdaMarketingCenter() {
 
             {/* ── Audience ── */}
             <div className="mkt-form-group">
-              <label className="mkt-form-label">🎯 Audience cible</label>
+              <label className="mkt-form-label">{iconSvg('🎯', 16)} Audience cible</label>
               <select className="mkt-select" value={boostAudience} onChange={e => setBoostAudience(e.target.value)}>
                 <option value="cameroun">🇨🇲 Tout le Cameroun</option>
                 <option value="yaounde">📍 Yaoundé seulement</option>
@@ -2009,7 +2392,7 @@ export default function OdaMarketingCenter() {
 
             {/* ── Objectif ── */}
             <div className="mkt-form-group">
-              <label className="mkt-form-label">🏁 Objectif de campagne</label>
+              <label className="mkt-form-label">{iconSvg('🏁', 16)} Objectif de campagne</label>
               <div className="mkt-budget-pills">
                 {[
                   { val:'ventes',    label:'🛒 Ventes' },
@@ -2027,7 +2410,7 @@ export default function OdaMarketingCenter() {
 
             {/* ── SmartBoost Toggle ── */}
             <div className="mkt-sb-toggle" onClick={() => setSmartBoost(v => !v)}>
-              <div style={{ fontSize:'1.5rem' }}>⚡</div>
+              <div style={{ fontSize:'1.5rem' }}>{iconSvg('⚡', 28)}</div>
               <div style={{ flex:1 }}>
                 <div style={{ fontWeight:700, fontSize:'.88rem', color:'#FF6B00' }}>
                   SmartBoost™ — Analyse & optimisation IA continue (+5%)
@@ -2048,7 +2431,7 @@ export default function OdaMarketingCenter() {
                   const montant = (PLATFORM_PRICES[pf] || 0) * dureeJours;
                   return (
                     <div className="mkt-total-row" key={pf}>
-                      <span className="mkt-total-label">{plat?.emoji} {plat?.label} × {dureeJours}j</span>
+                      <span className="mkt-total-label">{plat?.emoji ? iconSvg(plat.emoji, 16) : null} {plat?.label} × {dureeJours}j</span>
                       <span className="mkt-total-val">{montant.toLocaleString('fr-FR')} F</span>
                     </div>
                   );
@@ -2063,7 +2446,7 @@ export default function OdaMarketingCenter() {
 
                 {smartBoost && (
                   <div className="mkt-total-row">
-                    <span className="mkt-total-label">⚡ SmartBoost™ IA (+5%)</span>
+                    <span className="mkt-total-label">{iconSvg('⚡', 14)} SmartBoost™ IA (+5%)</span>
                     <span className="mkt-total-val" style={{ color:'#FF9500' }}>+{fraisSmartBoost.toLocaleString('fr-FR')} F</span>
                   </div>
                 )}
@@ -2091,7 +2474,7 @@ export default function OdaMarketingCenter() {
               onClick={handleBoost}
               disabled={boostPlateformes.length === 0 || totalAPayer === 0}
             >
-              💳 Payer {totalAPayer > 0 ? `${totalAPayer.toLocaleString('fr-FR')} FCFA` : '—'} et lancer le boost
+              {iconSvg('💳', 16)} Payer {totalAPayer > 0 ? `${totalAPayer.toLocaleString('fr-FR')} FCFA` : '—'} et lancer le boost
             </button>
             <button className="mkt-modal-cancel" onClick={() => setBoostProduct(null)}>
               Annuler
@@ -2106,32 +2489,157 @@ export default function OdaMarketingCenter() {
       {showCreateStatus && (
         <div className="mkt-status-create-modal" onClick={e => { if (e.target === e.currentTarget) setShowCreateStatus(false); }}>
           <div className="mkt-status-create-sheet">
-            <div className="mkt-status-create-title">📸 Nouveau status</div>
-            <div className="mkt-status-create-sub">Votre photo sera visible 24h sur ODA Marketplace</div>
-
-            <div
-              className={`mkt-status-preview ${statusPreview ? 'has-image' : ''}`}
-              style={statusPreview ? { backgroundImage: `url(${statusPreview})` } : {}}
-            >
-              {!statusPreview && (
-                <div className="mkt-status-preview-placeholder">
-                  <span>🖼️</span>
-                  Ajoutez une photo
-                </div>
+            <div className="mkt-status-create-title">
+              {statusType === 'video' ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:6}}>
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:6}}>
+                  <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
               )}
+              Nouveau status
             </div>
+            <div className="mkt-status-create-sub">Votre {statusType === 'video' ? 'vidéo' : 'photo'} sera visible 24h sur ODA Marketplace</div>
+
+            {statusPreview && statusType === 'video' ? (
+              <div className="mkt-status-preview has-video">
+                <video src={statusPreview} autoPlay loop playsInline style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'inherit' }} />
+                <button className="mkt-preview-remove" onClick={handleClearStatusFile} title="Retirer la vidéo">✕</button>
+              </div>
+            ) : (
+              <div
+                className={`mkt-status-preview ${statusPreview ? 'has-image' : ''}`}
+                style={statusPreview ? { backgroundImage: `url(${statusPreview})` } : {}}
+              >
+                {!statusPreview ? (
+                  <label htmlFor="statusFileInput" className="mkt-status-preview-placeholder" style={{ cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:8 }}>
+                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="2" width="20" height="20" rx="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <path d="M21 15l-5-5L5 21"/>
+                    </svg>
+                    Ajoutez une photo ou vidéo
+                  </label>
+                ) : (
+                  <>
+                    <button className="mkt-preview-remove" onClick={handleClearStatusFile} title="Retirer la photo">✕</button>
+                    <label htmlFor="statusFileInput" className="mkt-preview-change" style={{ position:'absolute', inset:0, cursor:'pointer', zIndex:1 }} />
+                  </>
+                )}
+              </div>
+            )}
 
             <input
               type="file"
-              accept="image/*"
+              accept="image/*,video/*"
               onChange={handleStatusFile}
               style={{ display: 'none' }}
               id="statusFileInput"
             />
             <label htmlFor="statusFileInput" className="mkt-status-upload-btn" style={{ display:'inline-flex', marginBottom:16 }}>
-              {statusPreview ? '🔄 Changer la photo' : '📁 Choisir une photo'}
+              {statusPreview ? (statusType === 'video' ? (
+                <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:5}}>
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg> Changer la vidéo</>
+              ) : (
+                <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:5}}>
+                  <polyline points="23 4 23 10 17 10"/>
+                  <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+                </svg> Changer la photo</>
+              )) : (
+                <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:5}}>
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg> Choisir une photo/vidéo</>
+              )}
             </label>
 
+            {/* ── VIDEO TRIMMER ─ STYLE WHATSAPP ── */}
+            {showVideoTrimmer && originalFile && (
+              <div className="mkt-trimmer">
+                <div className="mkt-trimmer-bar">
+                  <div className="mkt-trimmer-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:4}}>
+                      <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
+                      <line x1="20" y1="4" x2="8.12" y2="15.88"/>
+                      <line x1="14.47" y1="14.48" x2="20" y2="20"/>
+                      <line x1="8.12" y1="8.12" x2="12" y2="12"/>
+                    </svg>
+                    Ajuster la sélection
+                  </div>
+                  <div className="mkt-trimmer-dur">
+                    {(() => { const m = Math.floor(videoDuration / 60); const s = Math.floor(videoDuration % 60); return `${m}:${s.toString().padStart(2,'0')}`; })()}
+                  </div>
+                </div>
+                <div className="mkt-trimmer-preview">
+                  <video
+                    src={URL.createObjectURL(originalFile)}
+                    controls
+                    preload="auto"
+                    style={{ width:'100%', borderRadius:10, maxHeight:200 }}
+                    id="trimmerVideo"
+                  />
+                </div>
+                <div className="mkt-trimmer-strip-wrap" id="trimmerWrap">
+                  <div className="mkt-trimmer-strip" id="trimmerStrip" ref={trimmerRef} />
+                  <div className="mkt-trimmer-shade left" id="trimShadeLeft" />
+                  <div className="mkt-trimmer-shade right" id="trimShadeRight" />
+                  <div className="mkt-trimmer-region" id="trimRegion" />
+                  <div className="mkt-trimmer-handle left" id="trimHandleLeft">
+                    <span className="mkt-trimmer-handle-line" />
+                    <span className="mkt-trimmer-time" id="trimTimeLeft">0:00</span>
+                  </div>
+                  <div className="mkt-trimmer-handle right" id="trimHandleRight">
+                    <span className="mkt-trimmer-handle-line" />
+                    <span className="mkt-trimmer-time" id="trimTimeRight">0:00</span>
+                  </div>
+                </div>
+                <div className="mkt-trimmer-info" id="trimInfo">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:4}}>
+                    <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
+                    <line x1="20" y1="4" x2="8.12" y2="15.88"/>
+                    <line x1="14.47" y1="14.48" x2="20" y2="20"/>
+                    <line x1="8.12" y1="8.12" x2="12" y2="12"/>
+                  </svg>
+                  <b>0.0s</b> sélectionnées
+                </div>
+                <div className="mkt-trimmer-actions">
+                  <button
+                    className="mkt-status-submit"
+                    onClick={handleTrimVideo}
+                    disabled={trimmingVideo || (videoTrimEnd - videoTrimStart) > 80}
+                    style={{ flex:1 }}
+                  >
+                    {trimmingVideo ? (
+                      <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:5}} className="mkt-spinner">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                      </svg> Coupe en cours...</>
+                    ) : (
+                      <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:5}}>
+                        <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
+                        <line x1="20" y1="4" x2="8.12" y2="15.88"/>
+                        <line x1="14.47" y1="14.48" x2="20" y2="20"/>
+                        <line x1="8.12" y1="8.12" x2="12" y2="12"/>
+                      </svg> Appliquer la coupe</>
+                    )}
+                  </button>
+                  <button
+                    className="mkt-status-cancel"
+                    onClick={() => { setShowVideoTrimmer(false); setOriginalFile(null); framesCache.current = null; document.getElementById('statusFileInput').value = ''; }}
+                    style={{ flex:1 }}
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!showVideoTrimmer && (<>
             <textarea
               className="mkt-status-caption-input"
               placeholder="Ajouter une légende (optionnel)..."
@@ -2139,7 +2647,7 @@ export default function OdaMarketingCenter() {
               onChange={e => setStatusCaption(e.target.value)}
               maxLength={150}
             />
-            <div style={{ textAlign:'right', fontSize:.68rem, color:'var(--text-3)', marginTop:4 }}>
+            <div style={{ textAlign:'right', fontSize:'0.68rem', color:'var(--text-3)', marginTop:4 }}>
               {statusCaption.length}/150
             </div>
 
@@ -2148,11 +2656,22 @@ export default function OdaMarketingCenter() {
               onClick={handleCreateStatus}
               disabled={!statusFile || statusUploading}
             >
-              {statusUploading ? '⏳ Publication...' : '🚀 Publier mon status'}
+              {statusUploading ? (
+                <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:5}} className="mkt-spinner">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg> Publication...</>
+              ) : (
+                <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:5}}>
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg> Publier mon status</>
+              )}
             </button>
-            <button className="mkt-status-cancel" onClick={() => { setShowCreateStatus(false); setStatusFile(null); setStatusPreview(null); setStatusCaption(''); }}>
+            <button className="mkt-status-cancel" onClick={() => { setShowCreateStatus(false); handleClearStatusFile(); setStatusCaption(''); }}>
               Annuler
             </button>
+            </>)}
           </div>
         </div>
       )}
