@@ -4,10 +4,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { getSupabase } from '@/lib/supabase';
 
 // ─── Config Supabase ─────────────────────────────────────────
-const SUPABASE_URL      = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2ticWJxeGN3emNybG11dnpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MTk1MzMsImV4cCI6MjA3NjA5NTUzM30.AMzAUwtjFt7Rvof5r2enMyYIYToc1wNWWEjvZqK_YXM';
 
 // ─── 🔑 Config plateformes publicitaires (Meta, TikTok, YouTube…)
 // ─── Pour changer une API plateforme, modifiez UNIQUEMENT platformsConfig.js
@@ -18,14 +17,10 @@ import {
   COMMISSION_ODA_RATE,
   SMARTBOOST_FEE_RATE,
 } from './platformsConfig';
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from '@/lib/config';
 
-let _sb = null;
 function sb() {
-  if (!_sb) {
-    const { createClient } = require('@supabase/supabase-js');
-    _sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  }
-  return _sb;
+  return getSupabase();
 }
 
 // ─── Données analytiques (démo — à remplacer par API Meta/TikTok)
@@ -481,6 +476,106 @@ const MKT_STYLES = `
   .mkt-internal-name { font-size:.78rem; font-weight:600; margin-bottom:4px; }
   .mkt-internal-price { font-size:.82rem; font-weight:800; color:var(--primary); }
 
+  /* ── STATUS (Stories) ── */
+  .mkt-status-section { margin-bottom:20px; }
+  .mkt-status-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:12px; }
+  .mkt-status-card {
+    border-radius:16px; overflow:hidden; position:relative;
+    aspect-ratio:9/16; background:var(--bg); cursor:pointer;
+    border:2px solid var(--border); transition:all .2s;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background-size:cover; background-position:center;
+  }
+  .mkt-status-card:hover { transform:translateY(-3px); border-color:var(--sb-orange); box-shadow:0 6px 20px rgba(255,107,0,.25); }
+  .mkt-status-card .mkt-status-overlay {
+    position:absolute; inset:0;
+    background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.2) 50%,rgba(0,0,0,.1) 100%);
+  }
+  .mkt-status-card .mkt-status-caption {
+    position:absolute; bottom:8px; left:8px; right:8px;
+    color:white; font-size:.68rem; font-weight:600; line-height:1.3;
+    text-shadow:0 1px 4px rgba(0,0,0,.6); z-index:1;
+    overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  }
+  .mkt-status-card .mkt-status-time {
+    position:absolute; top:8px; right:8px; z-index:1;
+    background:rgba(0,0,0,.6); backdrop-filter:blur(4px);
+    color:white; font-size:.58rem; font-weight:600; padding:3px 7px; border-radius:8px;
+  }
+  .mkt-status-add {
+    border:2px dashed var(--border); background:rgba(255,255,255,.05);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:8px; cursor:pointer; transition:all .2s; color:var(--text-2);
+  }
+  .mkt-status-add:hover { border-color:var(--sb-orange); color:var(--sb-orange); background:rgba(255,107,0,.05); }
+  .mkt-status-add-icon { font-size:1.8rem; }
+  .mkt-status-add-label { font-size:.7rem; font-weight:600; }
+  .mkt-status-empty {
+    text-align:center; padding:30px 20px; color:var(--text-2);
+    background:rgba(255,255,255,.03); border-radius:14px; border:1px dashed var(--border);
+  }
+  .mkt-status-empty-icon { font-size:2.5rem; margin-bottom:8px; }
+  .mkt-status-empty-txt { font-size:.82rem; font-weight:500; }
+  .mkt-status-empty-sub { font-size:.72rem; margin-top:4px; opacity:.6; }
+  .mkt-status-delete {
+    position:absolute; top:8px; left:8px; z-index:2;
+    width:26px; height:26px; border-radius:50%; border:none;
+    background:rgba(255,59,48,.85); color:white; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:.7rem; transition:transform .15s; opacity:0;
+  }
+  .mkt-status-card:hover .mkt-status-delete { opacity:1; }
+  .mkt-status-delete:hover { transform:scale(1.15); }
+  .mkt-status-create-modal {
+    position:fixed; inset:0; z-index:10000;
+    background:rgba(0,0,0,.6); backdrop-filter:blur(8px);
+    display:flex; align-items:center; justify-content:center;
+    animation:mktFadeIn .2s ease; padding:20px;
+  }
+  .mkt-status-create-sheet {
+    background:white; border-radius:24px; width:100%; max-width:400px;
+    max-height:90vh; overflow-y:auto; padding:24px;
+    animation:mktSlideUp .32s cubic-bezier(.34,1.3,.64,1);
+  }
+  .mkt-status-create-title { font-size:1.1rem; font-weight:800; margin-bottom:4px; }
+  .mkt-status-create-sub { font-size:.78rem; color:var(--text-2); margin-bottom:20px; }
+  .mkt-status-preview {
+    width:100%; aspect-ratio:9/16; border-radius:16px;
+    background:var(--bg); background-size:cover; background-position:center;
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:16px; overflow:hidden; position:relative;
+    border:2px dashed var(--border);
+  }
+  .mkt-status-preview.has-image { border-color:var(--sb-orange); }
+  .mkt-status-preview-placeholder { color:var(--text-3); text-align:center; font-size:.8rem; font-weight:500; }
+  .mkt-status-preview-placeholder span { font-size:2.5rem; display:block; margin-bottom:6px; }
+  .mkt-status-upload-btn {
+    display:inline-flex; align-items:center; gap:8px;
+    padding:10px 20px; border-radius:12px; border:1.5px solid var(--border);
+    background:white; font-size:.82rem; font-weight:600; cursor:pointer;
+    font-family:'Poppins',sans-serif; transition:all .15s;
+  }
+  .mkt-status-upload-btn:hover { border-color:var(--sb-orange); background:rgba(255,107,0,.04); }
+  .mkt-status-caption-input {
+    width:100%; padding:12px 14px; border:1.5px solid var(--border);
+    border-radius:12px; font-family:'Poppins',sans-serif; font-size:.85rem;
+    resize:none; min-height:80px; transition:border-color .2s;
+  }
+  .mkt-status-caption-input:focus { outline:none; border-color:var(--sb-orange); }
+  .mkt-status-submit {
+    width:100%; padding:14px; border:none; border-radius:14px;
+    background:linear-gradient(135deg,var(--sb-orange),#FF9500);
+    color:white; font-size:.95rem; font-weight:700; cursor:pointer;
+    font-family:'Poppins',sans-serif; box-shadow:0 6px 20px rgba(255,107,0,.35);
+    transition:transform .15s,opacity .15s; margin-top:16px;
+  }
+  .mkt-status-submit:active { transform:scale(.97); }
+  .mkt-status-submit:disabled { opacity:.5; cursor:not-allowed; }
+  .mkt-status-cancel {
+    width:100%; padding:12px; border:none; border-radius:14px;
+    background:transparent; color:var(--text-2); font-size:.85rem; font-weight:600;
+    cursor:pointer; font-family:'Poppins',sans-serif; margin-top:8px;
+  }
   /* ── TOASTS ── */
   .mkt-toast-stack { position:fixed; top:66px; right:12px; z-index:9999; display:flex; flex-direction:column; gap:8px; max-width:320px; width:calc(100vw - 24px); }
   .mkt-toast { background:white; padding:14px 18px; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.14); font-family:'Poppins',sans-serif; font-size:.86rem; font-weight:500; animation:mktToastIn .4s cubic-bezier(.34,1.56,.64,1); }
@@ -772,6 +867,15 @@ export default function OdaMarketingCenter() {
     notifs:         true,
   });
 
+  // ─── State Status (Stories)
+  const [myStatuses, setMyStatuses] = useState([]);
+  const [loadingStatuses, setLoadingStatuses] = useState(true);
+  const [showCreateStatus, setShowCreateStatus] = useState(false);
+  const [statusFile, setStatusFile] = useState(null);
+  const [statusPreview, setStatusPreview] = useState(null);
+  const [statusCaption, setStatusCaption] = useState('');
+  const [statusUploading, setStatusUploading] = useState(false);
+
   // ─── Détection mobile
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -869,6 +973,95 @@ export default function OdaMarketingCenter() {
     setToasts(p => [...p, { id, message, type }]);
     setTimeout(() => setToasts(p => p.filter(t => t.id !== id)), 3800);
   }, []);
+
+  // ─── Status / Stories
+  useEffect(() => {
+    if (!user) return;
+    chargerStatus();
+    const interval = setInterval(chargerStatus, 30000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  async function chargerStatus() {
+    try {
+      const { data, error } = await sb()
+        .from('shop_statuses')
+        .select('*')
+        .eq('user_id', user.id)
+        .gt('expires_at', new Date().toISOString())
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setMyStatuses(data || []);
+    } catch (err) {
+      console.error('Erreur chargement status:', err);
+    } finally {
+      setLoadingStatuses(false);
+    }
+  }
+
+  async function handleCreateStatus() {
+    if (!statusFile || statusUploading) return;
+    setStatusUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', statusFile);
+      fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      fd.append('folder', `status/${user.id}`);
+      fd.append('quality', 'auto:good');
+      const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
+      if (!resp.ok) throw new Error('Upload échoué');
+      const result = await resp.json();
+      const { error } = await sb().from('shop_statuses').insert({
+        user_id: user.id,
+        media_url: result.secure_url,
+        caption: statusCaption.trim(),
+        type: 'image',
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      });
+      if (error) throw error;
+      toast('✅ Status publié avec succès !', 'success');
+      setShowCreateStatus(false);
+      setStatusFile(null);
+      setStatusPreview(null);
+      setStatusCaption('');
+      chargerStatus();
+    } catch (err) {
+      toast('❌ Erreur: ' + err.message, 'error');
+    } finally {
+      setStatusUploading(false);
+    }
+  }
+
+  async function handleDeleteStatus(id) {
+    try {
+      const { error } = await sb().from('shop_statuses').delete().eq('id', id);
+      if (error) throw error;
+      toast('🗑️ Status supprimé', 'info');
+      chargerStatus();
+    } catch (err) {
+      toast('❌ Erreur: ' + err.message, 'error');
+    }
+  }
+
+  function handleStatusFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast('Veuillez sélectionner une image', 'error'); return; }
+    if (file.size > 10 * 1024 * 1024) { toast("L'image ne doit pas dépasser 10 MB", 'error'); return; }
+    setStatusFile(file);
+    const reader = new FileReader();
+    reader.onload = ev => setStatusPreview(ev.target.result);
+    reader.readAsDataURL(file);
+  }
+
+  function getTimeRemaining(expiresAt) {
+    const diff = new Date(expiresAt).getTime() - Date.now();
+    if (diff <= 0) return 'Expiré';
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    return h > 0 ? `${h}h` : `${m}min`;
+  }
 
   // ────────────────────────────────────────────────────────────
   // CONNEXION META FACEBOOK (OAuth réel via FB SDK)
@@ -1589,6 +1782,68 @@ export default function OdaMarketingCenter() {
         )}
 
         {/* ══════════════════════════════════════
+            STATUS / STORIES (24h)
+        ══════════════════════════════════════ */}
+        {showSection('interne') && (
+          <div className="mkt-section mkt-status-section">
+            <div className="mkt-section-head">
+              <div className="mkt-section-title">
+                <span style={{ background:'linear-gradient(135deg,#FF6B00,#FF9500)', borderRadius:8, padding:'4px 8px', color:'white' }}>⭕</span>
+                Mes Status — Stories 24h
+              </div>
+              <button className="mkt-section-link" onClick={() => setShowCreateStatus(true)}>
+                + Nouveau status
+              </button>
+            </div>
+            <div className="mkt-card">
+              {loadingStatuses ? (
+                <div style={{ display:'flex', gap:12, padding:'8px 0' }}>
+                  {[1,2,3].map(i => <div key={i} className="mkt-skeleton" style={{ width:100, aspectRatio:'9/16', borderRadius:16 }} />)}
+                </div>
+              ) : myStatuses.length === 0 ? (
+                <div className="mkt-status-empty">
+                  <div className="mkt-status-empty-icon">📸</div>
+                  <div className="mkt-status-empty-txt">Aucun status actif</div>
+                  <div className="mkt-status-empty-sub">Publiez une photo qui restera visible 24h sur ODA Marketplace</div>
+                  <button
+                    onClick={() => setShowCreateStatus(true)}
+                    style={{ marginTop:14, padding:'10px 24px', background:'linear-gradient(135deg,var(--sb-orange),#FF9500)', color:'white', border:'none', borderRadius:12, fontWeight:700, fontSize:.85rem, cursor:'pointer', fontFamily:'Poppins,sans-serif' }}
+                  >
+                    + Créer un status
+                  </button>
+                </div>
+              ) : (
+                <div className="mkt-status-grid">
+                  <div className="mkt-status-card mkt-status-add" onClick={() => setShowCreateStatus(true)}>
+                    <div className="mkt-status-add-icon">+</div>
+                    <div className="mkt-status-add-label">Nouveau</div>
+                  </div>
+                  {myStatuses.map(s => (
+                    <div
+                      key={s.id}
+                      className="mkt-status-card"
+                      style={{ backgroundImage: `url(${s.media_url})` }}
+                      onClick={() => window.open(s.media_url, '_blank')}
+                    >
+                      <div className="mkt-status-overlay" />
+                      <button
+                        className="mkt-status-delete"
+                        onClick={e => { e.stopPropagation(); handleDeleteStatus(s.id); }}
+                        title="Supprimer"
+                      >
+                        ✕
+                      </button>
+                      <span className="mkt-status-time">{getTimeRemaining(s.expires_at)}</span>
+                      {s.caption && <span className="mkt-status-caption">{s.caption}</span>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════
             7. PUBLICITÉ INTERNE ODA
         ══════════════════════════════════════ */}
         {showSection('interne') && (
@@ -1839,6 +2094,63 @@ export default function OdaMarketingCenter() {
               💳 Payer {totalAPayer > 0 ? `${totalAPayer.toLocaleString('fr-FR')} FCFA` : '—'} et lancer le boost
             </button>
             <button className="mkt-modal-cancel" onClick={() => setBoostProduct(null)}>
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════
+          MODAL CRÉATION STATUS
+      ══════════════════════════════════════ */}
+      {showCreateStatus && (
+        <div className="mkt-status-create-modal" onClick={e => { if (e.target === e.currentTarget) setShowCreateStatus(false); }}>
+          <div className="mkt-status-create-sheet">
+            <div className="mkt-status-create-title">📸 Nouveau status</div>
+            <div className="mkt-status-create-sub">Votre photo sera visible 24h sur ODA Marketplace</div>
+
+            <div
+              className={`mkt-status-preview ${statusPreview ? 'has-image' : ''}`}
+              style={statusPreview ? { backgroundImage: `url(${statusPreview})` } : {}}
+            >
+              {!statusPreview && (
+                <div className="mkt-status-preview-placeholder">
+                  <span>🖼️</span>
+                  Ajoutez une photo
+                </div>
+              )}
+            </div>
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleStatusFile}
+              style={{ display: 'none' }}
+              id="statusFileInput"
+            />
+            <label htmlFor="statusFileInput" className="mkt-status-upload-btn" style={{ display:'inline-flex', marginBottom:16 }}>
+              {statusPreview ? '🔄 Changer la photo' : '📁 Choisir une photo'}
+            </label>
+
+            <textarea
+              className="mkt-status-caption-input"
+              placeholder="Ajouter une légende (optionnel)..."
+              value={statusCaption}
+              onChange={e => setStatusCaption(e.target.value)}
+              maxLength={150}
+            />
+            <div style={{ textAlign:'right', fontSize:.68rem, color:'var(--text-3)', marginTop:4 }}>
+              {statusCaption.length}/150
+            </div>
+
+            <button
+              className="mkt-status-submit"
+              onClick={handleCreateStatus}
+              disabled={!statusFile || statusUploading}
+            >
+              {statusUploading ? '⏳ Publication...' : '🚀 Publier mon status'}
+            </button>
+            <button className="mkt-status-cancel" onClick={() => { setShowCreateStatus(false); setStatusFile(null); setStatusPreview(null); setStatusCaption(''); }}>
               Annuler
             </button>
           </div>
