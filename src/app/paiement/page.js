@@ -2,13 +2,10 @@
 
 // ==================== IMPORTS ====================
 import { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabase } from '@/lib/supabase';
 
 // ==================== CONFIGURATION SUPABASE ====================
-const SUPABASE_URL = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
-const SUPABASE_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2ticWJxeGN3emNybG11dnpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MTk1MzMsImV4cCI6MjA3NjA5NTUzM30.AMzAUwtjFt7Rvof5r2enMyYIYToc1wNWWEjvZqK_YXM';
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = getSupabase();
 
 // ==================== COMPOSANT PRINCIPAL ====================
 export default function PaiementPage() {

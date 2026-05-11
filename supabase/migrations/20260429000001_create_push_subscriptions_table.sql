@@ -1,4 +1,4 @@
-create table push_subscriptions (
+create table if not exists push_subscriptions (
   id uuid primary key default gen_random_uuid(),
   endpoint text not null,
   keys jsonb not null,

@@ -2,16 +2,10 @@
 
 import { useState, useRef, useEffect } from 'react';
 
-const SUPABASE_URL = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2ticWJxeGN3emNybG11dnpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MTk1MzMsImV4cCI6MjA3NjA5NTUzM30.AMzAUwtjFt7Rvof5r2enMyYIYToc1wNWWEjvZqK_YXM';
 
-let _sb = null;
+import { getSupabase as getSupabaseClient } from '@/lib/supabase';
 function getSupabase() {
-  if (!_sb) {
-    const { createClient } = require('@supabase/supabase-js');
-    _sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  }
-  return _sb;
+  return getSupabaseClient();
 }
 
 const COLORS = [

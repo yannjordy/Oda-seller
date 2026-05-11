@@ -1,24 +1,11 @@
 'use client';
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET, CATEGORIES } from '@/lib/config';
+import { getSupabase } from '@/lib/supabase';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import ShopCreationModal from '@/components/ShopCreationModal';
 
-// ==================== CONFIGURATION ====================
-const SUPABASE_URL = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co';
-const SUPABASE_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2ticWJxeGN3emNybG11dnpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MTk1MzMsImV4cCI6MjA3NjA5NTUzM30.AMzAUwtjFt7Rvof5r2enMyYIYToc1wNWWEjvZqK_YXM';
-
-const CLOUDINARY_CLOUD_NAME    = 'dnpeuymo0';
-const CLOUDINARY_UPLOAD_PRESET = 'oda_unsigned_upload';
-
-const CATEGORIES = [
-  'Vetements','Electroniques','Decoration','Electromenager','Beaute & soin',
-  'Accessoires','Bebe','jeux & jouets','Bricolage','Alimentation','Boissons',
-  'Livre','Hygiene & sante','fitness','Animaux','Luxe','Bureau','peruque',
-  'chaussures','telephone','outils','enfants','bijoux','autre','site-web',
-  'voiture','formation',
-];
 
 const COLORS = [
   'linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%)',
@@ -160,16 +147,6 @@ const Icon = {
     </svg>
   ),
 };
-
-// ==================== SUPABASE (lazy singleton) ====================
-let _supabase = null;
-function getSupabase() {
-  if (!_supabase) {
-    const { createClient } = require('@supabase/supabase-js');
-    _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  }
-  return _supabase;
-}
 
 // ==================== PAGE ====================
 export default function TableauDeBord() {

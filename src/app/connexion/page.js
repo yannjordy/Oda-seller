@@ -2,14 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabase } from '@/lib/supabase';
 import TermsModal from '@/components/TermsModal';
 
 // ── Supabase ──────────────────────────────────────────────────────────────────
-const supabase = createClient(
-  'https://xjckbqbqxcwzcrlmuvzf.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2ticWJxeGN3emNybG11dnpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MTk1MzMsImV4cCI6MjA3NjA5NTUzM30.AMzAUwtjFt7Rvof5r2enMyYIYToc1wNWWEjvZqK_YXM'
-);
+const supabase = getSupabase();
 
 // ── Composant Modal "Mot de passe oublié" (remplace le prompt() natif) ─────────
 function ForgotPasswordModal({ onClose }) {

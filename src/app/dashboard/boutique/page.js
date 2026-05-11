@@ -2,24 +2,11 @@
 
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabase } from '@/lib/supabase'
+import { PARAMS_DEFAUT } from '@/lib/config';
 
-// ==================== SUPABASE CONFIG ====================
-const SUPABASE_URL = 'https://xjckbqbqxcwzcrlmuvzf.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqY2ticWJxeGN3emNybG11dnpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MTk1MzMsImV4cCI6MjA3NjA5NTUzM30.AMzAUwtjFt7Rvof5r2enMyYIYToc1wNWWEjvZqK_YXM'
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-// ==================== ÉTAT INITIAL DES PARAMÈTRES ====================
-const PARAMS_DEFAUT = {
-  general: { nom: '', description: '', telephone: '+237 6XX XX XX XX', email: '', adresse: '' },
-  apparence: { couleurPrimaire: '#FF6B00', couleurSecondaire: '#1A1A1A', accent: '#FF9A3C', logo: 'oda.jpg', favicon: 'oda.jpg', police: 'Outfit' },
-  paiement: {
-    carte: { actif: false, cle: '', confirme: false },
-    mobile: { actif: false, confirme: false, mtn: { actif: false, numero: '', nomCompte: '', confirme: false }, orange: { actif: false, numero: '', nomCompte: '', confirme: false } },
-    cash: { actif: true, confirme: true }, devise: 'FCFA'
-  },
-  livraison: { fraisDouala: 1000, fraisAutres: 2500, zonesPersonnalisees: [], delai: '2-5 jours ouvrables', livraisonGratuite: false, montantMinimum: 50000 }
-}
+// ==================== SUPABASE ====================
+const supabase = getSupabase()
 
 // ==================== COMPOSANT PRINCIPAL ====================
 export default function BoutiquePage() {

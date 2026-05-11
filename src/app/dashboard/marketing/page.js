@@ -384,6 +384,36 @@ const MKT_STYLES = `
   @media(min-width:600px){ .mkt-modal{ border-radius:24px; max-height:88vh; } }
   .mkt-modal-handle { width:36px; height:4px; background:#E5E5EA; border-radius:4px; margin:0 auto 20px; display:block; }
   @media(min-width:600px){ .mkt-modal-handle{ display:none; } }
+  .mkt-status-preview-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,.85);
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    z-index:3000; display:flex; align-items:center; justify-content:center;
+    animation:mktFadeIn .2s ease; padding:24px;
+  }
+  .mkt-status-preview-overlay .mkt-status-preview-close {
+    position:absolute; top:16px; right:16px; width:36px; height:36px; border-radius:50%;
+    background:rgba(255,255,255,.15); border:none; color:white; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:1.2rem;
+    transition:background .15s; z-index:1;
+  }
+  .mkt-status-preview-overlay .mkt-status-preview-close:active { background:rgba(255,255,255,.25); }
+  .mkt-status-preview-card {
+    max-width:400px; width:100%; border-radius:20px; overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.5); animation:mktSlideUp .35s cubic-bezier(.34,1.56,.64,1);
+  }
+  .mkt-status-preview-card video,
+  .mkt-status-preview-card img { width:100%; display:block; }
+  .mkt-status-preview-info {
+    background:rgba(255,255,255,.06); padding:16px 20px; display:flex;
+    align-items:center; justify-content:space-between; gap:12px;
+  }
+  .mkt-status-preview-info-left { display:flex; flex-direction:column; gap:4px; }
+  .mkt-status-preview-info-label { font-size:.65rem; color:rgba(255,255,255,.4); text-transform:uppercase; letter-spacing:.5px; font-weight:600; }
+  .mkt-status-preview-info-val { font-size:.95rem; font-weight:700; color:white; display:flex; align-items:center; gap:6px; }
+  .mkt-status-preview-caption {
+    background:rgba(255,255,255,.04); padding:14px 20px;
+    font-size:.82rem; color:rgba(255,255,255,.75); line-height:1.5;
+  }
   .mkt-modal-title { font-size:1.15rem; font-weight:800; margin-bottom:4px; }
   .mkt-modal-sub { font-size:.82rem; color:var(--text-2); margin-bottom:20px; }
 
@@ -584,6 +614,12 @@ const MKT_STYLES = `
   }
   .mkt-status-card:hover .mkt-status-delete { opacity:1; }
   .mkt-status-delete:hover { transform:scale(1.15); }
+  .mkt-status-views {
+    position:absolute; bottom:8px; right:8px; z-index:1;
+    background:rgba(0,0,0,.6); backdrop-filter:blur(4px);
+    color:white; font-size:.6rem; font-weight:600; padding:3px 7px; border-radius:8px;
+    display:flex; align-items:center; gap:4px;
+  }
   .mkt-status-video-badge {
     position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:1;
     width:36px; height:36px; border-radius:50%; background:rgba(0,0,0,.65); backdrop-filter:blur(4px);
@@ -604,6 +640,52 @@ const MKT_STYLES = `
   }
   .mkt-status-create-title { font-size:1.1rem; font-weight:800; margin-bottom:4px; }
   .mkt-status-create-sub { font-size:.78rem; color:var(--text-2); margin-bottom:20px; }
+  .mkt-status-views-modal {
+    position:fixed; inset:0; z-index:10000;
+    background:rgba(0,0,0,.65); backdrop-filter:blur(10px);
+    display:flex; align-items:center; justify-content:center;
+    animation:mktFadeIn .2s ease; padding:16px;
+  }
+  .mkt-status-views-card {
+    background:white; border-radius:20px; width:100%; max-width:380px;
+    max-height:90vh; overflow-y:auto; padding:24px;
+    animation:mktSlideUp .3s cubic-bezier(.34,1.3,.64,1);
+    position:relative;
+  }
+  .mkt-status-views-close {
+    position:absolute; top:12px; right:12px; z-index:2;
+    width:30px; height:30px; border-radius:50%; border:none;
+    background:rgba(0,0,0,.5); color:white; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:.8rem; transition:transform .15s;
+  }
+  .mkt-status-views-close:hover { transform:scale(1.1); }
+  .mkt-status-views-media { width:100%; aspect-ratio:9/16; border-radius:14px; overflow:hidden; background:#000; margin-bottom:16px; }
+  .mkt-status-views-stats { display:flex; gap:12px; margin-bottom:16px; }
+  .mkt-status-views-stat {
+    flex:1; background:var(--bg-2); border-radius:12px; padding:12px 8px;
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+  }
+  .mkt-status-views-stat-icon { font-size:1.2rem; }
+  .mkt-status-views-stat-num { font-size:1.1rem; font-weight:800; }
+  .mkt-status-views-stat-label { font-size:.65rem; color:var(--text-2); text-transform:uppercase; letter-spacing:.5px; }
+  .mkt-status-views-caption {
+    background:var(--bg-2); border-radius:12px; padding:12px 14px;
+    font-size:.85rem; color:var(--text-1); margin-bottom:12px;
+  }
+  .mkt-status-views-date { font-size:.72rem; color:var(--text-3); text-align:center; }
+  .mkt-status-comments-section { margin-top:16px; border-top:1px solid var(--border); padding-top:14px; }
+  .mkt-status-comments-head { font-size:.82rem; font-weight:700; margin-bottom:12px; color:var(--text-1); }
+  .mkt-status-comments-loading, .mkt-status-comments-empty { font-size:.78rem; color:var(--text-3); text-align:center; padding:12px 0; }
+  .mkt-status-comments-list { display:flex; flex-direction:column; gap:10px; max-height:200px; overflow-y:auto; }
+  .mkt-status-comment { display:flex; gap:8px; align-items:flex-start; }
+  .mkt-status-comment.is-reply { margin-left:28px; padding:6px 0 0; }
+  .mkt-status-comment-avatar { width:28px; height:28px; min-width:28px; border-radius:50%; background:linear-gradient(135deg,var(--sb-orange),#FF9500); color:white; display:flex; align-items:center; justify-content:center; font-size:.7rem; font-weight:700; }
+  .mkt-status-comment-body { flex:1; min-width:0; }
+  .mkt-status-comment-author { font-size:.75rem; font-weight:600; color:var(--text-1); }
+  .mkt-status-comment-date { font-size:.65rem; font-weight:400; color:var(--text-3); margin-left:4px; }
+  .mkt-status-comment-text { font-size:.78rem; color:var(--text-2); margin-top:2px; line-height:1.4; word-wrap:break-word; }
+  .mkt-status-comment-replies { margin-top:6px; }
   .mkt-status-preview {
     width:100%; aspect-ratio:9/16; border-radius:16px;
     background:var(--bg); background-size:cover; background-position:center;
@@ -967,6 +1049,7 @@ export default function OdaMarketingCenter() {
   const [loadingStatuses, setLoadingStatuses] = useState(true);
   const [showCreateStatus, setShowCreateStatus] = useState(false);
   const [statusFile, setStatusFile] = useState(null);
+  const [selectedStatusForView, setSelectedStatusForView] = useState(null);
   const [statusPreview, setStatusPreview] = useState(null);
   const [statusCaption, setStatusCaption] = useState('');
   const [statusUploading, setStatusUploading] = useState(false);
@@ -977,6 +1060,9 @@ export default function OdaMarketingCenter() {
   const [videoDuration, setVideoDuration] = useState(0);
   const [originalFile, setOriginalFile] = useState(null);
   const [trimmingVideo, setTrimmingVideo] = useState(false);
+  const [viewingStatus, setViewingStatus] = useState(null);
+  const [statusComments, setStatusComments] = useState([]);
+  const [loadingComments, setLoadingComments] = useState(false);
   const trimmerRef = useRef(null);
   const framesCache = useRef(null);
 
@@ -1103,6 +1189,25 @@ export default function OdaMarketingCenter() {
       setLoadingStatuses(false);
     }
   }
+
+  // ─── Charger commentaires du status sélectionné
+  useEffect(() => {
+    if (!selectedStatusForView) { setStatusComments([]); return; }
+    let cancelled = false;
+    setLoadingComments(true);
+    sb()
+      .from('shop_status_comments')
+      .select('*')
+      .eq('status_id', selectedStatusForView.id)
+      .order('created_at', { ascending: false })
+      .limit(100)
+      .then(({ data }) => {
+        if (!cancelled) setStatusComments(data || []);
+      })
+      .catch(() => { if (!cancelled) setStatusComments([]); })
+      .finally(() => { if (!cancelled) setLoadingComments(false); });
+    return () => { cancelled = true; };
+  }, [selectedStatusForView]);
 
   async function handleCreateStatus() {
     if (!statusFile || statusUploading) return;
@@ -2208,10 +2313,11 @@ export default function OdaMarketingCenter() {
                       key={s.id}
                       className="mkt-status-card"
                       style={{ backgroundImage: `url(${s.media_url})` }}
-                      onClick={() => window.open(s.media_url, '_blank')}
+                      onClick={() => setSelectedStatusForView(s)}
                     >
                       <div className="mkt-status-overlay" />
                       {s.type === 'video' && <div className="mkt-status-video-badge">▶</div>}
+                      <div className="mkt-status-views">👁 {s.views ?? 0}</div>
                       <button
                         className="mkt-status-delete"
                         onClick={e => { e.stopPropagation(); handleDeleteStatus(s.id); }}
@@ -2225,6 +2331,86 @@ export default function OdaMarketingCenter() {
                   ))}
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* ─── Views Status Modal ─── */}
+        {selectedStatusForView && (
+          <div className="mkt-status-views-modal" onClick={() => setSelectedStatusForView(null)}>
+            <div className="mkt-status-views-card" onClick={e => e.stopPropagation()}>
+              <button className="mkt-status-views-close" onClick={() => setSelectedStatusForView(null)}>✕</button>
+              <div className={`mkt-status-views-media${selectedStatusForView.type === 'video' ? ' has-video' : ''}`}>
+                {selectedStatusForView.type === 'video' ? (
+                  <video src={selectedStatusForView.media_url} controls autoPlay playsInline style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:14 }} />
+                ) : (
+                  <img src={selectedStatusForView.media_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:14 }} />
+                )}
+              </div>
+              <div className="mkt-status-views-stats">
+                <div className="mkt-status-views-stat">
+                  <span className="mkt-status-views-stat-icon">👁</span>
+                  <span className="mkt-status-views-stat-num">{selectedStatusForView.views ?? 0}</span>
+                  <span className="mkt-status-views-stat-label">vues</span>
+                </div>
+                <div className="mkt-status-views-stat">
+                  <span className="mkt-status-views-stat-icon">⏱</span>
+                  <span className="mkt-status-views-stat-num">{getTimeRemaining(selectedStatusForView.expires_at)}</span>
+                  <span className="mkt-status-views-stat-label">restant</span>
+                </div>
+                <div className="mkt-status-views-stat">
+                  <span className="mkt-status-views-stat-icon">{selectedStatusForView.type === 'video' ? '🎬' : '📷'}</span>
+                  <span className="mkt-status-views-stat-num">{selectedStatusForView.type}</span>
+                  <span className="mkt-status-views-stat-label">type</span>
+                </div>
+              </div>
+              {selectedStatusForView.caption && (
+                <div className="mkt-status-views-caption">{selectedStatusForView.caption}</div>
+              )}
+              <div className="mkt-status-views-date">
+                Publié le {new Date(selectedStatusForView.created_at).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' })}
+              </div>
+              <div className="mkt-status-comments-section">
+                <div className="mkt-status-comments-head">
+                  💬 Commentaires ({loadingComments ? '...' : statusComments.length})
+                </div>
+                {loadingComments ? (
+                  <div className="mkt-status-comments-loading">Chargement...</div>
+                ) : statusComments.length === 0 ? (
+                  <div className="mkt-status-comments-empty">Aucun commentaire</div>
+                ) : (
+                  <div className="mkt-status-comments-list">
+                    {statusComments.filter(c => !c.reply_to).map(c => (
+                      <div key={c.id} className="mkt-status-comment">
+                        <div className="mkt-status-comment-avatar">{(c.author_name || 'A')[0].toUpperCase()}</div>
+                        <div className="mkt-status-comment-body">
+                          <div className="mkt-status-comment-author">
+                            {c.author_name || 'Anonyme'}
+                            <span className="mkt-status-comment-date">· {new Date(c.created_at).toLocaleDateString('fr-FR', { day:'numeric', month:'short' })}</span>
+                          </div>
+                          <div className="mkt-status-comment-text">{c.content}</div>
+                        </div>
+                        {statusComments.filter(r => r.reply_to === c.id).length > 0 && (
+                          <div className="mkt-status-comment-replies">
+                            {statusComments.filter(r => r.reply_to === c.id).map(r => (
+                              <div key={r.id} className="mkt-status-comment is-reply">
+                                <div className="mkt-status-comment-avatar">{(r.author_name || 'A')[0].toUpperCase()}</div>
+                                <div className="mkt-status-comment-body">
+                                  <div className="mkt-status-comment-author">
+                                    {r.author_name || 'Anonyme'}
+                                    <span className="mkt-status-comment-date">· {new Date(r.created_at).toLocaleDateString('fr-FR', { day:'numeric', month:'short' })}</span>
+                                  </div>
+                                  <div className="mkt-status-comment-text">{r.content}</div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

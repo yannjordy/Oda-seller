@@ -3,17 +3,17 @@
 
 // ─── Meta / Facebook ───────────────────────────────────────────
 // 👉 Obtenez votre App ID sur developers.facebook.com
-export const META_APP_ID      = '1453272052599452';
+export const META_APP_ID      = process.env.NEXT_PUBLIC_META_APP_ID || '1453272052599452';
 export const META_API_VERSION = 'v19.0';
 
 // ─── TikTok Ads ────────────────────────────────────────────────
 // 👉 Obtenez votre App ID sur ads.tiktok.com/marketing_api
-export const TIKTOK_APP_ID      = 'VOTRE_TIKTOK_APP_ID';
+export const TIKTOK_APP_ID      = process.env.NEXT_PUBLIC_TIKTOK_APP_ID || 'VOTRE_TIKTOK_APP_ID';
 export const TIKTOK_API_VERSION = 'v1.3';
 
 // ─── YouTube / Google Ads ──────────────────────────────────────
 // 👉 Obtenez votre Client ID sur console.cloud.google.com
-export const GOOGLE_CLIENT_ID   = 'VOTRE_GOOGLE_CLIENT_ID';
+export const GOOGLE_CLIENT_ID   = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || 'VOTRE_GOOGLE_CLIENT_ID';
 export const GOOGLE_API_VERSION = 'v14';
 
 // ─── WhatsApp Business (via Meta) ──────────────────────────────

@@ -51,7 +51,6 @@ CREATE TABLE IF NOT EXISTS shop_status_comments (
   user_id text,
   author_name text DEFAULT 'Anonyme',
   content text NOT NULL,
-  reply_to uuid REFERENCES shop_status_comments,
   created_at timestamptz DEFAULT now()
 );
 
@@ -78,16 +77,3 @@ CREATE POLICY "Insertion publique des commentaires"
 SELECT '✅ shop_statuses' AS table_name, count(*) AS policies FROM pg_policies WHERE tablename = 'shop_statuses'
 UNION ALL
 SELECT '✅ shop_status_comments', count(*) FROM pg_policies WHERE tablename = 'shop_status_comments';
-
--- ===========================================================
--- Fonction RPC pour incrémenter les vues d'un status
--- ===========================================================
-CREATE OR REPLACE FUNCTION increment_status_view(row_id uuid)
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-BEGIN
-  UPDATE shop_statuses SET views = views + 1 WHERE id = row_id;
-END;
-$$;
