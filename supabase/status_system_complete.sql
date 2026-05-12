@@ -28,17 +28,17 @@ CREATE INDEX IF NOT EXISTS idx_shop_statuses_user
 ALTER TABLE shop_statuses ENABLE ROW LEVEL SECURITY;
 
 -- Tout le monde peut voir les status encore actifs
-CREATE POLICY "Tout le monde peut voir les status actifs"
+CREATE POLICY IF NOT EXISTS "Tout le monde peut voir les status actifs"
   ON shop_statuses FOR SELECT
   USING (expires_at > now());
 
 -- Seul le vendeur authentifié peut créer son status
-CREATE POLICY "Les vendeurs peuvent créer leurs status"
+CREATE POLICY IF NOT EXISTS "Les vendeurs peuvent créer leurs status"
   ON shop_statuses FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
 -- Seul le propriétaire peut supprimer son status
-CREATE POLICY "Les vendeurs peuvent supprimer leurs status"
+CREATE POLICY IF NOT EXISTS "Les vendeurs peuvent supprimer leurs status"
   ON shop_statuses FOR DELETE
   USING (auth.uid() = user_id);
 
@@ -63,12 +63,12 @@ CREATE INDEX IF NOT EXISTS idx_status_comments_status
 ALTER TABLE shop_status_comments ENABLE ROW LEVEL SECURITY;
 
 -- Tout le monde peut lire les commentaires
-CREATE POLICY "Lecture publique des commentaires"
+CREATE POLICY IF NOT EXISTS "Lecture publique des commentaires"
   ON shop_status_comments FOR SELECT
   USING (true);
 
 -- Tout le monde peut commenter (anonyme ou connecté)
-CREATE POLICY "Insertion publique des commentaires"
+CREATE POLICY IF NOT EXISTS "Insertion publique des commentaires"
   ON shop_status_comments FOR INSERT
   WITH CHECK (true);
 
@@ -105,6 +105,7 @@ CREATE TABLE IF NOT EXISTS services (
   images text[] DEFAULT '{}',
   video_url text DEFAULT '',
   statut text DEFAULT 'actif',
+  prix numeric(12,0) DEFAULT NULL,
   created_at timestamptz DEFAULT now()
 );
 
@@ -112,18 +113,23 @@ CREATE INDEX IF NOT EXISTS idx_services_user ON services (user_id, created_at DE
 
 ALTER TABLE services ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Lecture publique des services"
+DROP POLICY IF EXISTS "Lecture publique des services" ON services;
+DROP POLICY IF EXISTS "Les vendeurs peuvent créer leurs services" ON services;
+DROP POLICY IF EXISTS "Les vendeurs peuvent modifier leurs services" ON services;
+DROP POLICY IF EXISTS "Les vendeurs peuvent supprimer leurs services" ON services;
+
+CREATE POLICY IF NOT EXISTS "Lecture publique des services"
   ON services FOR SELECT
   USING (statut = 'actif');
 
-CREATE POLICY "Les vendeurs peuvent créer leurs services"
+CREATE POLICY IF NOT EXISTS "Les vendeurs peuvent créer leurs services"
   ON services FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Les vendeurs peuvent modifier leurs services"
+CREATE POLICY IF NOT EXISTS "Les vendeurs peuvent modifier leurs services"
   ON services FOR UPDATE
   USING (auth.uid() = user_id);
 
-CREATE POLICY "Les vendeurs peuvent supprimer leurs services"
+CREATE POLICY IF NOT EXISTS "Les vendeurs peuvent supprimer leurs services"
   ON services FOR DELETE
   USING (auth.uid() = user_id);

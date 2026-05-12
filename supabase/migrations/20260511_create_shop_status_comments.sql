@@ -17,11 +17,11 @@ CREATE INDEX IF NOT EXISTS idx_status_comments_status
 ALTER TABLE shop_status_comments ENABLE ROW LEVEL SECURITY;
 
 -- Lecture : tout le monde peut voir les commentaires
-CREATE POLICY "Lecture publique des commentaires"
+CREATE POLICY IF NOT EXISTS "Lecture publique des commentaires"
   ON shop_status_comments FOR SELECT
   USING (true);
 
 -- Insertion : tout le monde peut commenter (anonyme ou connecté)
-CREATE POLICY "Insertion publique des commentaires"
+CREATE POLICY IF NOT EXISTS "Insertion publique des commentaires"
   ON shop_status_comments FOR INSERT
   WITH CHECK (true);

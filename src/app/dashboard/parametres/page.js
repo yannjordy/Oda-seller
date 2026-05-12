@@ -978,6 +978,7 @@ function toast(msg, type = 'info') {
 const DEFAULTS = {
   general:      { nom:'', description:'', email:'', telephone:'', adresse:'' },
   identifiant:  { slug:'', disponible:false, auto:false },
+  negociation:  { prix: true },
   paiement: {
     carte:  { actif:false, cle:'', confirme:false },
     mobile: { actif:false, confirme:false, mtn:{actif:false,nomCompte:'',numero:'',confirme:false}, orange:{actif:false,nomCompte:'',numero:'',confirme:false} },
@@ -1381,6 +1382,16 @@ export default function ParametresPage() {
                   <div className="p-field">
                     <label className="p-lbl">Adresse</label>
                     <input className="p-inp" value={params.general.adresse} onChange={e => up('general.adresse', e.target.value)} placeholder="Douala, Cameroun" />
+                  </div>
+                  <div className="p-toggle-row">
+                    <div className="p-toggle-info">
+                      <div className="p-toggle-label">Négociation de prix</div>
+                      <div className="p-toggle-desc">Permettre aux clients de proposer leur prix sur vos produits</div>
+                    </div>
+                    <label className="p-switch">
+                      <input type="checkbox" checked={params.negociation?.prix !== false} onChange={e => up('negociation.prix', e.target.checked)} />
+                      <span className="p-slider" />
+                    </label>
                   </div>
                   <div>
                     <button type="submit" className="p-btn p-btn-primary" disabled={saving}>

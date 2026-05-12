@@ -26,6 +26,7 @@ export const CATEGORIES = [
 // ─── Paramètres boutique par défaut ───────
 export const PARAMS_DEFAUT = {
   general: { nom: '', description: '', telephone: '+237 6XX XX XX XX', email: '', adresse: '' },
+  negociation: { prix: true },
   apparence: { couleurPrimaire: '#FF6B00', couleurSecondaire: '#1A1A1A', accent: '#FF9A3C', logo: 'oda.jpg', favicon: 'oda.jpg', police: 'Outfit' },
   paiement: {
     carte: { actif: false, cle: '', confirme: false },

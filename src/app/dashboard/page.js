@@ -246,7 +246,7 @@ export default function TableauDeBord() {
   }
 
   // ==================== SYSTÈME ABONNEMENT ====================
-  async function verifierQuotaAvantPublication(produitId = null) {
+  async function verifierQuotaAvantPublication(itemId = null, type = 'produit') {
     try {
       const supabase = getSupabase();
       const { data: abo } = await supabase
@@ -257,63 +257,96 @@ export default function TableauDeBord() {
         limite = abo.limite_produits; planActif = true;
       }
 
-      const { data: produitsPublies, error: countError } = await supabase
-        .from('produits').select('id').eq('user_id', user.id).eq('statut', 'published');
-      if (countError) throw countError;
+      const [produits, services] = await Promise.all([
+        supabase.from('produits').select('id').eq('user_id', user.id).eq('statut', 'published'),
+        supabase.from('services').select('id').eq('user_id', user.id).eq('statut', 'actif'),
+      ]);
 
-      let nombrePublies = produitsPublies?.length || 0;
-      if (produitId && produitsPublies?.find(p => p.id === produitId)) nombrePublies--;
+      let nbProduits = produits.data?.length || 0;
+      let nbServices = services.data?.length || 0;
+      let total = nbProduits + nbServices;
 
-      return { peutPublier: nombrePublies < limite, nombrePublies, limite, restant: limite - nombrePublies, planActif };
+      if (itemId && type === 'produit' && produits.data?.find(p => p.id === itemId)) total--;
+      if (itemId && type === 'service' && services.data?.find(s => s.id === itemId)) total--;
+
+      return { peutPublier: total < limite, nbProduits, nbServices, total, limite, restant: limite - total, planActif };
     } catch (err) {
       console.error('❌ Erreur quota:', err);
-      return { peutPublier: false, nombrePublies: 0, limite: 10, restant: 10, planActif: false };
+      return { peutPublier: false, nbProduits: 0, nbServices: 0, total: 0, limite: 10, restant: 10, planActif: false };
     }
   }
 
-  async function gererProduitsExpires() {
+  async function gererItemsExpires() {
     try {
       const supabase = getSupabase();
       const { data: abo, error: aboError } = await supabase
         .from('abonnements').select('*').eq('user_id', user.id).single();
       if (aboError && aboError.code !== 'PGRST116') return;
       if (!abo || new Date(abo.date_expiration) <= new Date()) {
-        const { data: produitsPublies, error } = await supabase
+        const limite = 10;
+        // Produits
+        const { data: produits } = await supabase
           .from('produits').select('id, created_at').eq('user_id', user.id)
           .eq('statut', 'published').order('created_at', { ascending: false });
-        if (error || !produitsPublies || produitsPublies.length <= 10) return;
-        const ids = produitsPublies.slice(10).map(p => p.id);
-        await supabase.from('produits').update({ statut: 'draft', date_draft: new Date().toISOString() }).in('id', ids);
-        console.log(`📦 ${ids.length} produit(s) mis en brouillon`);
+        if (produits && produits.length > limite) {
+          await supabase.from('produits').update({ statut: 'draft', date_draft: new Date().toISOString() })
+            .in('id', produits.slice(limite).map(p => p.id));
+        }
+        // Services
+        const { data: services } = await supabase
+          .from('services').select('id, created_at').eq('user_id', user.id)
+          .eq('statut', 'actif').order('created_at', { ascending: false });
+        if (services && services.length > limite) {
+          await supabase.from('services').update({ statut: 'inactif' })
+            .in('id', services.slice(limite).map(s => s.id));
+        }
       }
     } catch (err) { console.error('❌ Erreur gestion expirés:', err); }
   }
 
-  async function supprimerProduitsAnciens() {
+  async function supprimerItemsAnciens() {
     try {
       const supabase = getSupabase();
       const dateLimite = new Date();
       dateLimite.setDate(dateLimite.getDate() - 14);
-      const { data, error } = await supabase
+      // Produits brouillons anciens
+      const { data: produits, error: errP } = await supabase
         .from('produits').select('id').eq('user_id', user.id).eq('statut', 'draft')
         .not('date_draft', 'is', null).lt('date_draft', dateLimite.toISOString());
-      if (error || !data?.length) return;
-      await supabase.from('produits').delete().in('id', data.map(p => p.id));
-      afficherNotification(`${data.length} brouillon(s) anciens supprimés`, 'info');
+      if (!errP && produits?.length) {
+        await supabase.from('produits').delete().in('id', produits.map(p => p.id));
+      }
+      // Services inactifs anciens (pas de date_draft, on se base sur updated_at ou created_at)
+      const { data: services, error: errS } = await supabase
+        .from('services').select('id, created_at').eq('user_id', user.id).eq('statut', 'inactif')
+        .lt('created_at', dateLimite.toISOString());
+      if (!errS && services?.length) {
+        await supabase.from('services').delete().in('id', services.map(s => s.id));
+      }
     } catch (err) { console.error('❌ Erreur suppression anciens:', err); }
   }
 
-  async function afficherAvertissementProduitsEnDanger() {
+  async function afficherAvertissementItemsEnDanger() {
     try {
       const supabase = getSupabase();
       const date7  = new Date(); date7.setDate(date7.getDate() - 7);
       const date14 = new Date(); date14.setDate(date14.getDate() - 14);
-      const { data, error } = await supabase
+      // Produits danger
+      const { data: produits } = await supabase
         .from('produits').select('id, date_draft').eq('user_id', user.id).eq('statut', 'draft')
         .not('date_draft', 'is', null).lt('date_draft', date7.toISOString()).gte('date_draft', date14.toISOString());
-      if (error || !data?.length) return;
-      const jours = data.map(p => 14 - Math.floor((Date.now() - new Date(p.date_draft)) / 86400000));
-      setWarnBanner({ count: data.length, minJours: Math.min(...jours) });
+      // Services danger (inactifs depuis 7-14 jours)
+      const { data: services } = await supabase
+        .from('services').select('id, created_at').eq('user_id', user.id).eq('statut', 'inactif')
+        .lt('created_at', date7.toISOString()).gte('created_at', date14.toISOString());
+      const total = (produits?.length || 0) + (services?.length || 0);
+      if (total > 0) {
+        const jours = [
+          ...(produits || []).map(p => 14 - Math.floor((Date.now() - new Date(p.date_draft)) / 86400000)),
+          ...(services || []).map(s => 14 - Math.floor((Date.now() - new Date(s.created_at)) / 86400000)),
+        ];
+        setWarnBanner({ count: total, minJours: Math.min(...jours) });
+      }
     } catch (err) { console.error('❌ Erreur avertissement danger:', err); }
   }
 
@@ -374,9 +407,9 @@ export default function TableauDeBord() {
   }
 
   async function initialiserSystemeAbonnement() {
-    await gererProduitsExpires();
-    await supprimerProduitsAnciens();
-    await afficherAvertissementProduitsEnDanger();
+    await gererItemsExpires();
+    await supprimerItemsAnciens();
+    await afficherAvertissementItemsEnDanger();
   }
 
   async function verifierAlertesAbonnement() {
@@ -393,7 +426,7 @@ export default function TableauDeBord() {
       }
       const quota = await verifierQuotaAvantPublication();
       if (quota.restant === 0 && window.notificationManager)
-        window.notificationManager.notifySubscriptionAlert({ type: 'quota_reached', count: quota.nombrePublies, limit: quota.limite });
+        window.notificationManager.notifySubscriptionAlert({ type: 'quota_reached', count: quota.total, limit: quota.limite });
     } catch (err) { console.error('❌ Erreur alertes:', err); }
   }
 
@@ -546,9 +579,11 @@ export default function TableauDeBord() {
       if (productStatus === 'published') {
         const quota = await verifierQuotaAvantPublication(produitEnEdition?.id);
         if (!quota.peutPublier) {
-          afficherNotification(`Limite atteinte : ${quota.nombrePublies}/${quota.limite} produits.`, 'error');
+          afficherNotification(`Limite atteinte : ${quota.total}/${quota.limite} (produits + services).`, 'error');
           const ok = window.confirm(
-            `⚠️ Limite de ${quota.limite} produits publiés atteinte.\n\n` +
+            `⚠️ Quota de ${quota.limite} articles (produits + services) atteint.\n\n` +
+            `Produits: ${quota.nbProduits} · Services: ${quota.nbServices}\n` +
+            `→ Abonnez-vous pour publier plus sur oda-seller/abonnement\n\n` +
             `Enregistrer en BROUILLON ?\n→ OUI : sauvegardé mais non visible\n→ NON : annuler`
           );
           if (ok) { statutFinal = 'draft'; setProductStatus('draft'); afficherNotification('Produit enregistré en brouillon', 'info'); }
@@ -1962,16 +1997,16 @@ export default function TableauDeBord() {
           {subBanner && (
             <div style={{ marginTop: 14, padding: '12px 14px', borderRadius: 10, background: 'var(--oda-surface)', border: '1px solid var(--oda-border)' }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: 6 }}>
-                <span style={{ fontSize:'.75rem', fontWeight:600, color:'var(--oda-muted)' }}>Quota produits</span>
+                <span style={{ fontSize:'.75rem', fontWeight:600, color:'var(--oda-muted)' }}>Quota produits + services</span>
                 <span style={{ fontSize:'.75rem', fontWeight:700, color:'var(--oda-slate)' }}>
-                  {subBanner.quota?.nombrePublies}/{subBanner.quota?.limite}
+                  {subBanner.quota?.total}/{subBanner.quota?.limite}
                 </span>
               </div>
               <div style={{ height: 5, borderRadius: 50, background: 'var(--oda-border)', overflow: 'hidden' }}>
                 <div style={{
                   height: '100%',
-                  width: `${((subBanner.quota?.nombrePublies || 0) / (subBanner.quota?.limite || 10)) * 100}%`,
-                  background: subBanner.quota?.nombrePublies >= subBanner.quota?.limite
+                  width: `${((subBanner.quota?.total || 0) / (subBanner.quota?.limite || 10)) * 100}%`,
+                  background: subBanner.quota?.total >= subBanner.quota?.limite
                     ? 'var(--oda-error)'
                     : subBanner.type === 'active'
                     ? 'linear-gradient(90deg,var(--oda-indigo),#818CF8)'
@@ -1980,17 +2015,16 @@ export default function TableauDeBord() {
                   borderRadius: 50,
                 }}/>
               </div>
-              {subBanner.type === 'active' && (
-                <p style={{ fontSize:'.7rem', color:'var(--oda-muted)', margin:'6px 0 0' }}>
-                  Plan {subBanner.plan?.toUpperCase()} · expire dans {subBanner.joursRestants}j
-                </p>
-              )}
+              <p style={{ fontSize:'.7rem', color:'var(--oda-muted)', margin:'6px 0 0' }}>
+                {subBanner.quota?.nbProduits} produit{subBanner.quota?.nbProduits > 1 ? 's' : ''} · {subBanner.quota?.nbServices} service{subBanner.quota?.nbServices > 1 ? 's' : ''}
+                {subBanner.type === 'active' && ` · ${subBanner.joursRestants}j restant${subBanner.joursRestants > 1 ? 's' : ''}`}
+              </p>
             </div>
           )}
         </aside>
       </div>
 
-      {/* ── BANNIÈRE PRODUITS EN DANGER ── */}
+      {/* ── BANNIÈRE ARTICLES EN DANGER ── */}
       {warnBanner && showWarnBanner && (
         <div style={{
           position:'fixed', top:76, left:'50%', transform:'translateX(-50%)',
@@ -2008,10 +2042,10 @@ export default function TableauDeBord() {
             <span style={{ color:'var(--oda-warning)', flexShrink:0, marginTop:1 }}><Icon.AlertTriangle /></span>
             <div style={{ flex:1 }}>
               <p style={{ margin:'0 0 3px', fontSize:'.88rem', fontWeight:700, color:'var(--oda-slate)' }}>
-                Produits en danger
+                Articles en danger
               </p>
               <p style={{ margin:'0 0 10px', fontSize:'.82rem', color:'var(--oda-muted)' }}>
-                {warnBanner.count} produit(s) supprimé(s) dans {warnBanner.minJours} jour{warnBanner.minJours > 1 ? 's' : ''}.
+                {warnBanner.count} article(s) supprimé(s) dans {warnBanner.minJours} jour{warnBanner.minJours > 1 ? 's' : ''}.
               </p>
               <div style={{ display:'flex', gap:8 }}>
                 <button onClick={() => window.location.href='/abonnement'} style={{
@@ -2056,7 +2090,7 @@ export default function TableauDeBord() {
                 <div>
                   <p style={{ margin:0, fontSize:'.88rem', fontWeight:700, color:'var(--oda-slate)' }}>Plan gratuit actif</p>
                   <p style={{ margin:'2px 0 0', color:'var(--oda-muted)', fontSize:'.78rem' }}>
-                    {subBanner.quota.nombrePublies}/{subBanner.quota.limite} produits publiés
+                    {subBanner.quota.total}/{subBanner.quota.limite} articles (dont {subBanner.quota.nbServices} service{subBanner.quota.nbServices > 1 ? 's' : ''})
                   </p>
                 </div>
                 <button onClick={() => setShowSubBanner(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--oda-muted)', padding:0 }}>
@@ -2065,9 +2099,9 @@ export default function TableauDeBord() {
               </div>
               <div style={{ background:'var(--oda-border)', height:5, borderRadius:50, marginBottom:12, overflow:'hidden' }}>
                 <div style={{
-                  background: subBanner.quota.nombrePublies >= subBanner.quota.limite ? 'var(--oda-error)' : 'var(--oda-amber)',
+                  background: subBanner.quota.total >= subBanner.quota.limite ? 'var(--oda-error)' : 'var(--oda-amber)',
                   height:'100%',
-                  width:`${(subBanner.quota.nombrePublies/subBanner.quota.limite)*100}%`,
+                  width:`${(subBanner.quota.total/subBanner.quota.limite)*100}%`,
                   transition:'width .3s', borderRadius:50,
                 }}/>
               </div>
@@ -2090,7 +2124,7 @@ export default function TableauDeBord() {
                     </p>
                   </div>
                   <p style={{ margin:0, color:'var(--oda-muted)', fontSize:'.78rem' }}>
-                    {subBanner.quota.nombrePublies}/{subBanner.quota.limite} produits · {subBanner.joursRestants}j restant{subBanner.joursRestants > 1 ? 's' : ''}
+                    {subBanner.quota.total}/{subBanner.quota.limite} · {subBanner.joursRestants}j restant{subBanner.joursRestants > 1 ? 's' : ''}
                   </p>
                 </div>
                 <button onClick={() => setShowSubBanner(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--oda-muted)', padding:0 }}>
@@ -2101,7 +2135,7 @@ export default function TableauDeBord() {
                 <div style={{
                   background:'linear-gradient(90deg,var(--oda-success),#34D399)',
                   height:'100%',
-                  width:`${(subBanner.quota.nombrePublies/subBanner.quota.limite)*100}%`,
+                  width:`${(subBanner.quota.total/subBanner.quota.limite)*100}%`,
                   transition:'width .3s', borderRadius:50,
                 }}/>
               </div>

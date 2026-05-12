@@ -22,16 +22,16 @@ CREATE INDEX IF NOT EXISTS idx_shop_statuses_user
 ALTER TABLE shop_statuses ENABLE ROW LEVEL SECURITY;
 
 -- Lecture: tout le monde peut voir les status actifs
-CREATE POLICY "Tout le monde peut voir les status actifs"
+CREATE POLICY IF NOT EXISTS "Tout le monde peut voir les status actifs"
   ON shop_statuses FOR SELECT
   USING (expires_at > now());
 
 -- Insertion: authentifié seulement
-CREATE POLICY "Les vendeurs peuvent créer leurs status"
+CREATE POLICY IF NOT EXISTS "Les vendeurs peuvent créer leurs status"
   ON shop_statuses FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
 -- Suppression: propriétaire seulement
-CREATE POLICY "Les vendeurs peuvent supprimer leurs status"
+CREATE POLICY IF NOT EXISTS "Les vendeurs peuvent supprimer leurs status"
   ON shop_statuses FOR DELETE
   USING (auth.uid() = user_id);

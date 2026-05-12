@@ -247,16 +247,37 @@ const MKT_STYLES = `
   }
 
   /* ── HERO ── */
+  @keyframes mktFloat {
+    0%   { transform:translate(0,0) scale(1); opacity:.35; }
+    25%  { transform:translate(30px,-40px) scale(1.1); opacity:.5; }
+    50%  { transform:translate(-20px,-80px) scale(.9); opacity:.3; }
+    75%  { transform:translate(-50px,-30px) scale(1.05); opacity:.45; }
+    100% { transform:translate(0,0) scale(1); opacity:.35; }
+  }
+  @keyframes mktFloat2 {
+    0%   { transform:translate(0,0) scale(1); opacity:.3; }
+    33%  { transform:translate(-40px,30px) scale(1.15); opacity:.45; }
+    66%  { transform:translate(20px,50px) scale(.85); opacity:.25; }
+    100% { transform:translate(0,0) scale(1); opacity:.3; }
+  }
+  @keyframes mktFloat3 {
+    0%   { transform:translate(0,0) scale(1); opacity:.25; }
+    50%  { transform:translate(40px,-20px) scale(1.2); opacity:.4; }
+    100% { transform:translate(0,0) scale(1); opacity:.25; }
+  }
+  .mkt-hero-blur {
+    position:absolute; border-radius:50%; filter:blur(80px); pointer-events:none; z-index:0;
+  }
   .mkt-hero {
-    background:linear-gradient(135deg,#0a1628 0%,#0d2a54 45%,#1a1035 100%);
+    background:linear-gradient(135deg,#1e3355 0%,#2e4a7a 45%,#302060 100%);
     border-radius:20px; padding:28px 24px; color:white; margin-bottom:20px;
     position:relative; overflow:hidden;
   }
   .mkt-hero::before {
     content:''; position:absolute; inset:0;
-    background:radial-gradient(circle at 80% 20%,rgba(24,119,242,.35) 0%,transparent 60%),
-               radial-gradient(circle at 20% 80%,rgba(255,107,0,.2) 0%,transparent 50%);
-    pointer-events:none;
+    background:radial-gradient(circle at 80% 20%,rgba(24,119,242,.15) 0%,transparent 60%),
+               radial-gradient(circle at 20% 80%,rgba(255,107,0,.1) 0%,transparent 50%);
+    pointer-events:none; z-index:0;
   }
   .mkt-hero-grid { display:grid; grid-template-columns:1fr; gap:20px; position:relative; z-index:1; }
   @media(min-width:768px){ .mkt-hero-grid{ grid-template-columns:1fr auto; align-items:center; } }
@@ -705,6 +726,7 @@ const MKT_STYLES = `
   .mkt-service-body { padding:12px; }
   .mkt-service-title { font-weight:700; font-size:.85rem; margin-bottom:4px; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
   .mkt-service-desc { font-size:.75rem; color:var(--text-2); margin-bottom:8px; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .mkt-service-price { font-size:.85rem; font-weight:800; color:var(--primary); margin-bottom:2px; }
   .mkt-service-meta-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
   .mkt-service-whatsapp { font-size:.72rem; color:var(--success); font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:3px; }
   .mkt-service-whatsapp:hover { text-decoration:underline; }
@@ -752,6 +774,71 @@ const MKT_STYLES = `
   }
   .mkt-service-image-remove:active { transform:scale(.85); }
   .mkt-service-video-input { margin-bottom:16px; }
+  /* ── Wizard multi-étapes services ── */
+  .mkt-wizard-progress { display:flex; flex-direction:column; gap:4px; margin-bottom:18px; }
+  .mkt-wizard-prog-track { display:flex; align-items:center; }
+  .mkt-wizard-prog-circle {
+    width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:.7rem; font-weight:700; border:2px solid var(--border); background:white; color:var(--text-3);
+    cursor:default; transition:all .35s; flex-shrink:0;
+  }
+  .mkt-wizard-prog-circle.active { background:var(--success); border-color:var(--success); color:white; }
+  .mkt-wizard-prog-circle.done { background:var(--success); border-color:var(--success); color:white; cursor:pointer; }
+  .mkt-wizard-prog-line { height:2px; background:var(--border); margin:0 4px; transition:background .35s; }
+  .mkt-wizard-prog-line.done { background:var(--success); }
+  .mkt-wizard-prog-labels { display:flex; justify-content:space-between; padding:0 2px; }
+  .mkt-wizard-prog-label { font-size:.6rem; font-weight:600; color:var(--text-3); letter-spacing:.3px; text-transform:uppercase; }
+  .mkt-wizard-prog-label.active { color:var(--success); }
+  .mkt-wizard-track-wrap { overflow:hidden; margin-bottom:16px; }
+  .mkt-wizard-track { display:flex; transition:transform .4s cubic-bezier(.34,1.3,.64,1); }
+  .mkt-wizard-slide { min-width:100%; padding:4px 2px; }
+  .mkt-wizard-slide-icon { font-size:2rem; text-align:center; margin-bottom:6px; }
+  .mkt-wizard-slide-title { font-size:1rem; font-weight:700; text-align:center; margin-bottom:2px; }
+  .mkt-wizard-slide-desc { font-size:.75rem; color:var(--text-3); text-align:center; margin-bottom:16px; }
+  .mkt-wizard-input {
+    width:100%; padding:11px 14px; border-radius:12px; border:1.5px solid var(--border);
+    font-size:.85rem; font-family:'Poppins',sans-serif; outline:none; transition:border-color .2s; box-sizing:border-box;
+  }
+  .mkt-wizard-input:focus { border-color:var(--success); }
+  .mkt-wizard-textarea {
+    width:100%; padding:11px 14px; border-radius:12px; border:1.5px solid var(--border);
+    font-size:.85rem; font-family:'Poppins',sans-serif; outline:none; resize:vertical; min-height:70px;
+    transition:border-color .2s; box-sizing:border-box; margin-top:10px;
+  }
+  .mkt-wizard-textarea:focus { border-color:var(--success); }
+  .mkt-wizard-images { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .mkt-wizard-img-box {
+    aspect-ratio:1; border-radius:10px; border:2px dashed var(--border);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    background:#FAFAFA; transition:border-color .2s; position:relative; overflow:hidden;
+  }
+  .mkt-wizard-img-box.has { border-style:solid; border-color:var(--success); }
+  .mkt-wizard-img-box img { width:100%; height:100%; object-fit:cover; }
+  .mkt-wizard-img-remove {
+    position:absolute; top:3px; right:3px; width:18px; height:18px; border-radius:50%;
+    border:none; background:rgba(0,0,0,.5); color:white; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:.55rem;
+  }
+  .mkt-wizard-prix-wrap { position:relative; margin-top:10px; }
+  .mkt-wizard-prix-input { padding-right:60px !important; }
+  .mkt-wizard-prix-suffix { position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:.78rem; font-weight:600; color:var(--text-3); pointer-events:none; }
+  .mkt-wizard-summary { background:#F7F8FA; border-radius:14px; padding:14px 16px; }
+  .mkt-wizard-summary-item { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid var(--border); }
+  .mkt-wizard-summary-item:last-child { border-bottom:none; }
+  .mkt-wizard-summary-label { font-size:.75rem; font-weight:600; color:var(--text-3); }
+  .mkt-wizard-summary-value { font-size:.8rem; font-weight:600; color:var(--text-1); text-align:right; max-width:60%; word-break:break-word; }
+  .mkt-wizard-nav { display:flex; gap:10px; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:16px; margin-top:4px; }
+  .mkt-wizard-btn {
+    padding:10px 22px; border-radius:12px; border:none; font-size:.82rem; font-weight:700;
+    cursor:pointer; font-family:'Poppins',sans-serif; transition:all .15s;
+  }
+  .mkt-wizard-btn:disabled { opacity:.4; cursor:not-allowed; }
+  .mkt-wizard-next { background:var(--success); color:white; box-shadow:0 4px 12px rgba(52,199,89,.3); }
+  .mkt-wizard-next:active:not(:disabled) { transform:scale(.96); }
+  .mkt-wizard-prev { background:#F2F2F7; color:var(--text-1); }
+  .mkt-wizard-prev:active { transform:scale(.96); }
+  .mkt-wizard-submit { background:linear-gradient(135deg,var(--sb-orange),#FF9500); color:white; box-shadow:0 4px 12px rgba(255,107,0,.3); }
+  .mkt-wizard-submit:active:not(:disabled) { transform:scale(.96); }
   .mkt-status-preview {
     width:100%; aspect-ratio:9/16; border-radius:16px;
     background:var(--bg); background-size:cover; background-position:center;
@@ -1061,6 +1148,148 @@ function ProductSkeleton() {
   );
 }
 
+/* ══════════════════════════════════════════════════════════════
+   ServiceCarousel — Bannière professionnelle défilante
+══════════════════════════════════════════════════════════════ */
+function ServiceCarousel() {
+  const [idx, setIdx] = useState(0);
+  const timer = useRef(null);
+
+  const categories = [
+    { label:'Coiffure & Beauté',       desc:'Coupe, tresses, tresses, soins esthétiques', gradient:'linear-gradient(135deg,#f093fb,#f5576c)',
+      img:'https://images.unsplash.com/photo-C__JUIT_76E?w=400&h=300&fit=crop&q=80' },
+    { label:'Menuiserie & Ébénisterie', desc:'Meubles sur mesure, rénovation bois, agencement', gradient:'linear-gradient(135deg,#ffecd2,#fcb69f)',
+      img:'https://images.unsplash.com/photo-qj2pWULDYnE?w=400&h=300&fit=crop&q=80' },
+    { label:'Restauration & Traiteur',  desc:'Plats cuisinés, pâtisserie, services traiteur', gradient:'linear-gradient(135deg,#fa709a,#fee140)',
+      img:'https://images.unsplash.com/photo-gmQfS47FBOM?w=400&h=300&fit=crop&q=80' },
+    { label:'Services de Commission',   desc:'Courses, livraison, paiement de factures', gradient:'linear-gradient(135deg,#4facfe,#00f2fe)',
+      img:'https://images.unsplash.com/photo-WOsNSHiHV3k?w=400&h=300&fit=crop&q=80' },
+    { label:'Photographie & Vidéo',     desc:'Shooting, mariage, clips publicitaires', gradient:'linear-gradient(135deg,#667eea,#764ba2)',
+      img:'https://images.unsplash.com/photo-152brjBa5WA?w=400&h=300&fit=crop&q=80' },
+    { label:'Nettoyage & Entretien',    desc:'Ménage, désinfection, jardinage', gradient:'linear-gradient(135deg,#43e97b,#38f9d7)',
+      img:'https://images.unsplash.com/photo-o8Lyc1is43k?w=400&h=300&fit=crop&q=80' },
+    { label:'Santé & Bien-être',        desc:'Massage, spa, coaching sportif, nutrition', gradient:'linear-gradient(135deg,#a18cd1,#fbc2eb)',
+      img:'https://images.unsplash.com/photo-IYpn3d9O2y4?w=400&h=300&fit=crop&q=80' },
+    { label:'Réparation & Dépannage',   desc:'Électricité, plomberie, serrurerie', gradient:'linear-gradient(135deg,#fccb90,#d57eeb)',
+      img:'https://images.unsplash.com/photo-JCFzMlPNb9w?w=400&h=300&fit=crop&q=80' },
+    { label:'Transport & Livraison',    desc:'Courses, colis, déménagement', gradient:'linear-gradient(135deg,#89f7fe,#66a6ff)',
+      img:'https://images.unsplash.com/photo-NgH0WKgVR0A?w=400&h=300&fit=crop&q=80' },
+    { label:'Événementiel & Fêtes',     desc:'Mariage, anniversaire, cérémonies', gradient:'linear-gradient(135deg,#f5576c,#f093fb)',
+      img:'https://images.unsplash.com/photo-5zL2N_E_tkQ?w=400&h=300&fit=crop&q=80' },
+    { label:'Formation & Coaching',     desc:'Cours, mentorat, développement pro', gradient:'linear-gradient(135deg,#764ba2,#667eea)',
+      img:'https://images.unsplash.com/photo-KUzlAah2dog?w=400&h=300&fit=crop&q=80' },
+    { label:'Couture & Retouches',      desc:'Confection, réparation, styling', gradient:'linear-gradient(135deg,#e0c3fc,#8ec5fc)',
+      img:'https://images.unsplash.com/photo-pHFgs0oihAc?w=400&h=300&fit=crop&q=80' },
+    { label:'Agriculture & Élevage',    desc:'Produits frais, plants, animaux', gradient:'linear-gradient(135deg,#43e97b,#30B068)',
+      img:'https://images.unsplash.com/photo-9FdQND8pGDE?w=400&h=300&fit=crop&q=80' },
+    { label:'Informatique & Digital',   desc:'Dev web, maintenance, cybersécurité', gradient:'linear-gradient(135deg,#4facfe,#00f2fe)',
+      img:'https://images.unsplash.com/photo-APJkBRQJuj0?w=400&h=300&fit=crop&q=80' },
+    { label:'Immobilier & Logement',    desc:'Location, vente, gestion locative', gradient:'linear-gradient(135deg,#fa709a,#f5576c)',
+      img:'https://images.unsplash.com/photo-uByFsA048s0?w=400&h=300&fit=crop&q=80' },
+    { label:'Design & Création',        desc:'Logo, branding, motions graphiques', gradient:'linear-gradient(135deg,#a18cd1,#f093fb)',
+      img:'https://images.unsplash.com/photo-j60zrJOTn_o?w=400&h=300&fit=crop&q=80' },
+    { label:'Mécanique & Garage',       desc:'Réparation auto-moto, vidange, pneus', gradient:'linear-gradient(135deg,#fccb90,#fcb69f)',
+      img:'https://images.unsplash.com/photo-XP8o9_Arwqg?w=400&h=300&fit=crop&q=80' },
+  ];
+
+  useEffect(() => {
+    timer.current = setInterval(() => setIdx(prev => (prev + 1) % categories.length), 3200);
+    return () => clearInterval(timer.current);
+  }, []);
+
+  if (categories.length === 0) return null;
+
+  const current = categories[idx];
+
+  return (
+    <div style={{ borderRadius:16, overflow:'hidden', marginBottom:16, position:'relative', boxShadow:'0 8px 24px rgba(0,0,0,.12)' }}>
+      <div style={{ position:'relative', width:'100%', aspectRatio:'21/9', display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden',
+        background: current?.gradient, transition:'background .6s ease' }}>
+        {/* Cercles décoratifs */}
+        <div style={{ position:'absolute', top:'-20%', right:'-10%', width:'50%', aspectRatio:1, borderRadius:'50%', background:'rgba(255,255,255,.08)', pointerEvents:'none' }} />
+        <div style={{ position:'absolute', bottom:'-30%', left:'-15%', width:'60%', aspectRatio:1, borderRadius:'50%', background:'rgba(255,255,255,.06)', pointerEvents:'none' }} />
+        <div style={{ position:'relative', zIndex:1, textAlign:'center', color:'white', padding:'20px', width:'100%', boxSizing:'border-box' }}>
+          <div style={{ width:80, height:60, borderRadius:10, overflow:'hidden', margin:'0 auto 10px', boxShadow:'0 4px 12px rgba(0,0,0,.2)' }}>
+            <img src={current.img} alt={current.label} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}
+              onError={e => { e.target.style.display = 'none'; }} />
+          </div>
+          <div style={{ fontSize:'1.2rem', fontWeight:800, marginBottom:4, textShadow:'0 2px 8px rgba(0,0,0,.15)' }}>{current.label}</div>
+          <div style={{ fontSize:'.78rem', opacity:.85, fontWeight:500 }}>{current.desc}</div>
+        </div>
+      </div>
+      {/* Dots */}
+      <div style={{ position:'absolute', bottom:10, left:'50%', transform:'translateX(-50%)', display:'flex', gap:5, zIndex:2, maxWidth:'80%', flexWrap:'wrap', justifyContent:'center' }}>
+        {categories.map((_, i) => (
+          <button key={i} onClick={() => setIdx(i)}
+            style={{ width: i === idx ? 20 : 6, height:6, borderRadius:3, border:'none', cursor:'pointer',
+              background: i === idx ? 'white' : 'rgba(255,255,255,.45)', transition:'all .3s', padding:0 }} />
+        ))}
+      </div>
+      {/* Flèches */}
+      {categories.length > 1 && (
+        <>
+          <button onClick={() => setIdx(prev => (prev - 1 + categories.length) % categories.length)}
+            style={{ position:'absolute', left:8, top:'50%', transform:'translateY(-50%)', width:32, height:32, borderRadius:'50%', background:'rgba(255,255,255,.2)', backdropFilter:'blur(6px)', border:'none', color:'white', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.2rem', zIndex:2, transition:'background .15s', lineHeight:1 }}>
+            ‹
+          </button>
+          <button onClick={() => setIdx(prev => (prev + 1) % categories.length)}
+            style={{ position:'absolute', right:8, top:'50%', transform:'translateY(-50%)', width:32, height:32, borderRadius:'50%', background:'rgba(255,255,255,.2)', backdropFilter:'blur(6px)', border:'none', color:'white', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.2rem', zIndex:2, transition:'background .15s', lineHeight:1 }}>
+            ›
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ServiceQuotaWarning — Indicateur de quota discret
+══════════════════════════════════════════════════════════════ */
+function ServiceQuotaWarning({ user, services, router }) {
+  const [quota, setQuota] = useState(null);
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const sb = getSupabase();
+        const { data: abo } = await sb.from('abonnements').select('*').eq('user_id', user.id).single();
+        let limite = 10;
+        if (abo && new Date(abo.date_expiration) > new Date()) limite = abo.limite_produits;
+        const { data: produits } = await sb.from('produits').select('id').eq('user_id', user.id).eq('statut', 'published');
+        const nbProduits = produits?.length || 0;
+        const nbServices = services?.length || 0;
+        const total = nbProduits + nbServices;
+        if (!cancelled) setQuota({ total, limite, restant: limite - total, nbProduits, nbServices });
+      } catch (e) { console.error(e); }
+    })();
+    return () => { cancelled = true; };
+  }, [user, services]);
+  if (!quota || quota.restant > 5 || quota.restant < 0) return null;
+  const pct = (quota.total / quota.limite) * 100;
+  return (
+    <div style={{ marginBottom:14, padding:'10px 14px', borderRadius:10, background:'rgba(255,149,0,.08)', border:'1px solid rgba(255,149,0,.2)', display:'flex', alignItems:'center', gap:10, fontSize:'.78rem' }}>
+      <span style={{ fontSize:'1.1rem', flexShrink:0 }}>{quota.restant === 0 ? '🔴' : '🟠'}</span>
+      <div style={{ flex:1 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
+          <span style={{ fontWeight:600, color:'#8B5E00' }}>
+            {quota.restant === 0 ? 'Quota atteint' : `Plus que ${quota.restant} emplacement${quota.restant > 1 ? 's' : ''}`}
+          </span>
+          <span style={{ fontWeight:700, color:'#8B5E00' }}>{quota.total}/{quota.limite}</span>
+        </div>
+        <div style={{ height:4, borderRadius:4, background:'rgba(255,149,0,.15)', overflow:'hidden' }}>
+          <div style={{ height:'100%', width:`${Math.min(pct,100)}%`, background: quota.restant === 0 ? '#FF3B30' : '#FF9500', borderRadius:4, transition:'width .4s' }} />
+        </div>
+      </div>
+      {quota.restant === 0 && (
+        <button onClick={() => router.push('/abonnement')} style={{ padding:'6px 12px', background:'#FF9500', color:'white', border:'none', borderRadius:8, fontWeight:600, fontSize:'.72rem', cursor:'pointer', whiteSpace:'nowrap', fontFamily:'Poppins,sans-serif' }}>
+          Abonnement
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ══════════════════════════════════════════════════════════════
 // COMPOSANT PRINCIPAL
 // ══════════════════════════════════════════════════════════════
@@ -1138,6 +1367,8 @@ export default function OdaMarketingCenter() {
   const [serviceVideoUrl, setServiceVideoUrl] = useState('');
   const [serviceUploading, setServiceUploading] = useState(false);
   const [editingService, setEditingService] = useState(null);
+  const [serviceStep, setServiceStep] = useState(1);
+  const [servicePrix, setServicePrix] = useState('');
   const trimmerRef = useRef(null);
   const framesCache = useRef(null);
 
@@ -1302,22 +1533,51 @@ export default function OdaMarketingCenter() {
     return () => { cancelled = true; };
   }, [user]);
 
+  // ─── Vérification quota avant création service ──
+  async function verifierQuotaAvantService() {
+    try {
+      const { data: abo } = await sb().from('abonnements').select('*').eq('user_id', user.id).single();
+      let limite = 10;
+      if (abo && new Date(abo.date_expiration) > new Date()) limite = abo.limite_produits;
+      const [produits, servs] = await Promise.all([
+        sb().from('produits').select('id').eq('user_id', user.id).eq('statut', 'published'),
+        sb().from('services').select('id').eq('user_id', user.id).eq('statut', 'actif'),
+      ]);
+      const total = (produits.data?.length || 0) + (servs.data?.length || 0);
+      const restant = limite - total;
+      if (total >= limite) {
+        toast(`⚠️ Quota atteint : ${total}/${limite} (produits + services). Abonnez-vous pour ajouter plus.`, 'warning');
+        setTimeout(() => router.push('/abonnement'), 1500);
+        return false;
+      }
+      if (restant <= 2) toast(`💡 Plus que ${restant} emplacement${restant > 1 ? 's' : ''} disponible${restant > 1 ? 's' : ''} sur ${limite}`, 'info');
+      return true;
+    } catch (e) {
+      console.error('Erreur quota service:', e);
+      return true;
+    }
+  }
+
   async function handleCreateService() {
     if (serviceUploading) return;
     if (!serviceForm.nom.trim()) { toast('⚠️ Le nom du service est requis', 'warning'); return; }
-    if (serviceImages.length === 0 && !editingService) { toast('⚠️ Ajoutez au moins une image', 'warning'); return; }
-    setServiceUploading(true);
+    if (serviceImages.filter(Boolean).length === 0 && !editingService) { toast('⚠️ Ajoutez au moins une image', 'warning'); return; }
+    // Vérifier quota pour les nouveaux services
+    if (!editingService) {
+      const ok = await verifierQuotaAvantService();
+      if (!ok) { setServiceUploading(false); return; }
+    }
     try {
       let uploadedImages = editingService ? [...(editingService.images || [])] : [];
-      // Uploader les nouvelles images
-      for (const file of serviceImages) {
+      // Uploader les nouvelles images (filtrer les null des cases vidées)
+      for (const file of serviceImages.filter(Boolean)) {
         const fd = new FormData();
         fd.append('file', file);
         fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
         fd.append('folder', `services/${user.id}`);
         fd.append('quality', 'auto:good');
         const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
-        if (!resp.ok) throw new Error('Upload image échoué');
+        if (!resp.ok) { const errData = await resp.json().catch(() => ({})); throw new Error(errData?.error?.message || `Cloudinary erreur ${resp.status}`); }
         const result = await resp.json();
         uploadedImages.push(result.secure_url);
         // Limiter à 4 images
@@ -1331,6 +1591,7 @@ export default function OdaMarketingCenter() {
         lieu: serviceForm.lieu.trim(),
         images: uploadedImages,
         video_url: serviceVideoUrl.trim(),
+        prix: servicePrix ? Number(servicePrix) : null,
       };
 
       if (editingService) {
@@ -1361,6 +1622,8 @@ export default function OdaMarketingCenter() {
     setServiceImages([]);
     setServiceVideoUrl('');
     setEditingService(null);
+    setServiceStep(1);
+    setServicePrix('');
   }
 
   async function handleDeleteService(id) {
@@ -1383,8 +1646,12 @@ export default function OdaMarketingCenter() {
       lieu: svc.lieu || '',
     });
     setServiceVideoUrl(svc.video_url || '');
+    setServicePrix(svc.prix || '');
+    setServiceStep(1);
     setShowCreateService(true);
   }
+
+  function stepLabel(step) { return ['','Nommez et décrivez votre service','Ajoutez photos et vidéo','WhatsApp, lieu et prix','Vérifiez avant publication'][step] || ''; }
 
   async function handleCreateStatus() {
     if (!statusFile || statusUploading) return;
@@ -1731,6 +1998,54 @@ export default function OdaMarketingCenter() {
   }
 
   // ────────────────────────────────────────────────────────────
+  // CHARGEMENT / SAUVEGARDE connexions plateformes (DB)
+  // ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!user) return;
+    chargerConnexions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  async function chargerConnexions() {
+    try {
+      const { data, error } = await sb()
+        .from('meta_connexions')
+        .select('platform_status, fb_user_id, fb_user_name')
+        .eq('user_id', user.id)
+        .single();
+      if (error && error.code !== 'PGRST116') throw error;
+      if (data?.platform_status) {
+        setMetaStatus(prev => ({ ...prev, ...data.platform_status }));
+      }
+      if (data?.fb_user_id && data?.fb_user_name) {
+        setMetaAccessToken(data.fb_user_id);
+      }
+    } catch (e) {
+      console.error('Erreur chargement connexions:', e);
+    }
+  }
+
+  async function sauvegarderConnexions(status) {
+    try {
+      await sb().from('meta_connexions').upsert({
+        user_id:         user.id,
+        platform_status: status,
+        updated_at:      new Date().toISOString(),
+      }, { onConflict: 'user_id' });
+    } catch (e) {
+      console.error('Erreur sauvegarde connexions:', e);
+    }
+  }
+
+  // Sauvegarder à chaque changement de metaStatus (debounce)
+  useEffect(() => {
+    if (!user) return;
+    const timer = setTimeout(() => sauvegarderConnexions(metaStatus), 500);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metaStatus]);
+
+  // ────────────────────────────────────────────────────────────
   // CONNEXION META FACEBOOK (OAuth réel via FB SDK)
   // ────────────────────────────────────────────────────────────
   function handleMetaConnect(key) {
@@ -1809,11 +2124,13 @@ export default function OdaMarketingCenter() {
   async function sauvegarderTokenMeta(token, fbId, fbName) {
     try {
       await sb().from('meta_connexions').upsert({
-        user_id:      user.id,
-        fb_user_id:   fbId,
-        fb_user_name: fbName,
-        access_token: token,
-        connected_at: new Date().toISOString(),
+        user_id:         user.id,
+        fb_user_id:      fbId,
+        fb_user_name:    fbName,
+        access_token:    token,
+        platform_status: metaStatus,
+        connected_at:    new Date().toISOString(),
+        updated_at:      new Date().toISOString(),
       }, { onConflict: 'user_id' });
     } catch (e) {
       console.error('Erreur sauvegarde token Meta:', e);
@@ -2041,6 +2358,12 @@ export default function OdaMarketingCenter() {
         ══════════════════════════════════════ */}
         {(!isMobile || !activeSection) && (
           <div className="mkt-hero">
+            {/* Boules floues animées */}
+            <div className="mkt-hero-blur" style={{ width:220, height:220, background:'rgba(24,119,242,.45)', top:'-15%', right:'5%', animation:'mktFloat 8s ease-in-out infinite' }} />
+            <div className="mkt-hero-blur" style={{ width:160, height:160, background:'rgba(255,107,0,.4)', bottom:'-10%', left:'8%', animation:'mktFloat2 10s ease-in-out infinite' }} />
+            <div className="mkt-hero-blur" style={{ width:130, height:130, background:'rgba(52,199,89,.35)', top:'25%', left:'45%', animation:'mktFloat3 7s ease-in-out infinite' }} />
+            <div className="mkt-hero-blur" style={{ width:180, height:180, background:'rgba(156,39,176,.35)', top:'-20%', left:'25%', animation:'mktFloat2 12s ease-in-out infinite 1s' }} />
+            <div className="mkt-hero-blur" style={{ width:110, height:110, background:'rgba(255,193,7,.3)', bottom:'15%', right:'22%', animation:'mktFloat 9s ease-in-out infinite 2s' }} />
             <div className="mkt-hero-grid">
               <div>
                 <h1 className="mkt-hero-title">ODA Marketing Center {iconSvg('🚀', 22)}</h1>
@@ -2067,9 +2390,6 @@ export default function OdaMarketingCenter() {
                       <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                     </svg>
                     {metaStatus.facebook ? '✓ Meta connecté' : 'Se connecter Meta'}
-                  </button>
-                  <button className="mkt-btn-create" onClick={() => router.push('/dashboard/campagnes/new')}>
-                    {iconSvg('✏️', 16)} Créer une campagne
                   </button>
                   <button
                     className="mkt-btn-sb"
@@ -2346,8 +2666,8 @@ export default function OdaMarketingCenter() {
                       </div>
                     </div>
                   ))}
-                </div>
-                <div className="mkt-card">
+            </div>
+            <div className="mkt-card" style={{ marginTop:14 }}>
                   <div style={{ fontSize:'.9rem', fontWeight:700, marginBottom:14 }}>🏆 Produits les plus performants</div>
                   {topProducts.length > 0 ? (
                     <div className="mkt-top-products">
@@ -2606,6 +2926,8 @@ export default function OdaMarketingCenter() {
                 + Ajouter un service
               </button>
             </div>
+            <ServiceCarousel />
+            <ServiceQuotaWarning user={user} services={services} router={router} />
             <div className="mkt-card">
               {loadingServices ? (
                 <div style={{ display:'flex', gap:12, padding:'16px 0', flexWrap:'wrap' }}>
@@ -2640,6 +2962,7 @@ export default function OdaMarketingCenter() {
                       </div>
                       <div className="mkt-service-body">
                         <div className="mkt-service-title">{svc.nom}</div>
+                        {svc.prix && <div className="mkt-service-price">{Number(svc.prix).toLocaleString('fr-FR')} FCFA</div>}
                         {svc.description && <div className="mkt-service-desc">{svc.description}</div>}
                         <div className="mkt-service-meta-row">
                           {svc.whatsapp && (
@@ -3128,90 +3451,184 @@ export default function OdaMarketingCenter() {
         </div>
       )}
 
-      {/* ─── MODAL CRÉATION SERVICE ─── */}
+      {/* ─── MODAL CRÉATION SERVICE — Wizard multi-étapes ─── */}
       {showCreateService && (
         <div className="mkt-service-create-modal" onClick={e => { if (e.target === e.currentTarget) { setShowCreateService(false); resetServiceForm(); } }}>
           <div className="mkt-service-create-sheet" onClick={e => e.stopPropagation()}>
-            <div className="mkt-service-create-title">{editingService ? '✏️ Modifier le service' : '🛎️ Nouveau service'}</div>
-            <div className="mkt-service-create-sub">{editingService ? 'Modifiez les informations ci-dessous' : 'Créez un service pour attirer des clients'}</div>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+              <div className="mkt-service-create-title" style={{ margin:0 }}>
+                {editingService ? '✏️ Modifier' : '🛎️ Nouveau service'}
+              </div>
+              {!editingService && (
+                <div style={{ fontSize:'.7rem', color:'var(--text-3)', fontWeight:600 }}>
+                  {serviceStep}/4
+                </div>
+              )}
+            </div>
+            <div className="mkt-service-create-sub" style={{ marginBottom:14 }}>
+              {editingService ? 'Modifiez les informations ci-dessous' : stepLabel(serviceStep)}
+            </div>
 
-            <div style={{ marginBottom:16 }}>
-              <label style={{ fontSize:'.75rem', fontWeight:600, color:'var(--text-2)', display:'block', marginBottom:6 }}>Photos (max 4)</label>
-              <div className="mkt-service-images-grid">
-                {[0,1,2,3].map(i => {
-                  const imgFile = serviceImages[i] || null;
-                  const existingImg = editingService && editingService.images && editingService.images[i] && !imgFile ? editingService.images[i] : null;
-                  const hasImg = !!imgFile || !!existingImg;
-                  return (
-                    <div key={i} className={`mkt-service-image-box${hasImg ? ' has-img' : ''}`}
-                      onClick={() => {
-                        if (!imgFile && !existingImg) {
-                          const input = document.createElement('input');
-                          input.type = 'file';
-                          input.accept = 'image/*';
-                          input.onchange = e => {
-                            const file = e.target.files[0];
-                            if (file) {
-                              const newImgs = [...serviceImages];
-                              newImgs[i] = file;
-                              setServiceImages(newImgs);
-                            }
-                          };
-                          input.click();
-                        }
-                      }}
-                    >
-                      {imgFile ? (
-                        <><img src={URL.createObjectURL(imgFile)} alt="" /><button className="mkt-service-image-remove" onClick={e => { e.stopPropagation(); const newImgs = [...serviceImages]; newImgs[i] = null; setServiceImages(newImgs); }}>✕</button></>
-                      ) : existingImg ? (
-                        <><img src={existingImg} alt="" /><button className="mkt-service-image-remove" onClick={e => { e.stopPropagation(); if (editingService) { const imgs = [...(editingService.images || [])]; imgs.splice(i, 1); setEditingService({...editingService, images: imgs}); } }}>✕</button></>
-                      ) : (
-                        '+'
-                      )}
+            {/* ── Progression ── */}
+            {!editingService && (
+              <div className="mkt-wizard-progress">
+                {[1,2,3,4].map((s, i) => (
+                  <div key={s} className="mkt-wizard-prog-track" style={{ flex: i < 3 ? 1 : undefined }}>
+                    <div className={`mkt-wizard-prog-circle${serviceStep > s ? ' done' : ''}${serviceStep === s ? ' active' : ''}`}
+                      onClick={() => s < serviceStep && setServiceStep(s)}>
+                      {serviceStep > s ? '✓' : s}
                     </div>
-                  );
-                })}
+                    {i < 3 && <div className={`mkt-wizard-prog-line${serviceStep > s ? ' done' : ''}`} />}
+                  </div>
+                ))}
+                <div className="mkt-wizard-prog-labels">
+                  {['Service','Visuels','Coords','Confirmer'].map((l, i) => (
+                    <span key={l} className={`mkt-wizard-prog-label${serviceStep === i+1 ? ' active' : ''}`}>{l}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── Slides ── */}
+            <div className="mkt-wizard-track-wrap">
+              <div className="mkt-wizard-track" style={{ transform: `translateX(-${(serviceStep - 1) * 100}%)` }}>
+                {/* Slide 1 : Nom + Description */}
+                <div className="mkt-wizard-slide">
+                  <div className="mkt-wizard-slide-icon">📋</div>
+                  <div className="mkt-wizard-slide-title">Quel est votre service ?</div>
+                  <div className="mkt-wizard-slide-desc">Donnez un nom clair et une description détaillée</div>
+                  <input className="mkt-wizard-input" placeholder="Nom du service *" value={serviceForm.nom}
+                    onChange={e => setServiceForm(p => ({...p, nom: e.target.value}))}
+                    onKeyDown={e => e.key === 'Enter' && serviceForm.nom.trim() && setServiceStep(2)} />
+                  <textarea className="mkt-wizard-textarea" placeholder="Description (optionnelle)" value={serviceForm.description}
+                    onChange={e => setServiceForm(p => ({...p, description: e.target.value}))} rows={3} />
+                </div>
+
+                {/* Slide 2 : Visuels */}
+                <div className="mkt-wizard-slide">
+                  <div className="mkt-wizard-slide-icon">📸</div>
+                  <div className="mkt-wizard-slide-title">Ajoutez des visuels</div>
+                  <div className="mkt-wizard-slide-desc">Importez jusqu'à 4 photos. Vidéo par lien uniquement.</div>
+                  <div className="mkt-wizard-images">
+                    {[0,1,2,3].map(i => {
+                      const imgFile = serviceImages[i] || null;
+                      const existingImg = editingService?.images?.[i] && !imgFile ? editingService.images[i] : null;
+                      const hasImg = !!imgFile || !!existingImg;
+                      return (
+                        <div key={i} className={`mkt-wizard-img-box${hasImg ? ' has' : ''}`} onClick={() => {
+                          if (!imgFile && !existingImg) {
+                            const inp = document.createElement('input');
+                            inp.type = 'file'; inp.accept = 'image/*';
+                            inp.onchange = e => { const f = e.target.files?.[0]; if (f) { setServiceImages(prev => { const a = [...prev]; a[i] = f; return a; }); } };
+                            inp.click();
+                          }
+                        }}>
+                          {imgFile ? (
+                            <><img src={URL.createObjectURL(imgFile)} alt="" />
+                              <button className="mkt-wizard-img-remove" onClick={e => { e.stopPropagation(); const a = [...serviceImages]; a[i] = null; setServiceImages(a); }}>✕</button></>
+                          ) : existingImg ? (
+                            <><img src={existingImg} alt="" />
+                              <button className="mkt-wizard-img-remove" onClick={e => { e.stopPropagation(); const imgs = [...(editingService.images || [])]; imgs.splice(i,1); setEditingService({...editingService, images:imgs}); }}>✕</button></>
+                          ) : <span style={{ fontSize:'1.6rem', color:'#ccc' }}>+</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <input className="mkt-wizard-input" placeholder="Lien vidéo (optionnel)" value={serviceVideoUrl}
+                    onChange={e => setServiceVideoUrl(e.target.value)} style={{ marginTop:12 }} />
+                </div>
+
+                {/* Slide 3 : WhatsApp + Lieu + Prix */}
+                <div className="mkt-wizard-slide">
+                  <div className="mkt-wizard-slide-icon">📍</div>
+                  <div className="mkt-wizard-slide-title">Où vous trouver ?</div>
+                  <div className="mkt-wizard-slide-desc">Laissez vos coordonnées pour que les clients vous contactent</div>
+                  <input className="mkt-wizard-input" placeholder="WhatsApp *" value={serviceForm.whatsapp}
+                    onChange={e => setServiceForm(p => ({...p, whatsapp: e.target.value}))}
+                    onKeyDown={e => e.key === 'Enter' && setServiceStep(4)} />
+                  <input className="mkt-wizard-input" placeholder="Lieu (ex: Yaoundé)" value={serviceForm.lieu}
+                    onChange={e => setServiceForm(p => ({...p, lieu: e.target.value}))} style={{ marginTop:10 }} />
+                  <div className="mkt-wizard-prix-wrap">
+                    <input className="mkt-wizard-input mkt-wizard-prix-input" type="number" placeholder="Prix (optionnel)" value={servicePrix}
+                      onChange={e => setServicePrix(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && setServiceStep(4)} />
+                    <span className="mkt-wizard-prix-suffix">FCFA</span>
+                  </div>
+                </div>
+
+                {/* Slide 4 : Confirmation */}
+                <div className="mkt-wizard-slide">
+                  <div className="mkt-wizard-slide-icon">✅</div>
+                  <div className="mkt-wizard-slide-title">Confirmation</div>
+                  <div className="mkt-wizard-slide-desc">Vérifiez les informations avant de publier</div>
+                  <div className="mkt-wizard-summary">
+                    <div className="mkt-wizard-summary-item">
+                      <span className="mkt-wizard-summary-label">Nom</span>
+                      <span className="mkt-wizard-summary-value">{serviceForm.nom || '—'}</span>
+                    </div>
+                    {serviceForm.description && (
+                      <div className="mkt-wizard-summary-item">
+                        <span className="mkt-wizard-summary-label">Description</span>
+                        <span className="mkt-wizard-summary-value">{serviceForm.description}</span>
+                      </div>
+                    )}
+                    <div className="mkt-wizard-summary-item">
+                      <span className="mkt-wizard-summary-label">Images</span>
+                      <span className="mkt-wizard-summary-value">{serviceImages.filter(Boolean).length + (editingService?.images?.length || 0)} uploadée(s)</span>
+                    </div>
+                    <div className="mkt-wizard-summary-item">
+                      <span className="mkt-wizard-summary-label">WhatsApp</span>
+                      <span className="mkt-wizard-summary-value">{serviceForm.whatsapp || '—'}</span>
+                    </div>
+                    <div className="mkt-wizard-summary-item">
+                      <span className="mkt-wizard-summary-label">Lieu</span>
+                      <span className="mkt-wizard-summary-value">{serviceForm.lieu || '—'}</span>
+                    </div>
+                    {servicePrix && (
+                      <div className="mkt-wizard-summary-item">
+                        <span className="mkt-wizard-summary-label">Prix</span>
+                        <span className="mkt-wizard-summary-value">{Number(servicePrix).toLocaleString('fr-FR')} FCFA</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div style={{ marginBottom:14 }}>
-              <label style={{ fontSize:'.75rem', fontWeight:600, color:'var(--text-2)', display:'block', marginBottom:6 }}>Lien vidéo (optionnel)</label>
-              <input className="mkt-service-input mkt-service-video-input" placeholder="https://youtube.com/..." value={serviceVideoUrl} onChange={e => setServiceVideoUrl(e.target.value)} />
-            </div>
-
-            <div style={{ marginBottom:14 }}>
-              <label style={{ fontSize:'.75rem', fontWeight:600, color:'var(--text-2)', display:'block', marginBottom:6 }}>Nom du service *</label>
-              <input className="mkt-service-input" placeholder="ex: Plomberie Express" value={serviceForm.nom} onChange={e => setServiceForm(p => ({...p, nom: e.target.value}))} />
-            </div>
-
-            <div style={{ marginBottom:14 }}>
-              <label style={{ fontSize:'.75rem', fontWeight:600, color:'var(--text-2)', display:'block', marginBottom:6 }}>Description</label>
-              <textarea className="mkt-service-textarea" placeholder="Décrivez votre service..." value={serviceForm.description} onChange={e => setServiceForm(p => ({...p, description: e.target.value}))} />
-            </div>
-
-            <div style={{ marginBottom:14 }}>
-              <label style={{ fontSize:'.75rem', fontWeight:600, color:'var(--text-2)', display:'block', marginBottom:6 }}>WhatsApp</label>
-              <input className="mkt-service-input" placeholder="+237691234567" value={serviceForm.whatsapp} onChange={e => setServiceForm(p => ({...p, whatsapp: e.target.value}))} />
-            </div>
-
-            <div style={{ marginBottom:20 }}>
-              <label style={{ fontSize:'.75rem', fontWeight:600, color:'var(--text-2)', display:'block', marginBottom:6 }}>Lieu</label>
-              <input className="mkt-service-input" placeholder="ex: Yaoundé, Cameroun" value={serviceForm.lieu} onChange={e => setServiceForm(p => ({...p, lieu: e.target.value}))} />
-            </div>
-
-            <button className="mkt-modal-cta" onClick={handleCreateService} disabled={serviceUploading}>
-              {serviceUploading ? (
-                <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:5}} className="mkt-spinner">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg> {editingService ? 'Modification...' : 'Création...'}</>
+            {/* ── Navigation ── */}
+            <div className="mkt-wizard-nav">
+              {editingService ? (
+                <>
+                  <button className="mkt-modal-cancel" onClick={() => { setShowCreateService(false); resetServiceForm(); }}>Annuler</button>
+                  <button className="mkt-modal-cta" onClick={handleCreateService} disabled={serviceUploading}>
+                    {serviceUploading ? 'Modification...' : '💾 Enregistrer'}
+                  </button>
+                </>
+              ) : serviceStep > 1 ? (
+                <button className="mkt-wizard-btn mkt-wizard-prev" onClick={() => setServiceStep(s => s - 1)}>
+                  ← Retour
+                </button>
               ) : (
-                editingService ? '💾 Enregistrer les modifications' : '✅ Créer le service'
+                <div />
               )}
-            </button>
-            <button className="mkt-modal-cancel" onClick={() => { setShowCreateService(false); resetServiceForm(); }}>
-              Annuler
-            </button>
+              {!editingService && (
+                serviceStep < 4 ? (
+                  <button className="mkt-wizard-btn mkt-wizard-next"
+                    onClick={() => { const next = serviceStep + 1; if (next <= 4) setServiceStep(next); }}
+                    disabled={serviceStep === 1 && !serviceForm.nom.trim()}>
+                    Suivant →
+                  </button>
+                ) : (
+                  <button className="mkt-wizard-btn mkt-wizard-submit" onClick={handleCreateService} disabled={serviceUploading}>
+                    {serviceUploading ? (
+                      <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mkt-spinner" style={{verticalAlign:'middle',marginRight:4}}>
+                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                      </svg> Publication...</>
+                    ) : editingService ? '💾 Enregistrer' : '✅ Publier le service'}
+                  </button>
+                )
+              )}
+            </div>
           </div>
         </div>
       )}

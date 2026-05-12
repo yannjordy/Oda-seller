@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS services (
   images text[] DEFAULT '{}',
   video_url text DEFAULT '',
   statut text DEFAULT 'actif',
+  prix numeric(12,0) DEFAULT NULL,
   created_at timestamptz DEFAULT now()
 );
 
@@ -22,20 +23,20 @@ CREATE INDEX IF NOT EXISTS idx_services_user ON services (user_id, created_at DE
 ALTER TABLE services ENABLE ROW LEVEL SECURITY;
 
 -- Tout le monde peut voir les services actifs
-CREATE POLICY "Lecture publique des services"
+CREATE POLICY IF NOT EXISTS "Lecture publique des services"
   ON services FOR SELECT
   USING (statut = 'actif');
 
 -- Seul le vendeur peut créer ses services
-CREATE POLICY "Les vendeurs peuvent créer leurs services"
+CREATE POLICY IF NOT EXISTS "Les vendeurs peuvent créer leurs services"
   ON services FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
 -- Seul le propriétaire peut modifier/supprimer
-CREATE POLICY "Les vendeurs peuvent modifier leurs services"
+CREATE POLICY IF NOT EXISTS "Les vendeurs peuvent modifier leurs services"
   ON services FOR UPDATE
   USING (auth.uid() = user_id);
 
-CREATE POLICY "Les vendeurs peuvent supprimer leurs services"
+CREATE POLICY IF NOT EXISTS "Les vendeurs peuvent supprimer leurs services"
   ON services FOR DELETE
   USING (auth.uid() = user_id);
