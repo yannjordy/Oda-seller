@@ -91,6 +91,7 @@ const MOBILE_NAV_SECTIONS = [
   { key:'preferences', icon:'⚙️', label:'Préférences\nPublicitaires',      color:'rgba(0,122,255,.12)',   accent:'#007AFF' },
   { key:'interne',     icon:'🏪', label:'Publicité Interne\nODA Marketplace', color:'rgba(255,107,0,.12)', accent:'#FF6B00' },
   { key:'storie',      icon:'⭕',  label:'Stories 24h',   color:'rgba(255,107,0,.12)', accent:'#FF9500' },
+  { key:'services',    icon:'🛎️', label:'Services',      color:'rgba(52,199,89,.12)',  accent:'#34C759' },
 ];
 
 // ─── SVG Icon helper ────────────────────────────────────────────
@@ -687,6 +688,70 @@ const MKT_STYLES = `
   .mkt-status-comment-date { font-size:.65rem; font-weight:400; color:var(--text-3); margin-left:4px; }
   .mkt-status-comment-text { font-size:.78rem; color:var(--text-2); margin-top:2px; line-height:1.4; word-wrap:break-word; }
   .mkt-status-comment-replies { margin-top:6px; }
+  .mkt-services-section .mkt-card { min-height:200px; }
+  .mkt-services-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+  @media(min-width:600px){ .mkt-services-grid{ grid-template-columns:repeat(3,1fr); } }
+  @media(min-width:900px){ .mkt-services-grid{ grid-template-columns:repeat(4,1fr); } }
+  .mkt-service-card {
+    background:var(--card-bg); border-radius:16px; overflow:hidden;
+    border:.5px solid var(--border); box-shadow:var(--shadow-sm);
+    transition:transform .2s,box-shadow .2s; position:relative;
+  }
+  .mkt-service-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-md); }
+  .mkt-service-image-wrap { position:relative; width:100%; aspect-ratio:16/10; overflow:hidden; background:#F2F2F7; }
+  .mkt-service-img { width:100%; height:100%; object-fit:cover; display:block; }
+  .mkt-service-img-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:2.5rem; color:#ccc; }
+  .mkt-service-multi-badge { position:absolute; top:8px; right:8px; background:rgba(0,0,0,.5); color:white; font-size:.6rem; font-weight:700; padding:2px 7px; border-radius:8px; backdrop-filter:blur(4px); }
+  .mkt-service-body { padding:12px; }
+  .mkt-service-title { font-weight:700; font-size:.85rem; margin-bottom:4px; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .mkt-service-desc { font-size:.75rem; color:var(--text-2); margin-bottom:8px; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .mkt-service-meta-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+  .mkt-service-whatsapp { font-size:.72rem; color:var(--success); font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:3px; }
+  .mkt-service-whatsapp:hover { text-decoration:underline; }
+  .mkt-service-lieu { font-size:.7rem; color:var(--text-3); display:inline-flex; align-items:center; gap:3px; }
+  .mkt-service-thumbs { display:flex; gap:4px; flex-wrap:wrap; }
+  .mkt-service-thumb { width:28px; height:28px; border-radius:6px; object-fit:cover; border:1px solid var(--border); }
+  .mkt-service-thumb-more { width:28px; height:28px; border-radius:6px; background:#F2F2F7; display:flex; align-items:center; justify-content:center; font-size:.6rem; font-weight:700; color:var(--text-3); }
+  .mkt-service-actions { position:absolute; top:8px; left:8px; display:flex; gap:6px; opacity:0; transition:opacity .2s; }
+  .mkt-service-card:hover .mkt-service-actions { opacity:1; }
+  .mkt-service-btn { width:28px; height:28px; border-radius:50%; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:.7rem; background:rgba(0,0,0,.5); backdrop-filter:blur(4px); transition:transform .15s; }
+  .mkt-service-btn:active { transform:scale(.85); }
+  .mkt-service-edit { color:white; }
+  .mkt-service-delete { color:#FF3B30; }
+  .mkt-service-create-modal {
+    position:fixed; inset:0; z-index:10000;
+    background:rgba(0,0,0,.6); backdrop-filter:blur(8px);
+    display:flex; align-items:center; justify-content:center;
+    animation:mktFadeIn .2s ease; padding:16px;
+  }
+  .mkt-service-create-sheet {
+    background:white; border-radius:20px; width:100%; max-width:440px;
+    max-height:90vh; overflow-y:auto; padding:24px;
+    animation:mktSlideUp .32s cubic-bezier(.34,1.3,.64,1);
+  }
+  .mkt-service-create-title { font-size:1.05rem; font-weight:800; margin-bottom:4px; }
+  .mkt-service-create-sub { font-size:.76rem; color:var(--text-3); margin-bottom:18px; }
+  .mkt-service-input { width:100%; padding:11px 14px; border-radius:12px; border:1.5px solid var(--border); font-size:.85rem; font-family:'Poppins',sans-serif; outline:none; transition:border-color .15s; box-sizing:border-box; }
+  .mkt-service-input:focus { border-color:var(--success); }
+  .mkt-service-textarea { width:100%; padding:11px 14px; border-radius:12px; border:1.5px solid var(--border); font-size:.85rem; font-family:'Poppins',sans-serif; outline:none; resize:vertical; min-height:80px; transition:border-color .15s; box-sizing:border-box; }
+  .mkt-service-textarea:focus { border-color:var(--success); }
+  .mkt-service-images-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:16px; }
+  .mkt-service-image-box {
+    aspect-ratio:1; border-radius:12px; border:2px dashed var(--border); display:flex;
+    align-items:center; justify-content:center; cursor:pointer; background:#FAFAFA;
+    transition:border-color .2s; font-size:1.8rem; color:#ccc; position:relative; overflow:hidden;
+  }
+  .mkt-service-image-box:active { border-color:var(--success); }
+  .mkt-service-image-box.has-img { border-style:solid; border-color:var(--success); }
+  .mkt-service-image-box img { width:100%; height:100%; object-fit:cover; }
+  .mkt-service-image-remove {
+    position:absolute; top:4px; right:4px; width:20px; height:20px; border-radius:50%;
+    border:none; background:rgba(0,0,0,.5); color:white; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:.6rem;
+    transition:transform .15s;
+  }
+  .mkt-service-image-remove:active { transform:scale(.85); }
+  .mkt-service-video-input { margin-bottom:16px; }
   .mkt-status-preview {
     width:100%; aspect-ratio:9/16; border-radius:16px;
     background:var(--bg); background-size:cover; background-position:center;
@@ -1064,6 +1129,15 @@ export default function OdaMarketingCenter() {
   const [viewingStatus, setViewingStatus] = useState(null);
   const [statusComments, setStatusComments] = useState([]);
   const [loadingComments, setLoadingComments] = useState(false);
+  // ─── Services
+  const [services, setServices] = useState([]);
+  const [loadingServices, setLoadingServices] = useState(false);
+  const [showCreateService, setShowCreateService] = useState(false);
+  const [serviceForm, setServiceForm] = useState({ nom:'', description:'', whatsapp:'', lieu:'' });
+  const [serviceImages, setServiceImages] = useState([]);
+  const [serviceVideoUrl, setServiceVideoUrl] = useState('');
+  const [serviceUploading, setServiceUploading] = useState(false);
+  const [editingService, setEditingService] = useState(null);
   const trimmerRef = useRef(null);
   const framesCache = useRef(null);
 
@@ -1209,6 +1283,108 @@ export default function OdaMarketingCenter() {
       .finally(() => { if (!cancelled) setLoadingComments(false); });
     return () => { cancelled = true; };
   }, [selectedStatusForView]);
+
+  // ─── Charger les services
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    setLoadingServices(true);
+    sb()
+      .from('services')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        if (!cancelled) setServices(data || []);
+      })
+      .catch(() => { if (!cancelled) setServices([]); })
+      .finally(() => { if (!cancelled) setLoadingServices(false); });
+    return () => { cancelled = true; };
+  }, [user]);
+
+  async function handleCreateService() {
+    if (serviceUploading) return;
+    if (!serviceForm.nom.trim()) { toast('⚠️ Le nom du service est requis', 'warning'); return; }
+    if (serviceImages.length === 0 && !editingService) { toast('⚠️ Ajoutez au moins une image', 'warning'); return; }
+    setServiceUploading(true);
+    try {
+      let uploadedImages = editingService ? [...(editingService.images || [])] : [];
+      // Uploader les nouvelles images
+      for (const file of serviceImages) {
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        fd.append('folder', `services/${user.id}`);
+        fd.append('quality', 'auto:good');
+        const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
+        if (!resp.ok) throw new Error('Upload image échoué');
+        const result = await resp.json();
+        uploadedImages.push(result.secure_url);
+        // Limiter à 4 images
+        if (uploadedImages.length >= 4) break;
+      }
+
+      const payload = {
+        nom: serviceForm.nom.trim(),
+        description: serviceForm.description.trim(),
+        whatsapp: serviceForm.whatsapp.trim(),
+        lieu: serviceForm.lieu.trim(),
+        images: uploadedImages,
+        video_url: serviceVideoUrl.trim(),
+      };
+
+      if (editingService) {
+        const { error } = await sb().from('services').update(payload).eq('id', editingService.id);
+        if (error) throw error;
+        toast('✅ Service modifié avec succès !', 'success');
+      } else {
+        payload.user_id = user.id;
+        const { error } = await sb().from('services').insert(payload);
+        if (error) throw error;
+        toast('✅ Service créé avec succès !', 'success');
+      }
+
+      setShowCreateService(false);
+      resetServiceForm();
+      // Recharger les services
+      const { data, error } = await sb().from('services').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+      if (!error) setServices(data || []);
+    } catch (err) {
+      toast('❌ Erreur: ' + err.message, 'error');
+    } finally {
+      setServiceUploading(false);
+    }
+  }
+
+  function resetServiceForm() {
+    setServiceForm({ nom:'', description:'', whatsapp:'', lieu:'' });
+    setServiceImages([]);
+    setServiceVideoUrl('');
+    setEditingService(null);
+  }
+
+  async function handleDeleteService(id) {
+    try {
+      const { error } = await sb().from('services').delete().eq('id', id);
+      if (error) throw error;
+      toast('🗑️ Service supprimé', 'info');
+      setServices(prev => prev.filter(s => s.id !== id));
+    } catch (err) {
+      toast('❌ Erreur: ' + err.message, 'error');
+    }
+  }
+
+  function openEditService(svc) {
+    setEditingService(svc);
+    setServiceForm({
+      nom: svc.nom || '',
+      description: svc.description || '',
+      whatsapp: svc.whatsapp || '',
+      lieu: svc.lieu || '',
+    });
+    setServiceVideoUrl(svc.video_url || '');
+    setShowCreateService(true);
+  }
 
   async function handleCreateStatus() {
     if (!statusFile || statusUploading) return;
@@ -2417,6 +2593,92 @@ export default function OdaMarketingCenter() {
         )}
 
         {/* ══════════════════════════════════════
+            SERVICES
+        ══════════════════════════════════════ */}
+        {showSection('services') && (
+          <div className="mkt-section mkt-services-section">
+            <div className="mkt-section-head">
+              <div className="mkt-section-title">
+                <span style={{ background:'linear-gradient(135deg,#34C759,#30B068)', borderRadius:8, padding:'4px 8px', color:'white' }}>🛎️</span>
+                Vos Services
+              </div>
+              <button className="mkt-section-link" onClick={() => { setShowCreateService(true); setEditingService(null); }}>
+                + Ajouter un service
+              </button>
+            </div>
+            <div className="mkt-card">
+              {loadingServices ? (
+                <div style={{ display:'flex', gap:12, padding:'16px 0', flexWrap:'wrap' }}>
+                  {[1,2,3,4,5,6].map(i => <div key={i} className="mkt-skeleton" style={{ width:'calc(50% - 6px)', aspectRatio:'16/10', borderRadius:16 }} />)}
+                </div>
+              ) : services.length === 0 ? (
+                <div className="mkt-status-empty">
+                  <div className="mkt-status-empty-icon">🛎️</div>
+                  <div className="mkt-status-empty-txt">Aucun service</div>
+                  <div className="mkt-status-empty-sub">Créez votre premier service pour attirer des clients sur ODA Marketplace</div>
+                  <button
+                    onClick={() => { setShowCreateService(true); setEditingService(null); }}
+                    style={{ marginTop:14, padding:'10px 24px', background:'linear-gradient(135deg,#34C759,#30B068)', color:'white', border:'none', borderRadius:12, fontWeight:700, fontSize:'0.85rem', cursor:'pointer', fontFamily:'Poppins,sans-serif' }}
+                  >
+                    + Créer un service
+                  </button>
+                </div>
+              ) : (
+                <div className="mkt-services-grid">
+                  {services.map(svc => (
+                    <div key={svc.id} className="mkt-service-card">
+                      <div className="mkt-service-image-wrap">
+                        {svc.images && svc.images.length > 0 ? (
+                          <img src={svc.images[0]} alt={svc.nom} className="mkt-service-img"
+                            onError={e => { e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect fill="%23F2F2F7" width="300" height="200"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#999" font-size="14">Aucune image</text></svg>'; }} />
+                        ) : (
+                          <div className="mkt-service-img-placeholder">📸</div>
+                        )}
+                        {svc.images && svc.images.length > 1 && (
+                          <div className="mkt-service-multi-badge">+{svc.images.length}</div>
+                        )}
+                      </div>
+                      <div className="mkt-service-body">
+                        <div className="mkt-service-title">{svc.nom}</div>
+                        {svc.description && <div className="mkt-service-desc">{svc.description}</div>}
+                        <div className="mkt-service-meta-row">
+                          {svc.whatsapp && (
+                            <a href={`https://wa.me/${svc.whatsapp.replace(/\s/g,'')}`} target="_blank" rel="noopener noreferrer" className="mkt-service-whatsapp">
+                              📱 {svc.whatsapp}
+                            </a>
+                          )}
+                          {svc.lieu && (
+                            <span className="mkt-service-lieu">📍 {svc.lieu}</span>
+                          )}
+                        </div>
+                        {svc.images && svc.images.length > 0 && (
+                          <div className="mkt-service-thumbs">
+                            {svc.images.slice(0,4).map((img, i) => (
+                              <img key={i} src={img} alt="" className="mkt-service-thumb"
+                                onError={e => { e.target.style.display = 'none'; }}
+                              />
+                            ))}
+                            {svc.images.length > 4 && <span className="mkt-service-thumb-more">+{svc.images.length - 4}</span>}
+                          </div>
+                        )}
+                      </div>
+                      <div className="mkt-service-actions">
+                        <button className="mkt-service-btn mkt-service-edit" onClick={() => openEditService(svc)} title="Modifier">
+                          ✏️
+                        </button>
+                        <button className="mkt-service-btn mkt-service-delete" onClick={() => { if(window.confirm('Supprimer ce service ?')) handleDeleteService(svc.id); }} title="Supprimer">
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════
             7. PUBLICITÉ INTERNE ODA
         ══════════════════════════════════════ */}
         {showSection('interne') && (
@@ -2862,6 +3124,94 @@ export default function OdaMarketingCenter() {
               Annuler
             </button>
             </>)}
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL CRÉATION SERVICE ─── */}
+      {showCreateService && (
+        <div className="mkt-service-create-modal" onClick={e => { if (e.target === e.currentTarget) { setShowCreateService(false); resetServiceForm(); } }}>
+          <div className="mkt-service-create-sheet" onClick={e => e.stopPropagation()}>
+            <div className="mkt-service-create-title">{editingService ? '✏️ Modifier le service' : '🛎️ Nouveau service'}</div>
+            <div className="mkt-service-create-sub">{editingService ? 'Modifiez les informations ci-dessous' : 'Créez un service pour attirer des clients'}</div>
+
+            <div style={{ marginBottom:16 }}>
+              <label style={{ fontSize:'.75rem', fontWeight:600, color:'var(--text-2)', display:'block', marginBottom:6 }}>Photos (max 4)</label>
+              <div className="mkt-service-images-grid">
+                {[0,1,2,3].map(i => {
+                  const imgFile = serviceImages[i] || null;
+                  const existingImg = editingService && editingService.images && editingService.images[i] && !imgFile ? editingService.images[i] : null;
+                  const hasImg = !!imgFile || !!existingImg;
+                  return (
+                    <div key={i} className={`mkt-service-image-box${hasImg ? ' has-img' : ''}`}
+                      onClick={() => {
+                        if (!imgFile && !existingImg) {
+                          const input = document.createElement('input');
+                          input.type = 'file';
+                          input.accept = 'image/*';
+                          input.onchange = e => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              const newImgs = [...serviceImages];
+                              newImgs[i] = file;
+                              setServiceImages(newImgs);
+                            }
+                          };
+                          input.click();
+                        }
+                      }}
+                    >
+                      {imgFile ? (
+                        <><img src={URL.createObjectURL(imgFile)} alt="" /><button className="mkt-service-image-remove" onClick={e => { e.stopPropagation(); const newImgs = [...serviceImages]; newImgs[i] = null; setServiceImages(newImgs); }}>✕</button></>
+                      ) : existingImg ? (
+                        <><img src={existingImg} alt="" /><button className="mkt-service-image-remove" onClick={e => { e.stopPropagation(); if (editingService) { const imgs = [...(editingService.images || [])]; imgs.splice(i, 1); setEditingService({...editingService, images: imgs}); } }}>✕</button></>
+                      ) : (
+                        '+'
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div style={{ marginBottom:14 }}>
+              <label style={{ fontSize:'.75rem', fontWeight:600, color:'var(--text-2)', display:'block', marginBottom:6 }}>Lien vidéo (optionnel)</label>
+              <input className="mkt-service-input mkt-service-video-input" placeholder="https://youtube.com/..." value={serviceVideoUrl} onChange={e => setServiceVideoUrl(e.target.value)} />
+            </div>
+
+            <div style={{ marginBottom:14 }}>
+              <label style={{ fontSize:'.75rem', fontWeight:600, color:'var(--text-2)', display:'block', marginBottom:6 }}>Nom du service *</label>
+              <input className="mkt-service-input" placeholder="ex: Plomberie Express" value={serviceForm.nom} onChange={e => setServiceForm(p => ({...p, nom: e.target.value}))} />
+            </div>
+
+            <div style={{ marginBottom:14 }}>
+              <label style={{ fontSize:'.75rem', fontWeight:600, color:'var(--text-2)', display:'block', marginBottom:6 }}>Description</label>
+              <textarea className="mkt-service-textarea" placeholder="Décrivez votre service..." value={serviceForm.description} onChange={e => setServiceForm(p => ({...p, description: e.target.value}))} />
+            </div>
+
+            <div style={{ marginBottom:14 }}>
+              <label style={{ fontSize:'.75rem', fontWeight:600, color:'var(--text-2)', display:'block', marginBottom:6 }}>WhatsApp</label>
+              <input className="mkt-service-input" placeholder="+237691234567" value={serviceForm.whatsapp} onChange={e => setServiceForm(p => ({...p, whatsapp: e.target.value}))} />
+            </div>
+
+            <div style={{ marginBottom:20 }}>
+              <label style={{ fontSize:'.75rem', fontWeight:600, color:'var(--text-2)', display:'block', marginBottom:6 }}>Lieu</label>
+              <input className="mkt-service-input" placeholder="ex: Yaoundé, Cameroun" value={serviceForm.lieu} onChange={e => setServiceForm(p => ({...p, lieu: e.target.value}))} />
+            </div>
+
+            <button className="mkt-modal-cta" onClick={handleCreateService} disabled={serviceUploading}>
+              {serviceUploading ? (
+                <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'middle',marginRight:5}} className="mkt-spinner">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg> {editingService ? 'Modification...' : 'Création...'}</>
+              ) : (
+                editingService ? '💾 Enregistrer les modifications' : '✅ Créer le service'
+              )}
+            </button>
+            <button className="mkt-modal-cancel" onClick={() => { setShowCreateService(false); resetServiceForm(); }}>
+              Annuler
+            </button>
           </div>
         </div>
       )}

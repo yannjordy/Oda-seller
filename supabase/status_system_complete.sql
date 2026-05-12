@@ -91,3 +91,39 @@ BEGIN
   UPDATE shop_statuses SET views = views + 1 WHERE id = row_id;
 END;
 $$;
+
+-- ===========================================================
+-- 3. Table des services
+-- ===========================================================
+CREATE TABLE IF NOT EXISTS services (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users NOT NULL,
+  nom text NOT NULL,
+  description text DEFAULT '',
+  whatsapp text DEFAULT '',
+  lieu text DEFAULT '',
+  images text[] DEFAULT '{}',
+  video_url text DEFAULT '',
+  statut text DEFAULT 'actif',
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_services_user ON services (user_id, created_at DESC);
+
+ALTER TABLE services ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Lecture publique des services"
+  ON services FOR SELECT
+  USING (statut = 'actif');
+
+CREATE POLICY "Les vendeurs peuvent créer leurs services"
+  ON services FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Les vendeurs peuvent modifier leurs services"
+  ON services FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Les vendeurs peuvent supprimer leurs services"
+  ON services FOR DELETE
+  USING (auth.uid() = user_id);
