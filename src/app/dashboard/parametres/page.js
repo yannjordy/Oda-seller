@@ -1383,16 +1383,7 @@ export default function ParametresPage() {
                     <label className="p-lbl">Adresse</label>
                     <input className="p-inp" value={params.general.adresse} onChange={e => up('general.adresse', e.target.value)} placeholder="Douala, Cameroun" />
                   </div>
-                  <div className="p-toggle-row">
-                    <div className="p-toggle-info">
-                      <div className="p-toggle-label">Négociation de prix</div>
-                      <div className="p-toggle-desc">Permettre aux clients de proposer leur prix sur vos produits</div>
-                    </div>
-                    <label className="p-switch">
-                      <input type="checkbox" checked={params.negociation?.prix !== false} onChange={e => up('negociation.prix', e.target.checked)} />
-                      <span className="p-slider" />
-                    </label>
-                  </div>
+
                   <div>
                     <button type="submit" className="p-btn p-btn-primary" disabled={saving}>
                       {saving ? 'Enregistrement…' : <>{Icons.check} Enregistrer</>}
@@ -1563,6 +1554,74 @@ export default function ParametresPage() {
                   <button type="button" className="p-btn p-btn-success p-btn-sm" onClick={() => { up('paiement.cash.confirme', true); toast('Paiement cash activé', 'success'); }}>{Icons.check} Confirmer</button>
                 </div>
               )}
+            </div>
+
+            {/* Négociation de prix */}
+            <div className="p-card" style={{ border:'1px solid rgba(255,149,0,.25)', background:'linear-gradient(135deg,#fff8f0,#fff) '}}>
+              <div className="p-card-head">
+                <div>
+                  <div className="p-card-title">
+                    <span className="p-card-title-icon" style={{ background:'var(--yellow-dim) !important' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF9500" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                      </svg>
+                    </span>
+                    Négociation de prix
+                  </div>
+                  <div className="p-card-desc">Permettre aux clients de proposer leur prix sur vos produits et services</div>
+                </div>
+                <Toggle id="negoPrix" checked={params.negociation?.prix !== false} onChange={v => up('negociation.prix', v)} />
+              </div>
+              {params.negociation?.prix !== false && (
+                <div style={{ padding:'14px 16px', background:'#f8f9fd', borderRadius:'var(--radius-sm)', border:'1px dashed rgba(255,149,0,.3)', display:'flex', alignItems:'center', gap:12 }}>
+                  <div style={{ fontSize:'1.6rem', lineHeight:1 }}>💬</div>
+                  <div>
+                    <div style={{ fontSize:'.82rem', fontWeight:600, color:'#1a1a1a', marginBottom:2 }}>Négociation activée</div>
+                    <div style={{ fontSize:'.75rem', color:'#8e8e93', lineHeight:1.4 }}>
+                      Les clients peuvent faire une offre inférieure au prix affiché. Un champ de proposition s&apos;affiche sur chaque fiche produit/service.
+                    </div>
+                  </div>
+                </div>
+              )}
+              {params.negociation?.prix === false && (
+                <div style={{ padding:'14px 16px', background:'#f8f9fd', borderRadius:'var(--radius-sm)', border:'1px dashed var(--border-md)', display:'flex', alignItems:'center', gap:12 }}>
+                  <div style={{ fontSize:'1.6rem', lineHeight:1 }}>🔒</div>
+                  <div>
+                    <div style={{ fontSize:'.82rem', fontWeight:600, color:'#1a1a1a', marginBottom:2 }}>Négociation désactivée</div>
+                    <div style={{ fontSize:'.75rem', color:'#8e8e93', lineHeight:1.4 }}>
+                      Les clients paieront le prix affiché sans possibilité de négociation.
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Bouton sauvegarde discret */}
+            <div style={{ display:'flex', justifyContent:'flex-end', marginTop:4 }}>
+              <button
+                type="button"
+                onClick={async () => { setSaving(true); const ok = await save(); setSaving(false); toast(ok ? 'Paramètres de paiement enregistrés' : 'Erreur', ok ? 'success' : 'error'); }}
+                disabled={saving}
+                style={{
+                  display:'inline-flex', alignItems:'center', gap:6,
+                  padding:'7px 16px', borderRadius:20,
+                  fontSize:'.78rem', fontWeight:500,
+                  fontFamily:'var(--font)',
+                  color:'var(--text-2)', background:'transparent',
+                  border:'1px solid var(--border-md)',
+                  cursor:'pointer', transition:'all .18s',
+                  opacity:saving ? .5 : 1
+                }}
+                onMouseEnter={e => { if (!saving) { e.target.style.background = 'var(--bg-raised)'; e.target.style.color = 'var(--text-1)'; }}}
+                onMouseLeave={e => { e.target.style.background = 'transparent'; e.target.style.color = 'var(--text-2)'; }}
+              >
+                {saving ? (
+                  <><span className="p-spin" style={{ width:14, height:14, borderWidth:1.5 }} /> Sauvegarde…</>
+                ) : (
+                  <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Enregistrer</>
+                )}
+              </button>
             </div>
           </div>
         )}
