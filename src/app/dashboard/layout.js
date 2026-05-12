@@ -579,7 +579,7 @@ export default function DashboardLayout({ children }) {
     { href: '/dashboard/commandes',    icon: Icons.orders,     labelKey: 'orders',     color: 'green'  },
     { href: '/dashboard/clients',      icon: Icons.clients,    labelKey: 'clients',    color: 'purple' },
     { href: '/dashboard/messages',     icon: Icons.messages,   labelKey: 'messages',   color: 'pink'   },
-     { href: '/dashboard/marketing',     icon: Icons.marketing,   labelKey: 'oda-ADS',   color: 'red'   },
+     { href: '/dashboard/marketing',     icon: Icons.marketing,   labelKey: 'marketing',   color: 'red'   },
   ];
 
   const NAV_LINKS_SECONDARY = [
