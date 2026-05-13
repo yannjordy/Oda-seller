@@ -9,6 +9,7 @@ import { Icons } from '@/components/icons';
 
 
 export const LanguageContext = createContext({ lang: 'fr', setLang: () => {}, t: (k) => k });
+export const AdminContext = createContext({ isAdmin: false, adminRole: null });
 
 export function useLanguage() {
   return useContext(LanguageContext);
@@ -34,6 +35,7 @@ const TRANSLATIONS = {
     statistics:       'Statistiques',
     settings:         'Paramètres',
     myShop:           'Voir ma boutique',
+    admin:            'Tour de contrôle',
   },
   en: {
     loading:          'Loading...',
@@ -53,6 +55,7 @@ const TRANSLATIONS = {
     statistics:       'Statistics',
     settings:         'Settings',
     myShop:           'View my shop',
+    admin:            'Control Tower',
   },
 };
 
@@ -554,6 +557,8 @@ const LAYOUT_STYLES = `
 export default function DashboardLayout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [lang, setLangState]   = useState('fr');
+  const [adminRole, setAdminRole] = useState(null);
+  const [adminCheckDone, setAdminCheckDone] = useState(false);
   const { user, loading }       = useAuth();
   const router                  = useRouter();
   const pathname                = usePathname();
@@ -592,6 +597,17 @@ export default function DashboardLayout({ children }) {
   useEffect(() => {
     if (!loading && !user) router.replace('/connexion');
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (!user) return;
+    if (adminCheckDone) return;
+    import('@/lib/supabase').then(({ getSupabase }) => {
+      getSupabase().from('admin_roles').select('role').eq('user_id', user.id).single()
+        .then(({ data }) => { if (data) setAdminRole(data.role); })
+        .catch(() => {})
+        .finally(() => setAdminCheckDone(true));
+    });
+  }, [user, adminCheckDone]);
 
   /* Bloquer le scroll quand le menu est ouvert */
   useEffect(() => {
@@ -638,7 +654,8 @@ export default function DashboardLayout({ children }) {
 
   return (
     <LanguageContext.Provider value={{ lang, setLang, t }}>
-      <div className="oda-layout">
+      <AdminContext.Provider value={{ isAdmin: !!adminRole, adminRole }}>
+        <div className="oda-layout">
 
         {/* ── OVERLAY ── */}
         <div
@@ -706,6 +723,23 @@ export default function DashboardLayout({ children }) {
                 <span className="oda-nav-chevron">›</span>
               </Link>
             ))}
+
+            {adminRole && (
+              <Link
+                href="/dashboard/admin"
+                data-color="indigo"
+                className={`oda-nav-link oda-nav-anim-${NAV_LINKS.length + NAV_LINKS_SECONDARY.length + 1}${pathname?.startsWith('/dashboard/admin') ? ' active' : ''}`}
+                onClick={closeMenu}
+              >
+                <div className="oda-nav-icon-wrap">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                </div>
+                <span>{t('admin')}</span>
+                <span className="oda-nav-chevron">›</span>
+              </Link>
+            )}
 
             <div className="oda-divider" />
             <div className="oda-nav-section-label">{t('sectionCommunity')}</div>
@@ -798,6 +832,7 @@ export default function DashboardLayout({ children }) {
         </main>
 
       </div>
+      </AdminContext.Provider>
     </LanguageContext.Provider>
   );
 }
