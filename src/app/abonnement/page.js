@@ -5,11 +5,14 @@ import { useRouter } from 'next/navigation';
 import { getSupabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 
-/* PawaPay — appels via les routes Next.js /api/pawapay/* */
-const PAWAPAY_DEPOSIT_URL = '/api/pawapay/deposit';
-const PAWAPAY_STATUS_URL  = (id) => `/api/pawapay/status/${id}`;
-const POLL_INTERVAL_MS    = 3000;   // vérification toutes les 3 s
-const POLL_MAX_ATTEMPTS   = 40;     // 40 × 3 s = 2 min max
+/* Notch Pay — appels via les routes Next.js /api/notchpay/* */
+const NOTCHPAY_INITIER_URL  = '/api/notchpay/initier';
+const NOTCHPAY_ACTIVER_URL  = '/api/notchpay/activer';
+const NOTCHPAY_VERIFIER_URL = (ref) => `/api/notchpay/verifier/${ref}`;
+const POLL_INTERVAL_MS      = 3000;
+const POLL_MAX_ATTEMPTS     = 40;
+
+const OPERATOR_MAP = { mtn: 'cm.mtn', orange: 'cm.orange' };
 
 const PLANS = {
   gratuit:  { nom:'Débutant', limite:10,  prix:0,    icon:'🌱', badge:'🎁 Gratuit',       variant:'free',     ctaLabel:'Plan actuel', disabled:true },
@@ -484,15 +487,18 @@ export default function AbonnementPage() {
   const { user, loading: authLoading } = useAuth();
   const router       = useRouter();
 
-  const [abonnement,  setAbonnement]  = useState(null);
-  const [nbPublies,   setNbPublies]   = useState(0);
-  const [loading,     setLoading]     = useState(true);
+  const [abonnement,    setAbonnement]    = useState(null);
+  const [nbPublies,     setNbPublies]     = useState(0);
+  const [loading,       setLoading]       = useState(true);
   const [payLoading,    setPayLoading]    = useState(false);
   const [showLoading,   setShowLoading]   = useState(false);
   const [pollingActive, setPollingActive] = useState(false);
+  const [operator,      setOperator]      = useState('mtn');
+  const [phase,         setPhase]         = useState('config'); // config | pending
+  const [notchRef,      setNotchRef]      = useState(null);
   const pollRef = useRef(false);
 
-  /* ── NOUVEAU : numéro Mobile Money saisi par l'utilisateur ── */
+  /* ── Numéro Mobile Money saisi par l'utilisateur ── */
   const [phoneInput, setPhoneInput] = useState('');
 
   /* Modal */
@@ -587,76 +593,88 @@ export default function AbonnementPage() {
     setModalPlan(planKey);
     setStepState([1, 0, 0]);
     setPhoneInput(''); // reset du champ téléphone à chaque ouverture
+    setPhase('config');
+    setNotchRef(null);
     setModalOpen(true);
     if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(30);
   }
 
   function fermerModal() {
     setModalOpen(false);
+    setPhase('config');
+    setNotchRef(null);
+    pollRef.current = false;
+    setPollingActive(false);
+    setStepState([0, 0, 0]);
     setTimeout(() => setModalPlan(null), 500);
   }
 
-  /* ── Procéder au paiement via PawaPay ── */
+  /* ── Procéder au paiement via Notch Pay USSD push ── */
   async function procederPaiement() {
     if (!modalPlan || payLoading || pollingActive) return;
 
-    /* ── Validation du numéro de téléphone ── */
-    const phone = phoneInput.trim() || user.phone || user.user_metadata?.phone;
-    if (!phone) {
-      showNotif('⚠️ Veuillez entrer votre numéro Mobile Money (MTN ou Orange)', 'warning');
-      return;
-    }
-    if (phone.replace(/\D/g, '').length < 9) {
-      showNotif('⚠️ Numéro invalide — ex : 237690000000', 'warning');
+    const phone = phoneInput.trim().replace(/\D/g, '');
+    if (!phone || phone.length < 9) {
+      showNotif('⚠️ Entrez votre numéro Mobile Money (ex: 237690000000)', 'warning');
       return;
     }
 
     const plan = PLANS[modalPlan];
+    const channel = OPERATOR_MAP[operator];
+    const customerName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Client';
+    const ref = `SUB-${user.id}-${Date.now()}`;
+
     setPayLoading(true);
     setStepState([1, 0, 0]);
 
     try {
-      /* ── Étape 1 : générer une référence client ── */
-      const clientReferenceId = `ODA-${user.id}-${Date.now()}`;
       setStepState([2, 1, 0]);
 
-      /* ── Étape 2 : initier le dépôt PawaPay ── */
-      const response = await fetch(PAWAPAY_DEPOSIT_URL, {
-        method:  'POST',
+      const res1 = await fetch(NOTCHPAY_INITIER_URL, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount:            plan.prix,
-          phone:             phone.replace(/\D/g, ''), // chiffres uniquement
-          planNom:           plan.nom,
-          planKey:           modalPlan,
-          userId:            user.id,
-          clientReferenceId,
+          amount: plan.prix,
+          currency: 'XAF',
+          customer: { name: customerName, email: user.email, phone },
+          description: `Abonnement ${plan.nom} — Oda Boutique`,
+          reference: ref,
+          callback: 'https://notchpay.co',
         }),
       });
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || `Erreur serveur (${response.status})`);
+      const data1 = await res1.json();
+      if (!res1.ok) throw new Error(data1.error || 'Erreur création paiement');
 
-      const { depositId } = data;
-      if (!depositId) throw new Error('depositId absent dans la réponse PawaPay');
-
-      /* ── Étape 3 : sauvegarder localement ── */
-      localStorage.setItem('paiement_en_attente', JSON.stringify({
-        plan: modalPlan, prix: plan.prix, limite: plan.limite,
-        userId: user.id, depositId, clientReferenceId, initiatedAt: Date.now(),
-      }));
+      const nRef = data1.transaction?.reference || data1.reference || ref;
+      setNotchRef(nRef);
 
       setStepState([2, 2, 1]);
+
+      const res2 = await fetch(NOTCHPAY_ACTIVER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reference: nRef, channel, phone }),
+      });
+
+      const data2 = await res2.json();
+      if (!res2.ok) throw new Error(data2.error || "Erreur activation USSD push");
+
+      localStorage.setItem('paiement_en_attente', JSON.stringify({
+        plan: modalPlan, prix: plan.prix, limite: plan.limite,
+        userId: user.id, notchRef: nRef, reference: ref,
+      }));
+
       setPayLoading(false);
+      setPhase('pending');
       setPollingActive(true);
       pollRef.current = true;
-      showNotif('📲 Vérifiez votre téléphone et confirmez le paiement Mobile Money…', 'info');
+      showNotif('📩 Demande USSD envoyée — Entrez votre code PIN Mobile Money', 'info');
 
-      /* ── Étape 4 : polling jusqu'à confirmation ── */
-      await pollDepositStatus(depositId, modalPlan);
+      verifierStatut(nRef, modalPlan);
 
     } catch (err) {
-      showNotif(`❌ ${err.message}`, 'error');
+      showNotif('❌ ' + err.message, 'error');
       setStepState([1, 0, 0]);
       setPayLoading(false);
       setPollingActive(false);
@@ -664,58 +682,58 @@ export default function AbonnementPage() {
     }
   }
 
-  /* ── Polling du statut PawaPay ── */
-  async function pollDepositStatus(depositId, planKey) {
+  async function verifierStatut(ref, planKey) {
     for (let i = 0; i < POLL_MAX_ATTEMPTS; i++) {
       if (!pollRef.current) return;
       await new Promise(r => setTimeout(r, POLL_INTERVAL_MS));
       if (!pollRef.current) return;
 
       try {
-        const res  = await fetch(PAWAPAY_STATUS_URL(depositId));
+        const res = await fetch(NOTCHPAY_VERIFIER_URL(ref));
         const data = await res.json();
 
-        if (data.status === 'COMPLETED') {
+        const status = data.transaction?.status || data.status;
+
+        if (status === 'complete') {
           setStepState([2, 2, 2]);
-          await activerAbonnement(planKey, depositId);
+          await activerAbonnement(planKey, nRef);
           lancerConfetti(confettiRef.current);
-          showNotif('🎉 Paiement confirmé ! Abonnement activé.', 'success');
+          showNotif('🎉 Paiement confirmé ! Abonnement activé.', 'success');
           localStorage.removeItem('paiement_en_attente');
+          setPhase('config');
           fermerModal();
           setPollingActive(false);
           pollRef.current = false;
+          setNotchRef(null);
           setTimeout(() => router.replace('/dashboard/produits'), 3000);
           return;
         }
 
-        if (data.status === 'FAILED' || data.status === 'REFUNDED') {
-          throw new Error(`Paiement échoué : ${data.failureReason?.message || 'raison inconnue'}`);
+        if (status === 'failed' || status === 'canceled' || status === 'expired') {
+          throw new Error('Paiement ' + status);
         }
-        // INITIATED | PENDING → continuer
       } catch (err) {
-        if (err.message.startsWith('Paiement échoué')) {
-          showNotif(`❌ ${err.message}`, 'error');
+        if (err.message.startsWith('Paiement')) {
+          showNotif('❌ ' + err.message, 'error');
           localStorage.removeItem('paiement_en_attente');
+          setPhase('config');
           fermerModal();
           setPollingActive(false);
           pollRef.current = false;
+          setNotchRef(null);
           setStepState([0, 0, 0]);
           return;
         }
-        // erreur réseau temporaire → on continue le polling
-        console.warn('[Polling] Erreur temporaire:', err.message);
       }
     }
 
-    /* Timeout 2 min */
-    showNotif('⏰ Délai dépassé. Si vous avez confirmé, actualisez la page.', 'warning');
+    showNotif('⏰ Délai dépassé. Utilisez "Vérifier" pour réessayer.', 'warning');
     setPollingActive(false);
     pollRef.current = false;
-    setStepState([0, 0, 0]);
   }
 
   /* ── Activer l'abonnement dans Supabase ── */
-  async function activerAbonnement(planKey, depositId) {
+  async function activerAbonnement(planKey, transactionRef) {
     const planInfo       = PLANS[planKey];
     const dateDebut      = new Date();
     const dateExpiration = new Date();
@@ -728,7 +746,7 @@ export default function AbonnementPage() {
       date_debut:      dateDebut.toISOString(),
       date_expiration: dateExpiration.toISOString(),
       statut:          'actif',
-      reference:       depositId,
+      reference:       transactionRef,
     }, { onConflict: 'user_id' });
 
     if (error) throw error;
@@ -870,7 +888,7 @@ export default function AbonnementPage() {
           <h2 className="abo-faq-title">Questions fréquentes</h2>
           <div className="abo-faq-grid">
             {[
-              { q:'💳 Comment payer ?',         a:'Via PawaPay — Orange Money ou MTN MoMo, 100% sécurisé. Vous recevez une invite de confirmation directement sur votre téléphone.' },
+              { q:'💳 Comment payer ?',         a:'Via Notch Pay — Orange Money ou MTN MoMo, 100% sécurisé. Vous recevez une demande USSD push directement sur votre téléphone.' },
               { q:'🔄 Changer de plan ?',        a:'Oui, à tout moment. Upgrade ou downgrade effectif immédiatement.' },
               { q:'📦 Dépassement de limite ?',  a:'Les produits excédentaires passent en brouillon, restaurés lors d\'un upgrade.' },
               { q:'⏰ Durée ?',                  a:'Mensuel, renouvelable. Annulation libre à tout moment.' },
@@ -937,43 +955,108 @@ export default function AbonnementPage() {
             ))}
           </div>
 
-          {/* ── Champ numéro Mobile Money (NOUVEAU) ── */}
-          {!pollingActive && (
-            <div className="abo-phone-wrap">
-              <label className="abo-phone-label">📱 Numéro Mobile Money (MTN ou Orange)</label>
-              <input
-                className="abo-phone-input"
-                type="tel"
-                inputMode="numeric"
-                placeholder="Ex : 237690000000"
-                value={phoneInput}
-                onChange={e => setPhoneInput(e.target.value.replace(/\D/g, ''))}
+          {phase === 'config' && (
+            <>
+              {/* Operator selection */}
+              <div style={{marginBottom:20}}>
+                <label className="abo-phone-label">Opérateur mobile</label>
+                <div style={{display:'flex',gap:10}}>
+                  {['mtn','orange'].map(op => (
+                    <div key={op}
+                      onClick={() => { if (!payLoading) setOperator(op); }}
+                      style={{
+                        flex:1, padding:'14px 10px', borderRadius:14, textAlign:'center', cursor:'pointer',
+                        border: `1.5px solid ${operator === op ? 'var(--violet-l)' : 'var(--border)'}`,
+                        background: operator === op ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.04)',
+                        transition:'all .2s',
+                      }}
+                    >
+                      <div style={{fontSize:'1.5rem',marginBottom:4}}>📱</div>
+                      <div style={{fontWeight:700,fontSize:'.85rem'}}>{op.toUpperCase()}</div>
+                      <div style={{fontSize:'.7rem',color:'var(--muted)'}}>Cameroon</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Phone input */}
+              <div className="abo-phone-wrap">
+                <label className="abo-phone-label">📱 Numéro pour l USSD push</label>
+                <input
+                  className="abo-phone-input"
+                  type="tel" inputMode="numeric"
+                  placeholder="Ex : 237680000000"
+                  value={phoneInput}
+                  onChange={e => setPhoneInput(e.target.value.replace(/\D/g, ''))}
+                  disabled={payLoading}
+                />
+              </div>
+
+              {/* Pay button */}
+              <button
+                className="abo-btn-pay"
+                onClick={procederPaiement}
                 disabled={payLoading}
-              />
-            </div>
+              >
+                {payLoading ? '⏳ Envoi de la demande USSD…' : '💳 Payer par USSD push'}
+              </button>
+            </>
           )}
 
-          {/* Pay button */}
-          <button
-            className="abo-btn-pay"
-            onClick={procederPaiement}
-            disabled={payLoading || pollingActive}
-          >
-            {payLoading    ? '⏳ Initialisation…'
-           : pollingActive ? '📲 En attente de confirmation…'
-           :                 '💳 Payer maintenant'}
-          </button>
-
-          {/* Indicateur polling */}
-          {pollingActive && (
-            <div style={{textAlign:'center',marginTop:14,fontSize:'.82rem',color:'var(--muted)',lineHeight:1.5}}>
-              Confirmez le paiement sur votre téléphone.<br/>
-              <span style={{color:'var(--violet-l)',fontWeight:600}}>Cette fenêtre se fermera automatiquement.</span>
-              <button
-                onClick={() => { pollRef.current = false; setPollingActive(false); setStepState([0,0,0]); fermerModal(); }}
-                style={{display:'block',margin:'10px auto 0',background:'none',border:'1px solid var(--border)',
-                        color:'var(--muted)',borderRadius:8,padding:'4px 14px',cursor:'pointer',fontSize:'.78rem'}}
-              >Annuler</button>
+          {phase === 'pending' && (
+            <div style={{textAlign:'center',padding:'12px 0'}}>
+              <div style={{fontSize:'2.5rem',marginBottom:10}}>📩</div>
+              <div style={{fontWeight:700,marginBottom:6}}>Demande USSD envoyée</div>
+              <div style={{fontSize:'.85rem',color:'var(--muted)',marginBottom:16}}>
+                Entrez votre code PIN Mobile Money sur votre téléphone pour valider.
+              </div>
+              <div style={{display:'flex',gap:8}}>
+                <button
+                  className="abo-btn-pay" style={{flex:2,padding:14,fontSize:'.9rem'}}
+                  disabled={payLoading}
+                  onClick={async () => {
+                    if (!notchRef) return;
+                    setPayLoading(true);
+                    try {
+                      const res = await fetch(NOTCHPAY_VERIFIER_URL(notchRef));
+                      const data = await res.json();
+                      const status = data.transaction?.status || data.status;
+                      if (status === 'complete') {
+                        setStepState([2,2,2]);
+                        await activerAbonnement(modalPlan, notchRef);
+                        lancerConfetti(confettiRef.current);
+                        showNotif('🎉 Paiement confirmé ! Abonnement activé.', 'success');
+                        localStorage.removeItem('paiement_en_attente');
+                        setPhase('config'); fermerModal(); setPollingActive(false); pollRef.current = false; setNotchRef(null);
+                        setTimeout(() => router.replace('/dashboard/produits'), 3000);
+                      } else if (status === 'failed' || status === 'canceled' || status === 'expired') {
+                        showNotif('❌ Paiement ' + status, 'error');
+                        setPhase('config'); fermerModal(); setPollingActive(false); pollRef.current = false; setNotchRef(null);
+                      } else {
+                        showNotif('Statut: ' + status + ' — Réessayez', 'info');
+                      }
+                    } catch (err) {
+                      showNotif('Erreur: ' + err.message, 'error');
+                    } finally { setPayLoading(false); }
+                  }}
+                >
+                  Vérifier le statut
+                </button>
+                <button
+                  style={{
+                    flex:1, padding:14, borderRadius:16, border:'1px solid var(--border)',
+                    background:'rgba(255,255,255,0.04)', color:'var(--muted)',
+                    fontFamily:'DM Sans', fontSize:'.9rem', cursor:'pointer'
+                  }}
+                  onClick={() => {
+                    pollRef.current = false; setPollingActive(false); setStepState([0,0,0]);
+                    setPhase('config'); setNotchRef(null);
+                    localStorage.removeItem('paiement_en_attente');
+                  }}
+                >
+                  Annuler
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -983,7 +1066,7 @@ export default function AbonnementPage() {
       <div className={`abo-loading${showLoading ? ' abo-show' : ''}`}>
         <div className="abo-loader-ring" />
         <div className="abo-loader-txt">Paiement en cours…</div>
-        <div className="abo-loader-sub">Confirmation Mobile Money via PawaPay 🔐</div>
+        <div className="abo-loader-sub">Confirmation Mobile Money via Notch Pay 🔐</div>
       </div>
     </div>
   );
