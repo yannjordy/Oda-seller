@@ -314,10 +314,37 @@ export default function BoutiquePage() {
   const ajouterMetadonneesSEO = (params) => {
     const shopName = params.general?.nom || 'Ma Boutique'
     const shopDesc = params.general?.description || 'Découvrez nos produits'
+    const shopLogo = params.apparence?.logo || 'oda.jpg'
+    const shopUrl = window.location.href
+
     document.title = `${shopName} - Boutique en ligne`
+
     let metaDesc = document.querySelector('meta[name="description"]')
     if (!metaDesc) { metaDesc = document.createElement('meta'); metaDesc.name = 'description'; document.head.appendChild(metaDesc) }
     metaDesc.content = shopDesc
+
+    const setMeta = (property, content) => {
+      let el = document.querySelector(`meta[property="${property}"]`)
+      if (!el) { el = document.createElement('meta'); el.setAttribute('property', property); document.head.appendChild(el) }
+      el.setAttribute('content', content)
+    }
+
+    const setMetaName = (name, content) => {
+      let el = document.querySelector(`meta[name="${name}"]`)
+      if (!el) { el = document.createElement('meta'); el.setAttribute('name', name); document.head.appendChild(el) }
+      el.setAttribute('content', content)
+    }
+
+    setMeta('og:title', `${shopName} - Boutique en ligne`)
+    setMeta('og:description', shopDesc)
+    setMeta('og:image', shopLogo)
+    setMeta('og:url', shopUrl)
+    setMeta('og:type', 'website')
+
+    setMetaName('twitter:card', 'summary_large_image')
+    setMetaName('twitter:title', `${shopName} - Boutique en ligne`)
+    setMetaName('twitter:description', shopDesc)
+    setMetaName('twitter:image', shopLogo)
   }
 
   // ==================== DÉTECTION VISITEUR ====================

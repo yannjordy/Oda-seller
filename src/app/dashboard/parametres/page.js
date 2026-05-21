@@ -1250,6 +1250,31 @@ export default function ParametresPage() {
     });
   }
 
+  async function shareBoutique() {
+    const url = `${window.location.origin}/dashboard/boutique?shop=${params.identifiant?.slug}`;
+    const logoUrl = params.apparence?.logo;
+
+    if (navigator.share && logoUrl) {
+      try {
+        const response = await fetch(logoUrl);
+        const blob = await response.blob();
+        const ext = blob.type.split('/')[1] || 'png';
+        const file = new File([blob], `logo.${ext}`, { type: blob.type });
+        await navigator.share({
+          title: params.general?.nom || 'Ma Boutique',
+          text: `Découvrez ${params.general?.nom || 'ma boutique'} sur ODA`,
+          url: url,
+          files: [file],
+        });
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+      }
+    }
+
+    navigator.clipboard.writeText(url).then(() => toast('Lien copié', 'success'));
+  }
+
   function copyLink() {
     const url = `${window.location.origin}/dashboard/boutique?shop=${params.identifiant?.slug}`;
     navigator.clipboard.writeText(url).then(() => toast('Lien copié', 'success'));
@@ -1415,6 +1440,7 @@ export default function ParametresPage() {
                   <div style={{ display:'flex', gap:'8px', alignItems:'center', marginBottom:12 }}>
                     <input className="p-inp" readOnly value={linkUrl} style={{ fontFamily:'monospace', fontSize:'.8rem' }} />
                     <button type="button" className="p-btn p-btn-ghost p-btn-sm" onClick={copyLink}>Copier</button>
+                    <button type="button" className="p-btn p-btn-ghost p-btn-sm" onClick={shareBoutique}>Partager</button>
                   </div>
                   <button type="button" className="p-btn p-btn-ghost p-btn-sm" onClick={() => setShowSlug(true)}>Modifier l'identifiant</button>
                 </div>
