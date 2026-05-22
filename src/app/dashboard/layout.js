@@ -118,10 +118,6 @@ const LAYOUT_STYLES = `
     .oda-header { padding-top: env(safe-area-inset-top); }
   }
 
-  @supports selector(:has(*)) {
-    :root { --sat: env(safe-area-inset-top, 0px); }
-  }
-
   /* ── Brand centrée ── */
   .oda-brand {
     font-size: 1.15rem; font-weight: 700; letter-spacing: -.3px;

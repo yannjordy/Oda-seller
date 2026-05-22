@@ -34,6 +34,61 @@
   --radius-xl: 20px;
   --transition-fast: 0.3s ease;
   --header-height: 70px;
+
+  --sat: 0px;
+  --sab: 0px;
+  --sal: 0px;
+  --sar: 0px;
+}
+
+@supports (padding-top: env(safe-area-inset-top)) {
+  :root {
+    --sat: env(safe-area-inset-top);
+    --sab: env(safe-area-inset-bottom);
+    --sal: env(safe-area-inset-left);
+    --sar: env(safe-area-inset-right);
+  }
+}
+
+@supports (padding-top: constant(safe-area-inset-top)) {
+  :root {
+    --sat: constant(safe-area-inset-top);
+    --sab: constant(safe-area-inset-bottom);
+    --sal: constant(safe-area-inset-left);
+    --sar: constant(safe-area-inset-right);
+  }
+}
+
+.sat { padding-top: var(--sat); }
+.sab { padding-bottom: var(--sab); }
+.sal { padding-left: var(--sal); }
+.sar { padding-right: var(--sar); }
+
+.sat-max { padding-top: max(12px, var(--sat)); }
+.sab-max { padding-bottom: max(12px, var(--sab)); }
+
+.fixed-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  padding-top: var(--sat);
+}
+
+.fixed-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  padding-bottom: var(--sab);
+}
+
+.fixed-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
 }
 
 * {
@@ -81,7 +136,7 @@ body {
 
 .main-header {
   position: fixed;
-  top: env(safe-area-inset-top);
+  top: var(--sat, 0px);
   left: 0;
   right: 0;
   height: var(--header-height);
