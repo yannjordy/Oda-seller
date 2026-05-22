@@ -60,6 +60,7 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/icons/oda-192.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#7C3AED" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body>
         <AuthProvider>
