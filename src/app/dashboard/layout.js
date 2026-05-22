@@ -1,11 +1,14 @@
 'use client';
 
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect, createContext, useContext, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { getSupabase } from '@/lib/supabase';
 import PageLoader from '@/components/PageLoader';
 import { Icons } from '@/components/icons';
+
+const supabase = getSupabase();
 
 
 export const LanguageContext = createContext({ lang: 'fr', setLang: () => {}, t: (k) => k });
@@ -550,13 +553,80 @@ const LAYOUT_STYLES = `
 
 /* ══════════════════════════════════════════════════════════
    DASHBOARD LAYOUT — menu hamburger intégré et persistant
-══════════════════════════════════════════════════════════ */
+╚═════════════════════════════════════════════════════════ */
 export default function DashboardLayout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [lang, setLangState]   = useState('fr');
   const { user, loading }       = useAuth();
   const router                  = useRouter();
   const pathname                = usePathname();
+
+  /* ── Notifications de changement de plan ── */
+  const [planNotifs, setPlanNotifs] = useState([]);
+  const notifIdRef = useRef(0);
+
+  function showPlanNotif(msg, type = 'info') {
+    const id = ++notifIdRef.current;
+    setPlanNotifs(p => [...p, { id, msg, type }]);
+    setTimeout(() => setPlanNotifs(p => p.filter(n => n.id !== id)), 6000);
+  }
+
+  /* ── Écouter les changements d'abonnement en temps réel ── */
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('dashboard-abonnement-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'abonnements', filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          const { eventType, new: newRecord, old: oldRecord } = payload;
+
+          if (eventType === 'UPDATE' && oldRecord?.plan !== newRecord?.plan) {
+            const planNames = {
+              gratuit: 'Gratuit',
+              starter: 'Starter',
+              business: 'Business',
+              premium: 'Premium',
+            };
+            const fromName = planNames[oldRecord.plan] || oldRecord.plan;
+            const toName = planNames[newRecord.plan] || newRecord.plan;
+
+            showPlanNotif(
+              `🔄 Votre abonnement est passé de ${fromName} à ${toName}`,
+              'warning'
+            );
+
+            if (newRecord.plan === 'gratuit') {
+              showPlanNotif('⚠️ Votre limite de produits est maintenant de 10', 'warning');
+            } else {
+              showPlanNotif(`✅ Votre nouvelle limite est de ${newRecord.limite_produits} produits`, 'success');
+            }
+          }
+
+          if (eventType === 'INSERT' && !oldRecord) {
+            const planNames = {
+              gratuit: 'Gratuit',
+              starter: 'Starter',
+              business: 'Business',
+              premium: 'Premium',
+            };
+            const planName = planNames[newRecord.plan] || newRecord.plan;
+            showPlanNotif(`🎉 Nouvel abonnement activé : ${planName}`, 'success');
+          }
+
+          if (eventType === 'DELETE') {
+            showPlanNotif('❌ Votre abonnement a été supprimé', 'error');
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   /* Charger la langue sauvegardée */
   useEffect(() => {
@@ -796,6 +866,33 @@ export default function DashboardLayout({ children }) {
         <main className="oda-content">
           {children}
         </main>
+
+        {/* ── NOTIFICATIONS CHANGEMENT DE PLAN ── */}
+        {planNotifs.length > 0 && (
+          <div style={{ position: 'fixed', top: 80, right: 16, zIndex: 10000, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'none' }}>
+            {planNotifs.map(n => (
+              <div
+                key={n.id}
+                style={{
+                  padding: '12px 18px',
+                  borderRadius: 14,
+                  fontSize: '.88rem',
+                  fontWeight: 600,
+                  maxWidth: 340,
+                  pointerEvents: 'all',
+                  backdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(255,255,255,.1)',
+                  animation: 'slideInRight .4s cubic-bezier(.25,.8,.25,1)',
+                  background: n.type === 'success' ? 'rgba(16,185,129,.18)' : n.type === 'error' ? 'rgba(239,68,68,.18)' : 'rgba(245,158,11,.18)',
+                  borderColor: n.type === 'success' ? 'rgba(16,185,129,.4)' : n.type === 'error' ? 'rgba(239,68,68,.4)' : 'rgba(245,158,11,.4)',
+                  color: n.type === 'success' ? '#6EE7B7' : n.type === 'error' ? '#FCA5A5' : '#FCD34D',
+                }}
+              >
+                {n.msg}
+              </div>
+            ))}
+          </div>
+        )}
 
       </div>
     </LanguageContext.Provider>

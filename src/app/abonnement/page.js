@@ -534,6 +534,67 @@ export default function AbonnementPage() {
     }
   }, [user, authLoading]);
 
+  /* ── Écouter les changements d'abonnement en temps réel ── */
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('abonnement-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'abonnements', filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          const { eventType, new: newRecord, old: oldRecord } = payload;
+
+          if (eventType === 'UPDATE' && oldRecord?.plan !== newRecord?.plan) {
+            const planNames = {
+              gratuit: 'Gratuit',
+              starter: 'Starter',
+              business: 'Business',
+              premium: 'Premium',
+            };
+            const fromName = planNames[oldRecord.plan] || oldRecord.plan;
+            const toName = planNames[newRecord.plan] || newRecord.plan;
+
+            showNotif(
+              `🔄 Votre abonnement est passé de ${fromName} à ${toName}`,
+              'warning'
+            );
+
+            if (newRecord.plan === 'gratuit') {
+              showNotif('⚠️ Votre limite de produits est maintenant de 10', 'warning');
+            } else {
+              showNotif(`✅ Votre nouvelle limite est de ${newRecord.limite_produits} produits`, 'success');
+            }
+
+            loadData();
+          }
+
+          if (eventType === 'INSERT') {
+            const planNames = {
+              gratuit: 'Gratuit',
+              starter: 'Starter',
+              business: 'Business',
+              premium: 'Premium',
+            };
+            const planName = planNames[newRecord.plan] || newRecord.plan;
+            showNotif(`🎉 Nouvel abonnement activé : ${planName}`, 'success');
+            loadData();
+          }
+
+          if (eventType === 'DELETE') {
+            showNotif('❌ Votre abonnement a été supprimé', 'error');
+            loadData();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   /* Scroll dots tracking */
   useEffect(() => {
     const el = scrollRef.current;
