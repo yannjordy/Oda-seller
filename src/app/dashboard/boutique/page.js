@@ -29,6 +29,10 @@ export default function BoutiquePage() {
   const [showLoader, setShowLoader] = useState(true)
   const [loaderStatus, setLoaderStatus] = useState('Préparation de la boutique')
 
+  // --- ÉTATS CARTES ---
+  const [visibleCount, setVisibleCount] = useState(20)
+  const [favorites, setFavorites] = useState([])
+
   // --- ÉTATS MODALS ---
   const [productModal, setProductModal] = useState({ open: false, produit: null })
   const [checkoutModal, setCheckoutModal] = useState(false)
@@ -471,9 +475,29 @@ export default function BoutiquePage() {
 
   const filtrerParCategorie = useCallback((categorie) => {
     setCurrentFilter(categorie)
+    setVisibleCount(20)
     setSideMenuOpen(false)
     setOverlayActive(false)
   }, [])
+
+  const toggleFav = useCallback((id) => {
+    setFavorites(prev => {
+      const next = prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
+      try { localStorage.setItem('oda_favorites', JSON.stringify(next)) } catch {}
+      return next
+    })
+  }, [])
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('oda_favorites') || '[]')
+      setFavorites(stored)
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    setVisibleCount(20)
+  }, [currentFilter, currentSort, searchTerm])
 
   // useEffect pour appliquer les filtres quand les états changent
   useEffect(() => {
@@ -1125,49 +1149,62 @@ export default function BoutiquePage() {
                 <p>Essayez de modifier vos filtres</p>
               </div>
             ) : (
-              <div className="products-grid" id="productsGrid">
-                {filteredProduits.map((produit, index) => {
-                  const isLeft = index % 2 === 0
-                  const delay = Math.floor(index / 2) * 0.09
-                  const anim = isLeft ? 'slideInLeft' : 'slideInRight'
+              <><div className="products-grid" id="productsGrid">
+                {filteredProduits.slice(0, visibleCount).map((produit, index) => {
                   const hasPromo = produit.prixPromotion && produit.prixPromotion < produit.prix
                   const prixEffectif = hasPromo ? produit.prixPromotion : produit.prix
                   const remise = hasPromo ? Math.round((1 - produit.prixPromotion / produit.prix) * 100) : 0
+                  const images = [produit.mainImage, ...(produit.descriptionImages || [])].filter(Boolean)
+                  const isFav = favorites.includes(produit.id)
+                  const daysOld = Math.floor((Date.now() - new Date(produit.dateCreation || Date.now()).getTime()) / 86400000)
                   return (
                     <div key={produit.id} className="product-card"
-                      style={{ opacity:0, animation:`${anim} 0.45s cubic-bezier(0.25,0.46,0.45,0.94) ${delay}s forwards`, willChange:'transform, opacity' }}
-                      onClick={e => { if (!e.target.closest('.btn-add-cart') && !e.target.closest('.btn-mention-chat')) setProductModal({ open: true, produit }) }}>
-                      <div className="product-image-container">
-                        <img src={produit.mainImage || 'https://via.placeholder.com/300'} className="product-image" alt={produit.nom} loading="lazy"
-                          onError={e => { e.target.src = 'https://via.placeholder.com/300?text=Produit' }} />
-                        {produit.stock < 5 && <span className="product-badge">Stock limité</span>}
-                        {hasPromo && (
-                          <span className="promo-badge">-{remise}%</span>
+                      onClick={e => { if (e.target.closest('.btn-fav') || e.target.closest('.btn-mention-chat')) return; setProductModal({ open: true, produit }) }}>
+                      <div className="product-image-wrapper">
+                        <div className="product-carousel" data-images={JSON.stringify(images)}>
+                          {images.slice(0, 3).map((img, i) => (
+                            <img key={i} src={img} className={`carousel-slide${i === 0 ? ' active' : ''}`} alt="" loading={i === 0 ? 'eager' : 'lazy'}
+                              onError={e => { e.target.style.display = 'none' }} />
+                          ))}
+                        </div>
+                        {images.length > 1 && (
+                          <div className="carousel-dots">{images.slice(0, 3).map((_, i) => <span key={i} className={`carousel-dot${i === 0 ? ' active' : ''}`} />)}</div>
                         )}
+                        {daysOld < 7 && <span className="oda-badge oda-badge-new">Nouveau</span>}
+                        {produit.stock < 5 && <span className="oda-badge oda-badge-stock">Stock limité</span>}
+                        {hasPromo && <span className="oda-badge oda-badge-sale">-{remise}%</span>}
+                        <button className="btn-fav" onClick={e => { e.stopPropagation(); toggleFav(produit.id) }}>
+                          {isFav ? (
+                            <svg viewBox="0 0 24 24" fill="#EF4444" width="18" height="18"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                          ) : (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2.5" width="18" height="18"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          )}
+                        </button>
                         <button className="btn-mention-chat" title="Discuter de ce produit" onClick={e => { e.stopPropagation(); mentionnerProduitDansChat(produit.id) }}>💬</button>
                       </div>
                       <div className="product-info">
                         <h3 className="product-name">{produit.nom}</h3>
                         <div className="product-price-block">
                           {hasPromo ? (
-                            <>
-                              <div className="product-price-promo">{prixFormate(prixEffectif)}</div>
-                              <div className="product-price-original">{prixFormate(produit.prix)}</div>
-                            </>
+                            <div className="product-price promo">{prixFormate(prixEffectif)}</div>
                           ) : (
                             <div className="product-price">{prixFormate(produit.prix)}</div>
                           )}
+                          {hasPromo && <div className="product-price-original">{prixFormate(produit.prix)}</div>}
                         </div>
-                        <div className="product-stock">Stock: {produit.stock}</div>
-                        <button className="btn-add-cart" onClick={e => { e.stopPropagation(); ajouterAuPanier(produit.id) }}>
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 2L7.17 4M15 2l1.83 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><path d="M7.17 4H20l-2 9H9L7.17 4zm0 0L6 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          Ajouter
-                        </button>
                       </div>
                     </div>
                   )
                 })}
               </div>
+              {filteredProduits.length > visibleCount && (
+                <div className="load-more-wrap">
+                  <button className="load-more-btn" onClick={() => setVisibleCount(p => p + 20)}>
+                    Voir plus ({filteredProduits.length - visibleCount} produits)
+                  </button>
+                </div>
+              )}
+              </>
             )}
           </section>
         </main>
@@ -1682,36 +1719,37 @@ const GLOBAL_STYLES = `
   .chip.active{background:var(--primary-color);color:white;border-color:var(--primary-color);background-size:200% 200%!important;animation:shimmer 3s ease infinite}
   .filter-select{padding:8px 16px;background:var(--bg-primary);border:2px solid var(--border-color);border-radius:var(--radius-md);font-size:0.85rem;font-weight:600;font-family:var(--font-family);cursor:pointer;min-width:140px}
   .products-section{margin-bottom:24px}
-  .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-  .product-card{background:var(--bg-primary);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);transition:all 0.3s ease;cursor:pointer;position:relative;will-change:transform,opacity}
-  .product-card::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,var(--primary-color),var(--secondary-color));opacity:0;transition:opacity 0.3s ease;border-radius:var(--radius-md);z-index:-1}
-  .product-card:hover::before{opacity:0.1}
-  .product-card:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 12px 30px rgba(0,0,0,0.15),0 0 20px var(--primary-light),0 0 30px var(--accent-light)}
+  .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}@media(min-width:640px){.products-grid{grid-template-columns:repeat(3,1fr);gap:16px}}@media(min-width:768px){.products-grid{grid-template-columns:repeat(4,1fr)}}
+  .product-card{background:var(--bg-primary);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);transition:all .3s ease;cursor:pointer;position:relative;border:1px solid var(--border-color);will-change:transform,opacity}
+  .product-card:hover{transform:translateY(-3px);border-color:var(--primary-color);box-shadow:0 8px 20px rgba(0,0,0,.12)}
   .product-card:active{transform:scale(0.98)}
-  .product-image-container{position:relative;width:100%;padding-top:100%;background:var(--bg-secondary);overflow:hidden}
-  .product-image{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
-  .product-badge{position:absolute;top:8px;right:8px;background:var(--error-color);color:white;font-size:0.7rem;font-weight:700;padding:4px 8px;border-radius:12px;animation:glow 2s ease infinite,pulse 2s ease infinite}
-  .promo-badge{position:absolute;top:8px;left:8px;background:linear-gradient(135deg,var(--accent-color),var(--primary-color));color:white;font-size:0.72rem;font-weight:800;padding:4px 10px;border-radius:20px;letter-spacing:0.03em;box-shadow:0 2px 10px var(--accent-glow);animation:promoPop 0.4s cubic-bezier(.34,1.56,.64,1),promoShimmer 3s ease 0.4s infinite;z-index:5}
-  .promo-badge-modal{display:inline-flex;align-items:center;background:linear-gradient(135deg,var(--accent-color),var(--primary-color));color:white;font-size:0.8rem;font-weight:800;padding:4px 12px;border-radius:20px;letter-spacing:0.03em;box-shadow:0 2px 12px var(--accent-glow);animation:promoPop 0.4s cubic-bezier(.34,1.56,.64,1)}
-  @keyframes promoPop{0%{transform:scale(0) rotate(-10deg);opacity:0}60%{transform:scale(1.15) rotate(2deg)}100%{transform:scale(1) rotate(0deg);opacity:1}}
-  @keyframes promoShimmer{0%,100%{box-shadow:0 2px 10px var(--accent-glow)}50%{box-shadow:0 4px 20px var(--accent-glow),0 0 0 3px var(--accent-light)}}
-  .product-price-block{margin-bottom:8px;display:flex;flex-direction:column;gap:2px}
-  .product-price-promo{font-size:1.1rem;font-weight:800;color:var(--accent-color);text-shadow:0 1px 4px var(--accent-light);background:linear-gradient(135deg,var(--accent-color),var(--primary-color));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 200%;animation:shimmer 3s ease infinite;display:inline-block}
-  .product-price-original{font-size:0.82rem;color:var(--text-secondary);text-decoration:line-through;font-weight:500;opacity:0.8}
-  .product-info{padding:12px}
-  .product-name{font-size:0.9rem;font-weight:600;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .product-price{font-size:1.1rem;font-weight:800;color:var(--primary-color);margin-bottom:8px;background:linear-gradient(135deg,var(--primary-color),var(--secondary-color));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:200% 200%;animation:shimmer 3s ease infinite;display:inline-block}
-  .product-stock{font-size:0.75rem;color:var(--text-secondary);margin-bottom:8px}
-  .btn-add-cart{width:100%;padding:10px;background:var(--primary-color);color:white;border:none;border-radius:var(--radius-md);font-weight:600;font-size:0.85rem;cursor:pointer;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:6px}
-  .btn-add-cart:active{transform:scale(0.95);background:var(--primary-dark)}
-  .btn-mention-chat{position:absolute;top:12px;left:12px;width:40px;height:40px;background:linear-gradient(135deg,#25D366,#128C7E);color:white;border:none;border-radius:50%;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(37,211,102,0.4);transition:all 0.3s ease;z-index:10;opacity:0;transform:scale(0.8);animation:fadeInScale 0.3s ease 0.2s forwards}
-  @keyframes fadeInScale{to{opacity:1;transform:scale(1)}}
-  .btn-mention-chat::before{content:'';position:absolute;top:50%;left:50%;width:100%;height:100%;border-radius:50%;background:rgba(37,211,102,0.4);transform:translate(-50%,-50%) scale(1);animation:pulseMention 2s infinite;z-index:-1}
-  @keyframes pulseMention{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.8}50%{transform:translate(-50%,-50%) scale(1.3);opacity:0}}
-  .product-card:hover .btn-mention-chat{transform:scale(1.1);box-shadow:0 6px 18px rgba(37,211,102,0.6)}
+  .product-image-wrapper{position:relative;width:100%;padding-top:65%;background:var(--bg-secondary);overflow:hidden}
+  .product-carousel{position:absolute;inset:0}
+  .carousel-slide{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s ease}
+  .carousel-slide.active{opacity:1}
+  .product-card:hover .carousel-slide{transform:scale(1.05)}
+  .carousel-dots{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);display:flex;gap:4px;z-index:5}
+  .carousel-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.5);transition:all .3s ease}
+  .carousel-dot.active{background:#fff;width:16px;border-radius:3px}
+  .oda-badge{position:absolute;font-size:.62rem;font-weight:700;padding:3px 7px;border-radius:10px;z-index:5}
+  .oda-badge-new{top:8px;left:8px;background:#10B981;color:white}
+  .oda-badge-stock{top:34px;left:8px;background:#F59E0B;color:white}
+  .oda-badge-sale{top:8px;right:8px;background:#EF4444;color:white}
+  .btn-fav{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.9);backdrop-filter:blur(4px);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;transition:all .3s ease;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+  .btn-fav:active{transform:scale(.9)}
+  .btn-mention-chat{position:absolute;top:8px;left:48px;width:28px;height:28px;background:linear-gradient(135deg,#25D366,#128C7E);color:white;border:none;border-radius:50%;font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:all .3s ease;opacity:.8;box-shadow:0 2px 6px rgba(37,211,102,.3)}
+  .product-card:hover .btn-mention-chat{opacity:1;transform:scale(1.1)}
+  .product-price-block{padding:10px 10px 12px;display:flex;flex-direction:column;gap:3px}
+  .product-name{font-size:.83rem;font-weight:700;color:var(--text-primary);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.3;margin-bottom:4px}
+  .product-price{font-size:1.05rem;font-weight:800;color:var(--primary-color);display:inline-block;background:none;-webkit-background-clip:unset;-webkit-text-fill-color:unset}
+  .product-price.promo{color:var(--accent-color)}
+  .product-price-original{font-size:.75rem;color:var(--text-secondary);text-decoration:line-through;font-weight:500;opacity:.7}
   .empty-state{text-align:center;padding:60px 20px;color:var(--text-secondary);display:flex;flex-direction:column;align-items:center;gap:16px}
   .empty-state svg{opacity:0.3}
   .empty-state h3{font-size:1.1rem;font-weight:600}
+  .load-more-wrap{display:flex;justify-content:center;padding:20px 0 40px}
+  .load-more-btn{padding:12px 32px;background:var(--bg-primary);border:2px solid var(--primary-color);color:var(--primary-color);border-radius:24px;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .3s ease;font-family:var(--font-family)}
+  .load-more-btn:active{transform:scale(.95);background:var(--primary-color);color:white}
   .cart-panel{position:fixed;top:0;right:-100%;width:90%;max-width:400px;height:100vh;background:var(--bg-primary);box-shadow:var(--shadow-lg);z-index:2000;transition:right 0.3s ease;display:flex;flex-direction:column}
   .cart-panel.active{right:0}
   .cart-header{display:flex;justify-content:space-between;align-items:center;padding:20px;border-bottom:1px solid var(--border-color)}
