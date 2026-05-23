@@ -1590,15 +1590,11 @@ export default function BoutiquePage() {
 
       {/* ===== MODAL LOGO ===== */}
       {logoModalOpen && (
-        <div className="product-modal active" onClick={e => { if (e.target === e.currentTarget) setLogoModalOpen(false) }}>
-          <div className="modal-content modal-logo-content">
-            <button className="btn-close-modal" onClick={() => setLogoModalOpen(false)}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-            </button>
-            <div className="modal-body" style={{ display:'flex',alignItems:'center',justifyContent:'center',padding:'40px' }}>
-              <img src={parametres.apparence?.logo || 'oda.jpg'} alt="Logo" className="logo-modal-image" onError={(e) => { e.target.src = 'oda.jpg' }} />
-            </div>
-          </div>
+        <div className="logo-overlay" onClick={() => setLogoModalOpen(false)}>
+          <button className="btn-close-logo" onClick={() => setLogoModalOpen(false)}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/></svg>
+          </button>
+          <img src={parametres.apparence?.logo || 'oda.jpg'} alt="Logo" className="logo-modal-image" onError={(e) => { e.target.src = 'oda.jpg' }} />
         </div>
       )}
     </>
@@ -1630,7 +1626,12 @@ const GLOBAL_STYLES = `
   .btn-menu:active,.btn-cart:active,.btn-share:active{transform:scale(0.95);background:var(--border-color)}
   .logo-container{display:flex;align-items:center;gap:10px;flex:1;justify-content:center}
   .logo-image{width:36px;height:36px;border-radius:50%;object-fit:cover}
-  .logo-modal-image{max-width:280px;max-height:60vh;width:80vw;aspect-ratio:1;border-radius:50%;object-fit:cover;box-shadow:0 20px 60px rgba(0,0,0,0.15)}
+  .logo-modal-image{max-width:280px;max-height:60vh;width:80vw;aspect-ratio:1;border-radius:50%;object-fit:cover;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:logoZoomIn 0.3s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes logoZoomIn{from{opacity:0;transform:scale(0.6)}to{opacity:1;transform:scale(1)}}
+  .logo-overlay{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;animation:logoFadeIn 0.25s ease}
+  @keyframes logoFadeIn{from{opacity:0}to{opacity:1}}
+  .btn-close-logo{position:fixed;top:max(20px,env(safe-area-inset-top,20px));right:20px;width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,0.15);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);z-index:10001}
+  .btn-close-logo:active{transform:scale(0.92)}
   .shop-name{font-size:1.1rem;font-weight:800;color:var(--primary-color);animation:shimmer 4s ease infinite;background-size:200% 200%!important}
   .btn-cart{position:relative}
   .cart-badge{position:absolute;top:-4px;right:-4px;background:var(--error-color);color:white;font-size:0.7rem;font-weight:700;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center;display:flex;align-items:center;justify-content:center;background:linear-gradient(-45deg,var(--primary-color),var(--secondary-color),var(--primary-color))!important;background-size:300% 300%!important;animation:gradientShift 3s ease infinite,pulse 2s ease infinite!important}
