@@ -1074,7 +1074,7 @@ export default function BoutiquePage() {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
           </button>
         </div>
-        <div className="menu-content">
+        <div className="menu-scroll">
           <div className="menu-section">
             <h3>Catégories</h3>
             <div className="category-list" id="categoryList">
@@ -1083,17 +1083,17 @@ export default function BoutiquePage() {
               )) : <div style={{ padding:'12px',textAlign:'center',color:'var(--text-secondary)',fontSize:'0.9rem' }}>Aucune catégorie</div>}
             </div>
           </div>
-          <div className="menu-section">
-            <h3>Informations</h3>
-            <a href="#" className="menu-link" id="aboutLink" onClick={e => { e.preventDefault(); fermerMenu(); setTimeout(() => setModalAPropos(true), 300) }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/><path d="M12 16v-4M12 8h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-              À propos
-            </a>
-            <a href="#" className="menu-link" id="contactLink" onClick={e => { e.preventDefault(); fermerMenu(); setTimeout(() => setModalContact(true), 300) }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              Contact
-            </a>
-          </div>
+        </div>
+        <div className="menu-info">
+          <h3>Informations</h3>
+          <a href="#" className="menu-link" id="aboutLink" onClick={e => { e.preventDefault(); fermerMenu(); setTimeout(() => setModalAPropos(true), 300) }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/><path d="M12 16v-4M12 8h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+            À propos
+          </a>
+          <a href="#" className="menu-link" id="contactLink" onClick={e => { e.preventDefault(); fermerMenu(); setTimeout(() => setModalContact(true), 300) }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            Contact
+          </a>
         </div>
       </div>
 
@@ -1654,13 +1654,16 @@ const GLOBAL_STYLES = `
   .search-bar svg{color:var(--text-secondary);flex-shrink:0}
   .search-bar input{flex:1;border:none;background:transparent;font-size:0.95rem;font-family:var(--font-family);color:var(--text-primary);outline:none}
   .search-bar input::placeholder{color:var(--text-secondary)}
-  .side-menu{position:fixed;top:0;left:-100%;width:85%;max-width:320px;height:100vh;background:var(--bg-primary);box-shadow:var(--shadow-lg);z-index:2000;transition:left 0.3s ease;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .side-menu{position:fixed;top:0;left:-100%;width:85%;max-width:320px;height:100vh;background:var(--bg-primary);box-shadow:var(--shadow-lg);z-index:2000;transition:left 0.3s ease;overflow:hidden;display:flex;flex-direction:column}
   .side-menu.active{left:0}
-  .menu-header{display:flex;justify-content:space-between;align-items:center;padding:20px;border-bottom:1px solid var(--border-color);background:var(--primary-color);color:white;position:relative;overflow:hidden}
+  .menu-header{display:flex;justify-content:space-between;align-items:center;padding:20px;border-bottom:1px solid var(--border-color);background:var(--primary-color);color:white;position:relative;overflow:hidden;flex-shrink:0}
   .menu-header::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,var(--primary-color) 0%,transparent 70%);animation:rotate 15s linear infinite;opacity:0.2}
   .menu-header h2{font-size:1.25rem;font-weight:700}
+  .menu-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 0}
+  .menu-scroll .menu-section{padding:0 20px}
+  .menu-info{flex-shrink:0;border-top:1px solid var(--border-color);padding:16px 20px;background:var(--bg-primary)}
+  .menu-info h3{font-size:0.85rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px}
   .btn-close{width:40px;height:40px;border-radius:50%;border:none;background:rgba(255,255,255,0.2);color:white;display:flex;align-items:center;justify-content:center;cursor:pointer}
-  .menu-content{padding:20px}
   .menu-section{margin-bottom:32px}
   .menu-section h3{font-size:0.85rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px}
   .category-list{display:flex;flex-direction:column;gap:8px}
