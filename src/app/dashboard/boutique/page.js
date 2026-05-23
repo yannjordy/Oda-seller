@@ -1687,13 +1687,13 @@ const GLOBAL_STYLES = `
   .hero-subtitle{font-size:0.95rem;opacity:0.9;position:relative;z-index:1}
   .filters-section{display:flex;gap:12px;margin-bottom:24px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
   .filters-section::-webkit-scrollbar{display:none}
-  .filter-chips{display:flex;gap:8px;flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .filter-chips{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0}
   .filter-chips::-webkit-scrollbar{display:none}
-  .chip{padding:8px 16px;background:var(--bg-primary);border:2px solid var(--border-color);border-radius:20px;font-size:0.85rem;font-weight:600;white-space:nowrap;cursor:pointer;transition:all 0.3s ease;position:relative;overflow:hidden}
+  .chip{padding:8px 16px;background:var(--bg-primary);border:2px solid var(--border-color);border-radius:20px;font-size:0.85rem;font-weight:600;white-space:nowrap;cursor:pointer;transition:all 0.3s ease;position:relative;overflow:visible;flex-shrink:0}
   .chip::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:radial-gradient(circle,var(--secondary-color),var(--primary-color));transform:translate(-50%,-50%);transition:width 0.5s ease,height 0.5s ease}
   .chip:hover::before{width:300px;height:300px}
   .chip.active{background:var(--primary-color);color:white;border-color:var(--primary-color);background-size:200% 200%!important;animation:shimmer 3s ease infinite}
-  .filter-select{padding:8px 16px;background:var(--bg-primary);border:2px solid var(--border-color);border-radius:var(--radius-md);font-size:0.85rem;font-weight:600;font-family:var(--font-family);cursor:pointer;min-width:140px}
+  .filter-select{padding:8px 16px;background:var(--bg-primary);border:2px solid var(--border-color);border-radius:var(--radius-md);font-size:0.85rem;font-weight:600;font-family:var(--font-family);cursor:pointer;flex-shrink:0}
   .products-section{margin-bottom:24px}
   .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}@media(min-width:640px){.products-grid{grid-template-columns:repeat(3,1fr);gap:16px}}@media(min-width:768px){.products-grid{grid-template-columns:repeat(4,1fr)}}
   .product-card{background:var(--bg-primary);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);transition:all .3s ease;cursor:pointer;position:relative;border:1px solid var(--border-color);will-change:transform,opacity}
