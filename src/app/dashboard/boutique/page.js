@@ -1630,7 +1630,7 @@ const GLOBAL_STYLES = `
   .btn-menu:active,.btn-cart:active,.btn-share:active{transform:scale(0.95);background:var(--border-color)}
   .logo-container{display:flex;align-items:center;gap:10px;flex:1;justify-content:center}
   .logo-image{width:36px;height:36px;border-radius:50%;object-fit:cover}
-  .logo-modal-image{max-width:80vw;max-height:60vh;border-radius:16px;object-fit:contain;box-shadow:0 20px 60px rgba(0,0,0,0.15)}
+  .logo-modal-image{max-width:280px;max-height:60vh;width:80vw;aspect-ratio:1;border-radius:50%;object-fit:cover;box-shadow:0 20px 60px rgba(0,0,0,0.15)}
   .shop-name{font-size:1.1rem;font-weight:800;color:var(--primary-color);animation:shimmer 4s ease infinite;background-size:200% 200%!important}
   .btn-cart{position:relative}
   .cart-badge{position:absolute;top:-4px;right:-4px;background:var(--error-color);color:white;font-size:0.7rem;font-weight:700;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center;display:flex;align-items:center;justify-content:center;background:linear-gradient(-45deg,var(--primary-color),var(--secondary-color),var(--primary-color))!important;background-size:300% 300%!important;animation:gradientShift 3s ease infinite,pulse 2s ease infinite!important}
