@@ -31,7 +31,6 @@ export default function BoutiquePage() {
 
   // --- ÉTATS CARTES ---
   const [visibleCount, setVisibleCount] = useState(20)
-  const [favorites, setFavorites] = useState([])
 
   // --- ÉTATS MODALS ---
   const [productModal, setProductModal] = useState({ open: false, produit: null })
@@ -478,21 +477,6 @@ export default function BoutiquePage() {
     setVisibleCount(20)
     setSideMenuOpen(false)
     setOverlayActive(false)
-  }, [])
-
-  const toggleFav = useCallback((id) => {
-    setFavorites(prev => {
-      const next = prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
-      try { localStorage.setItem('oda_favorites', JSON.stringify(next)) } catch {}
-      return next
-    })
-  }, [])
-
-  useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('oda_favorites') || '[]')
-      setFavorites(stored)
-    } catch {}
   }, [])
 
   useEffect(() => {
@@ -1155,7 +1139,6 @@ export default function BoutiquePage() {
                   const prixEffectif = hasPromo ? produit.prixPromotion : produit.prix
                   const remise = hasPromo ? Math.round((1 - produit.prixPromotion / produit.prix) * 100) : 0
                   const images = [produit.mainImage, ...(produit.descriptionImages || [])].filter(Boolean)
-                  const isFav = favorites.includes(produit.id)
                   const daysOld = Math.floor((Date.now() - new Date(produit.dateCreation || Date.now()).getTime()) / 86400000)
                   return (
                     <div key={produit.id} className="product-card"
@@ -1173,13 +1156,6 @@ export default function BoutiquePage() {
                         {daysOld < 7 && <span className="oda-badge oda-badge-new">Nouveau</span>}
                         {produit.stock < 5 && <span className="oda-badge oda-badge-stock">Stock limité</span>}
                         {hasPromo && <span className="oda-badge oda-badge-sale">-{remise}%</span>}
-                        <button className="btn-fav" onClick={e => { e.stopPropagation(); toggleFav(produit.id) }}>
-                          {isFav ? (
-                            <svg viewBox="0 0 24 24" fill="#EF4444" width="18" height="18"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-                          ) : (
-                            <svg viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2.5" width="18" height="18"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          )}
-                        </button>
                         <button className="btn-mention-chat" title="Discuter de ce produit" onClick={e => { e.stopPropagation(); mentionnerProduitDansChat(produit.id) }}>💬</button>
                       </div>
                       <div className="product-info">
@@ -1735,8 +1711,6 @@ const GLOBAL_STYLES = `
   .oda-badge-new{top:8px;left:8px;background:#10B981;color:white}
   .oda-badge-stock{top:34px;left:8px;background:#F59E0B;color:white}
   .oda-badge-sale{top:8px;right:8px;background:#EF4444;color:white}
-  .btn-fav{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.9);backdrop-filter:blur(4px);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;transition:all .3s ease;box-shadow:0 2px 4px rgba(0,0,0,.1)}
-  .btn-fav:active{transform:scale(.9)}
   .btn-mention-chat{position:absolute;top:8px;left:48px;width:28px;height:28px;background:linear-gradient(135deg,#25D366,#128C7E);color:white;border:none;border-radius:50%;font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:all .3s ease;opacity:.8;box-shadow:0 2px 6px rgba(37,211,102,.3)}
   .product-card:hover .btn-mention-chat{opacity:1;transform:scale(1.1)}
   .product-price-block{padding:10px 10px 12px;display:flex;flex-direction:column;gap:3px}
