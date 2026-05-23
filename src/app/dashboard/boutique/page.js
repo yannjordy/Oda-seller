@@ -967,67 +967,17 @@ export default function BoutiquePage() {
     <>
       <style>{GLOBAL_STYLES}</style>
 
-      {/* ===== LOADER PROFESSIONNEL ===== */}
+      {/* ===== LOADER ===== */}
       {showLoader && (
         <div className="loader-screen">
-          {/* Particules d'arrière-plan */}
-          <div className="loader-particles">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className={`loader-particle loader-particle-${i+1}`} />
-            ))}
-          </div>
-
-          {/* Contenu central */}
           <div className="loader-center">
-
-            {/* Icône panier SVG arrondie */}
-            <div className="loader-icon-wrap">
-              <div className="loader-icon-ring" />
-              <div className="loader-icon-ring loader-icon-ring-2" />
-              <div className="loader-cart-bubble">
-                <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  {/* Poignée */}
-                  <path d="M8 10C8 10 10 10 11 10L15 28H32L36 15H14" stroke="white" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/>
-                  {/* Roue gauche */}
-                  <circle cx="17" cy="33" r="2.8" fill="white"/>
-                  {/* Roue droite */}
-                  <circle cx="29" cy="33" r="2.8" fill="white"/>
-                  {/* Plus au centre */}
-                  <path d="M23 18V24" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M20 21H26" stroke="rgba(255,255,255,0.65)" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </div>
-            </div>
-
-            {/* Message de bienvenue */}
             <div className="loader-shop-name">
-              {parametres.general?.nom
-                ? <>Bienvenue chez <span style={{ color:'var(--accent-color)' }}>{parametres.general.nom}</span></>
-                : <span className="loader-name-shimmer" />
-              }
+              {parametres.general?.nom || 'Boutique'}
             </div>
-
-            {/* Tagline */}
-            <div className="loader-tagline">
-              {parametres.general?.description || 'Préparation de votre expérience…'}
+            <div className="loader-bar-track">
+              <div className="loader-bar-fill" />
             </div>
-
-            {/* Barre de progression élégante */}
-            <div className="loader-bar-wrap">
-              <div className="loader-bar-track">
-                <div className="loader-bar-fill" />
-                <div className="loader-bar-glow" />
-              </div>
-            </div>
-
-            {/* Statut */}
             <div className="loader-status">{loaderStatus}</div>
-
-            {/* Points animés */}
-            <div className="loader-dots">
-              {[0,1,2].map(i => <div key={i} className="loader-dot" style={{ animationDelay:`${i*0.18}s` }} />)}
-            </div>
-
           </div>
         </div>
       )}
@@ -1856,174 +1806,11 @@ const GLOBAL_STYLES = `
   /* ══════════════════════════════════════
      LOADER PROFESSIONNEL
   ══════════════════════════════════════ */
-  .loader-screen{
-    position:fixed;inset:0;z-index:9999;
-    display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(135deg,
-      #0f0f1a 0%,
-      #1a0a00 35%,
-      #0a0a1a 65%,
-      #0f0f1a 100%);
-    background-size:400% 400%;
-    animation:loaderBgShift 6s ease infinite;
-    overflow:hidden;
-  }
-  @keyframes loaderBgShift{
-    0%{background-position:0% 50%}
-    50%{background-position:100% 50%}
-    100%{background-position:0% 50%}
-  }
-
-  /* ── Particules flottantes ── */
-  .loader-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-  .loader-particle{
-    position:absolute;border-radius:50%;
-    background:radial-gradient(circle,var(--accent-color),transparent);
-    opacity:0;animation:loaderFloat linear infinite;
-  }
-  .loader-particle-1{width:120px;height:120px;left:10%;top:20%;animation-duration:8s;animation-delay:0s}
-  .loader-particle-2{width:80px;height:80px;right:15%;top:10%;animation-duration:10s;animation-delay:-2s}
-  .loader-particle-3{width:160px;height:160px;left:60%;bottom:15%;animation-duration:12s;animation-delay:-4s}
-  .loader-particle-4{width:60px;height:60px;left:30%;bottom:25%;animation-duration:7s;animation-delay:-1s}
-  .loader-particle-5{width:100px;height:100px;right:5%;bottom:40%;animation-duration:9s;animation-delay:-3s}
-  .loader-particle-6{width:50px;height:50px;left:5%;top:60%;animation-duration:11s;animation-delay:-5s}
-  @keyframes loaderFloat{
-    0%{opacity:0;transform:translateY(0) scale(0.8)}
-    20%{opacity:0.12}
-    80%{opacity:0.06}
-    100%{opacity:0;transform:translateY(-80px) scale(1.2)}
-  }
-
-  /* ── Centre ── */
-  .loader-center{
-    position:relative;z-index:1;
-    display:flex;flex-direction:column;
-    align-items:center;gap:20px;
-    animation:loaderEnter 0.7s cubic-bezier(.34,1.56,.64,1);
-    text-align:center;padding:0 32px;
-  }
-  @keyframes loaderEnter{
-    from{opacity:0;transform:translateY(24px) scale(0.92)}
-    to{opacity:1;transform:none}
-  }
-
-  /* ── Icône panier ── */
-  .loader-icon-wrap{
-    position:relative;
-    width:100px;height:100px;
-    display:flex;align-items:center;justify-content:center;
-    margin-bottom:4px;
-  }
-  .loader-icon-ring{
-    position:absolute;inset:0;border-radius:50%;
-    border:2px solid transparent;
-    border-top-color:var(--primary-color);
-    border-right-color:var(--accent-color);
-    animation:loaderRingSpin 1.4s cubic-bezier(.4,0,.2,1) infinite;
-  }
-  .loader-icon-ring-2{
-    inset:10px;border-width:1.5px;
-    border-top-color:var(--accent-color);
-    border-right-color:transparent;
-    border-bottom-color:var(--primary-color);
-    animation-duration:2s;animation-direction:reverse;
-  }
-  @keyframes loaderRingSpin{to{transform:rotate(360deg)}}
-
-  .loader-cart-bubble{
-    width:64px;height:64px;border-radius:20px;
-    background:linear-gradient(145deg,var(--primary-color),var(--accent-color));
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:0 8px 28px var(--primary-glow),0 2px 8px rgba(0,0,0,0.3);
-    animation:loaderCartBounce 1.6s cubic-bezier(.34,1.56,.64,1) infinite;
-  }
-  @keyframes loaderCartBounce{
-    0%,100%{transform:translateY(0) scale(1)}
-    45%{transform:translateY(-7px) scale(1.07)}
-    65%{transform:translateY(-2px) scale(0.97)}
-  }
-
-  /* ── Textes ── */
-  .loader-shop-name{
-    font-size:1.65rem;font-weight:800;letter-spacing:-0.02em;
-    color:#ffffff;
-    text-shadow:0 2px 20px var(--primary-glow);
-    animation:loaderFadeUp 0.6s ease 0.3s both;
-    line-height:1.2;min-height:2rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;
-  }
-  .loader-name-shimmer{
-    display:inline-block;width:180px;height:1.65rem;border-radius:8px;
-    background:linear-gradient(90deg,rgba(255,255,255,0.06) 25%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.06) 75%);
-    background-size:400% 100%;
-    animation:loaderShimmerSlide 1.4s ease infinite;
-  }
-  @keyframes loaderShimmerSlide{
-    0%{background-position:100% 0}
-    100%{background-position:-100% 0}
-  }
-  .loader-tagline{
-    font-size:0.88rem;font-weight:400;
-    color:rgba(255,255,255,0.5);letter-spacing:0.02em;
-    animation:loaderFadeUp 0.6s ease 0.45s both;
-    max-width:260px;line-height:1.5;
-  }
-  @keyframes loaderFadeUp{
-    from{opacity:0;transform:translateY(10px)}
-    to{opacity:1;transform:none}
-  }
-
-  /* ── Barre de progression ── */
-  .loader-bar-wrap{
-    width:220px;
-    animation:loaderFadeUp 0.5s ease 0.6s both;
-  }
-  .loader-bar-track{
-    height:3px;border-radius:99px;
-    background:rgba(255,255,255,0.1);
-    overflow:visible;position:relative;
-  }
-  .loader-bar-fill{
-    height:100%;border-radius:99px;
-    background:linear-gradient(90deg,var(--primary-color),var(--accent-color),var(--primary-color));
-    background-size:200% 100%;
-    animation:loaderBarSlide 2s ease infinite;
-    box-shadow:0 0 8px var(--primary-glow);
-  }
-  .loader-bar-glow{
-    position:absolute;top:50%;left:0;
-    width:40px;height:12px;
-    background:radial-gradient(ellipse,var(--accent-color) 0%,transparent 70%);
-    transform:translateY(-50%);
-    animation:loaderGlowSlide 2s ease infinite;
-    pointer-events:none;
-  }
-  @keyframes loaderBarSlide{
-    0%{width:0%;background-position:0%}
-    50%{width:100%;background-position:100%}
-    100%{width:100%;opacity:0}
-  }
-  @keyframes loaderGlowSlide{
-    0%{left:0%;opacity:0}
-    20%{opacity:1}
-    80%{opacity:0.6}
-    100%{left:calc(100% - 40px);opacity:0}
-  }
-
-  /* ── Statut + dots ── */
-  .loader-status{
-    font-size:0.8rem;color:rgba(255,255,255,0.4);
-    letter-spacing:0.04em;font-weight:500;
-    animation:loaderFadeUp 0.5s ease 0.7s both;
-    min-height:18px;
-  }
-  .loader-dots{display:flex;gap:6px;animation:loaderFadeUp 0.5s ease 0.8s both}
-  .loader-dot{
-    width:5px;height:5px;border-radius:50%;
-    background:var(--accent-color);
-    animation:loaderDotPulse 1.1s ease infinite;
-  }
-  @keyframes loaderDotPulse{
-    0%,100%{opacity:0.25;transform:scale(0.8)}
-    50%{opacity:1;transform:scale(1.3)}
-  }
+  .loader-screen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#fff}
+  .loader-center{display:flex;flex-direction:column;align-items:center;gap:24px;text-align:center;padding:0 32px}
+  .loader-shop-name{font-size:1.4rem;font-weight:700;color:#1a1a1a;letter-spacing:-0.01em;line-height:1.3}
+  .loader-bar-track{width:200px;height:3px;border-radius:99px;background:#e8e8e8;overflow:hidden}
+  .loader-bar-fill{height:100%;border-radius:99px;background:#111;animation:loaderBarFill 2s ease infinite}
+  @keyframes loaderBarFill{0%{width:0%}50%{width:70%}100%{width:100%}}
+  .loader-status{font-size:0.82rem;color:#888;font-weight:400;min-height:18px}
 `
