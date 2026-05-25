@@ -965,7 +965,7 @@ export default function BoutiqueClient() {
 
   return (
     <>
-      <style>{GLOBAL_STYLES}</style>
+      
 
       {/* ===== LOADER ===== */}
       {showLoader && (

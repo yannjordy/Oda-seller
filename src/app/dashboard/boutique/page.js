@@ -980,7 +980,7 @@ export default function BoutiquePage() {
 
   return (
     <>
-      <style>{GLOBAL_STYLES}</style>
+      
 
       {/* ===== LOADER ===== */}
       {showLoader && (
