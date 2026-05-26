@@ -1218,7 +1218,7 @@ body {
   .oda-menu-nav::-webkit-scrollbar-thumb { background: rgba(0,0,0,.1); border-radius: 10px; }
 
   /* ── CONTENT AREA ── */
-  .oda-layout { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+  .oda-layout { display: flex; flex-direction: column; height: 100vh; overflow: hidden; position: fixed; inset: 0; }
   .oda-content { flex: 1; overflow-y: auto; overflow-x: hidden; }
 
   /* ════════════════════════════════════════════════════
