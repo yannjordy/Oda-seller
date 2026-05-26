@@ -621,9 +621,6 @@ export default function MessagesPage() {
   /* ════════════════════════ RENDER ════════════════════════ */
   return (
     <div className="msg-root">
-      {/* Injection CSS spécifique à la page messages */}
-      <style id="oda-messages-style" dangerouslySetInnerHTML={{ __html: PAGE_STYLES }} />
-
       {/* Fond animé */}
       <div className="msg-pattern-bg" />
 

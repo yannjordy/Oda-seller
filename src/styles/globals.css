@@ -1347,12 +1347,9 @@ body {
     -webkit-font-smoothing: antialiased;
   }
   .msg-container {
-    position: fixed;
-    top: var(--msg-header-h);
-    left: 0; right: 0; bottom: 0;
+    height: 100%;
     display: grid;
     grid-template-columns: 360px 1fr;
-    height: calc(100dvh - var(--msg-header-h));
     overflow: hidden;
   }
 

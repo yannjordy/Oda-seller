@@ -596,16 +596,6 @@ export default function OdaMarketingCenter() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  // ─── Injection styles
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    if (document.getElementById('oda-mkt-style')) return;
-    const el = document.createElement('style');
-    el.id = 'oda-mkt-style';
-    el.textContent = MKT_STYLES;
-    document.head.appendChild(el);
-  }, []);
-
   // ─── Chargement du SDK Facebook
   useEffect(() => {
     if (typeof window === 'undefined') return;
