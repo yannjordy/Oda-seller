@@ -1217,8 +1217,8 @@ body {
   .oda-menu-nav::-webkit-scrollbar-thumb { background: rgba(0,0,0,.1); border-radius: 10px; }
 
   /* ── CONTENT AREA ── */
-  .oda-layout { display: flex; flex-direction: column; min-height: 100vh; }
-  .oda-content { padding-top: 52px; flex: 1; }
+  .oda-layout { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+  .oda-content { padding-top: 52px; flex: 1; overflow-y: auto; overflow-x: hidden; }
 
   /* ════════════════════════════════════════════════════
      RESPONSIVE — du plus large au plus étroit

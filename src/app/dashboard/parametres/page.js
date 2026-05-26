@@ -94,7 +94,7 @@ const CSS = `
   .p-wrap {
     display: grid;
     grid-template-columns: 260px 1fr;
-    min-height: 100vh;
+    min-height: 100%;
     background: var(--bg);
     font-family: var(--font);
     color: var(--text-1);
@@ -916,7 +916,7 @@ const CSS = `
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    min-height: 100%;
     background: var(--bg);
     font-family: var(--font);
     color: var(--text-2);
