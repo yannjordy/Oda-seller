@@ -189,16 +189,6 @@ export default function DashboardLayout({ children }) {
     setMenuOpen(false);
   }, [pathname]);
 
-  /* Injection des styles globaux une seule fois */
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    if (document.getElementById('oda-layout-style')) return;
-    const el = document.createElement('style');
-    el.id = 'oda-layout-style';
-    el.textContent = LAYOUT_STYLES;
-    document.head.appendChild(el);
-  }, []);
-
   /* Chargement */
   if (loading) {
     return <PageLoader />;
