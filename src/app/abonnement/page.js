@@ -748,7 +748,7 @@ export default function AbonnementPage() {
       setPhase('pending');
       setPollingActive(true);
       pollRef.current = true;
-      showNotif('📩 Demande USSD envoyée — Entrez votre code PIN Mobile Money', 'info');
+      showNotif(`📞 Composez ${operator === 'mtn' ? `*126*1*${MERCHANTS.mtn.number}*` : `#150*1*${MERCHANTS.orange.number}*`}${plan.prix}# sur votre téléphone`, 'info');
 
       verifierStatut(nRef, modalPlan);
 
@@ -771,7 +771,7 @@ export default function AbonnementPage() {
         const res = await fetch(NOTCHPAY_VERIFIER_URL(ref));
         const data = await res.json();
 
-        const status = data.transaction?.status || data.status;
+        const status = data.transaction?.status || '';
 
         if (status === 'complete') {
           setStepState([2, 2, 2]);
@@ -1193,11 +1193,33 @@ export default function AbonnementPage() {
           )}
 
           {phase === 'pending' && (
-            <div style={{textAlign:'center',padding:'12px 0'}}>
-              <div style={{fontSize:'2.5rem',marginBottom:10}}>📩</div>
-              <div style={{fontWeight:700,marginBottom:6}}>Demande USSD envoyée</div>
-              <div style={{fontSize:'.85rem',color:'var(--muted)',marginBottom:16}}>
-                Entrez votre code PIN Mobile Money sur votre téléphone pour valider.
+            <div style={{textAlign:'center',padding:'8px 0'}}>
+              <div style={{fontSize:'2rem',marginBottom:8}}>📞</div>
+              <div style={{fontWeight:700,marginBottom:4}}>Confirmez le paiement</div>
+              <div style={{fontSize:'.82rem',color:'var(--muted)',marginBottom:12}}>
+                Composez le code ci-dessous sur votre téléphone<br />et entrez votre code PIN Mobile Money
+              </div>
+              <div style={{
+                background:'rgba(124,58,237,0.12)', border:'1px solid rgba(124,58,237,0.3)',
+                borderRadius:14, padding:'14px 18px', marginBottom:12,
+                fontFamily:'monospace', fontSize:'1.1rem', fontWeight:700,
+                letterSpacing:2, color:'var(--violet-l)',
+              }}>
+                {operator === 'mtn'
+                  ? `*126*1*${MERCHANTS.mtn.number}*${modalInfo?.prix}#`
+                  : `#150*1*${MERCHANTS.orange.number}*${modalInfo?.prix}#`
+                }
+              </div>
+              <div style={{
+                background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.25)',
+                borderRadius:12, padding:'10px 14px', marginBottom:14,
+                fontSize:'.8rem', color:'var(--gold)',
+              }}>
+                🏪 Paiement vers {MERCHANT_NAME}<br />
+                📞 {operator === 'mtn'
+                  ? `MTN MoMo (${MERCHANTS.mtn.number})`
+                  : `Orange Money (${MERCHANTS.orange.number})`
+                }
               </div>
               <div style={{display:'flex',gap:8}}>
                 <button
@@ -1209,7 +1231,7 @@ export default function AbonnementPage() {
                     try {
                       const res = await fetch(NOTCHPAY_VERIFIER_URL(notchRef));
                       const data = await res.json();
-                      const status = data.transaction?.status || data.status;
+        const status = data.transaction?.status || '';
                       if (status === 'complete') {
                         setStepState([2,2,2]);
                         await activerAbonnement(modalPlan, notchRef);
@@ -1229,7 +1251,7 @@ export default function AbonnementPage() {
                     } finally { setPayLoading(false); }
                   }}
                 >
-                  Vérifier le statut
+                  ✅ Vérifier le statut
                 </button>
                 <button
                   style={{
