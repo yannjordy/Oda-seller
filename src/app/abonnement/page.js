@@ -14,6 +14,13 @@ const POLL_MAX_ATTEMPTS     = 40;
 
 const OPERATOR_MAP = { mtn: 'cm.mtn', orange: 'cm.orange' };
 
+/* Commerçants Mobile Money (payement.txt) */
+const MERCHANTS = {
+  mtn:    { number: '650550950', label: 'MTN MoMo', ussd: '*126*1*650550950*' },
+  orange: { number: '698111771', label: 'Orange Money', ussd: '#150*1*698111771*' },
+};
+const MERCHANT_NAME = 'ODA SELLER / ODA MARKET';
+
 const PLANS = {
   gratuit:  { nom:'Débutant', limite:10,  prix:0,    icon:'🌱', badge:'🎁 Gratuit',       variant:'free',     ctaLabel:'Plan actuel', disabled:true },
   starter:  { nom:'Starter',  limite:80,  prix:1000, icon:'⚡', badge:'🚀 Populaire',      variant:'starter',  ctaLabel:'Choisir ce plan →' },
@@ -494,12 +501,20 @@ export default function AbonnementPage() {
   const [showLoading,   setShowLoading]   = useState(false);
   const [pollingActive, setPollingActive] = useState(false);
   const [operator,      setOperator]      = useState('mtn');
+  const [paiementMode,  setPaiementMode]  = useState('push'); // push | direct
   const [phase,         setPhase]         = useState('config'); // config | pending
   const [notchRef,      setNotchRef]      = useState(null);
   const pollRef = useRef(false);
 
   /* ── Numéro Mobile Money saisi par l'utilisateur ── */
   const [phoneInput, setPhoneInput] = useState('');
+
+  /* ── Formater le téléphone pour Notch Pay (format international avec +) ── */
+  function formatPhone(raw) {
+    const digits = raw.replace(/\D/g, '');
+    if (digits.startsWith('237')) return '+' + digits;
+    return '+237' + digits;
+  }
 
   /* Modal */
   const [modalOpen,   setModalOpen]   = useState(false);
@@ -653,6 +668,7 @@ export default function AbonnementPage() {
     if (planKey === 'gratuit') { showNotif('🌱 Vous êtes déjà sur le plan Gratuit !', 'info'); return; }
     setModalPlan(planKey);
     setStepState([1, 0, 0]);
+    setPaiementMode('push');
     setPhoneInput(''); // reset du champ téléphone à chaque ouverture
     setPhase('config');
     setNotchRef(null);
@@ -680,10 +696,12 @@ export default function AbonnementPage() {
       return;
     }
 
+    const notchPhone = formatPhone(phone);
     const plan = PLANS[modalPlan];
     const channel = OPERATOR_MAP[operator];
     const customerName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Client';
-    const ref = `SUB-${user.id}-${Date.now()}`;
+    const shortId = Date.now().toString(36).toUpperCase().slice(-4);
+    const ref = `ODA-SUB-${shortId}`;
 
     setPayLoading(true);
     setStepState([1, 0, 0]);
@@ -697,7 +715,7 @@ export default function AbonnementPage() {
         body: JSON.stringify({
           amount: plan.prix,
           currency: 'XAF',
-          customer: { name: customerName, email: user.email, phone },
+          customer: { name: customerName, email: user.email, phone: notchPhone },
           description: `Abonnement ${plan.nom} — Oda Boutique`,
           reference: ref,
           callback: 'https://notchpay.co',
@@ -715,7 +733,7 @@ export default function AbonnementPage() {
       const res2 = await fetch(NOTCHPAY_ACTIVER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reference: nRef, channel, phone }),
+        body: JSON.stringify({ reference: nRef, channel, phone: notchPhone }),
       });
 
       const data2 = await res2.json();
@@ -949,7 +967,7 @@ export default function AbonnementPage() {
           <h2 className="abo-faq-title">Questions fréquentes</h2>
           <div className="abo-faq-grid">
             {[
-              { q:'💳 Comment payer ?',         a:'Via Notch Pay — Orange Money ou MTN MoMo, 100% sécurisé. Vous recevez une demande USSD push directement sur votre téléphone.' },
+              { q:'💳 Comment payer ?',         a:'Via USSD push Notch Pay (automatique) ou en composant le code USSD direct. MTN MoMo (650550950) ou Orange Money (698111771) — 100% sécurisé.' },
               { q:'🔄 Changer de plan ?',        a:'Oui, à tout moment. Upgrade ou downgrade effectif immédiatement.' },
               { q:'📦 Dépassement de limite ?',  a:'Les produits excédentaires passent en brouillon, restaurés lors d\'un upgrade.' },
               { q:'⏰ Durée ?',                  a:'Mensuel, renouvelable. Annulation libre à tout moment.' },
@@ -1001,6 +1019,22 @@ export default function AbonnementPage() {
             </div>
           )}
 
+          {/* Marchand info */}
+          {modalPlan && modalPlan !== 'gratuit' && (
+            <div style={{
+              background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.25)',
+              borderRadius:16, padding:'14px 16px', marginBottom:16,
+              fontSize:'.82rem', lineHeight:1.6, color:'var(--gold)',
+            }}>
+              <div style={{fontWeight:700,marginBottom:6}}>🏪 Paiement vers {MERCHANT_NAME}</div>
+              <div>MTN MoMo : <strong>{MERCHANTS.mtn.number}</strong></div>
+              <div>Orange Money : <strong>{MERCHANTS.orange.number}</strong></div>
+              <div style={{marginTop:6,fontSize:'.75rem',opacity:.7}}>
+                Code USSD MTN : <code style={{background:'rgba(0,0,0,.3)',padding:'2px 6px',borderRadius:6}}>*126*1*{MERCHANTS.mtn.number}*{modalInfo.prix}#</code>
+              </div>
+            </div>
+          )}
+
           {/* Trust badges */}
           <div className="abo-trust">
             {[
@@ -1018,49 +1052,143 @@ export default function AbonnementPage() {
 
           {phase === 'config' && (
             <>
-              {/* Operator selection */}
-              <div style={{marginBottom:20}}>
-                <label className="abo-phone-label">Opérateur mobile</label>
-                <div style={{display:'flex',gap:10}}>
-                  {['mtn','orange'].map(op => (
-                    <div key={op}
-                      onClick={() => { if (!payLoading) setOperator(op); }}
+              {/* Payment method tabs */}
+              <div style={{display:'flex',gap:8,marginBottom:20}}>
+                {[
+                  { key:'push', label:'📲 USSD Push', desc:'Automatique via Notch Pay' },
+                  { key:'direct', label:'📞 USSD Direct', desc:'Composez vous-même' },
+                ].map(m => {
+                  const active = paiementMode === m.key;
+                  return (
+                    <div key={m.key}
+                      onClick={() => { if (!payLoading) setPaiementMode(m.key); }}
                       style={{
-                        flex:1, padding:'14px 10px', borderRadius:14, textAlign:'center', cursor:'pointer',
-                        border: `1.5px solid ${operator === op ? 'var(--violet-l)' : 'var(--border)'}`,
-                        background: operator === op ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.04)',
+                        flex:1, padding:'12px 10px', borderRadius:14, textAlign:'center', cursor:'pointer',
+                        border: `1.5px solid ${active ? 'var(--violet-l)' : 'var(--border)'}`,
+                        background: active ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.04)',
                         transition:'all .2s',
                       }}
                     >
-                      <div style={{fontSize:'1.5rem',marginBottom:4}}>📱</div>
-                      <div style={{fontWeight:700,fontSize:'.85rem'}}>{op.toUpperCase()}</div>
-                      <div style={{fontSize:'.7rem',color:'var(--muted)'}}>Cameroon</div>
+                      <div style={{fontWeight:700,fontSize:'.85rem',marginBottom:2}}>{m.label}</div>
+                      <div style={{fontSize:'.7rem',color:'var(--muted)'}}>{m.desc}</div>
                     </div>
-                  ))}
+                  );
+                })}
+              </div>
+
+              {paiementMode === 'push' && (
+                <>
+                  {/* Operator selection */}
+                  <div style={{marginBottom:20}}>
+                    <label className="abo-phone-label">Opérateur mobile</label>
+                    <div style={{display:'flex',gap:10}}>
+                      {['mtn','orange'].map(op => (
+                        <div key={op}
+                          onClick={() => { if (!payLoading) setOperator(op); }}
+                          style={{
+                            flex:1, padding:'14px 10px', borderRadius:14, textAlign:'center', cursor:'pointer',
+                            border: `1.5px solid ${operator === op ? 'var(--violet-l)' : 'var(--border)'}`,
+                            background: operator === op ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.04)',
+                            transition:'all .2s',
+                          }}
+                        >
+                          <div style={{fontSize:'1.5rem',marginBottom:4}}>📱</div>
+                          <div style={{fontWeight:700,fontSize:'.85rem'}}>{op.toUpperCase()}</div>
+                          <div style={{fontSize:'.7rem',color:'var(--muted)'}}>Cameroon</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Phone input */}
+                  <div className="abo-phone-wrap">
+                    <label className="abo-phone-label">📱 Numéro pour l'USSD push</label>
+                    <input
+                      className="abo-phone-input"
+                      type="tel" inputMode="numeric"
+                      placeholder="Ex : 237680000000"
+                      value={phoneInput}
+                      onChange={e => setPhoneInput(e.target.value.replace(/\D/g, ''))}
+                      disabled={payLoading}
+                    />
+                  </div>
+
+                  {/* Pay button */}
+                  <button
+                    className="abo-btn-pay"
+                    onClick={procederPaiement}
+                    disabled={payLoading}
+                  >
+                    {payLoading ? '⏳ Envoi de la demande USSD…' : '💳 Payer par USSD push'}
+                  </button>
+                </>
+              )}
+
+              {paiementMode === 'direct' && (
+                <div style={{textAlign:'center',padding:'8px 0'}}>
+                  {/* Opérateur selector */}
+                  <div style={{display:'flex',gap:10,marginBottom:16,justifyContent:'center'}}>
+                    {['mtn','orange'].map(op => (
+                      <div key={op}
+                        onClick={() => setOperator(op)}
+                        style={{
+                          padding:'10px 16px', borderRadius:12, textAlign:'center', cursor:'pointer',
+                          border: `1.5px solid ${operator === op ? 'var(--violet-l)' : 'var(--border)'}`,
+                          background: operator === op ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.04)',
+                          transition:'all .2s',
+                        }}
+                      >
+                        <div style={{fontWeight:700,fontSize:'.85rem'}}>{op.toUpperCase()}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{fontSize:'2rem',marginBottom:12}}>📞</div>
+                  <div style={{fontWeight:700,marginBottom:8}}>Composez le code USSD</div>
+                  <div style={{
+                    background:'rgba(124,58,237,0.12)', border:'1px solid rgba(124,58,237,0.3)',
+                    borderRadius:14, padding:'16px 20px', marginBottom:16,
+                    fontFamily:'monospace', fontSize:'1.2rem', fontWeight:700,
+                    letterSpacing:2, color:'var(--violet-l)',
+                  }}>
+                    {operator === 'mtn'
+                      ? `*126*1*${MERCHANTS.mtn.number}*${modalInfo?.prix}#`
+                      : `#150*1*${MERCHANTS.orange.number}*${modalInfo?.prix}#`
+                    }
+                  </div>
+                  <div style={{fontSize:'.85rem',color:'var(--muted)',lineHeight:1.6,marginBottom:16}}>
+                    1. Ouvrez votre application Téléphone<br />
+                    2. Composez le code ci-dessus<br />
+                    3. Entrez votre code PIN Mobile Money<br />
+                    4. Confirmez le paiement
+                  </div>
+                  <div style={{
+                    background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.25)',
+                    borderRadius:14, padding:'12px 16px', marginBottom:16,
+                    fontSize:'.82rem', color:'var(--gold)',
+                  }}>
+                    🏪 Bénéficiaire : <strong>{MERCHANT_NAME}</strong><br />
+                    📞 {operator === 'mtn'
+                      ? `MTN MoMo : ${MERCHANTS.mtn.number}`
+                      : `Orange Money : ${MERCHANTS.orange.number}`
+                    }
+                  </div>
+                  <div style={{display:'flex',gap:8}}>
+                    <button
+                      className="abo-btn-pay"
+                      onClick={() => {
+                        const code = operator === 'mtn'
+                          ? `*126*1*${MERCHANTS.mtn.number}*${modalInfo?.prix}#`
+                          : `#150*1*${MERCHANTS.orange.number}*${modalInfo?.prix}#`;
+                        navigator.clipboard?.writeText(code);
+                        showNotif('📋 Code USSD copié ! Ouvrez votre téléphone et composez-le.', 'info');
+                      }}
+                    >
+                      📋 Copier le code
+                    </button>
+                  </div>
                 </div>
-              </div>
-
-              {/* Phone input */}
-              <div className="abo-phone-wrap">
-                <label className="abo-phone-label">📱 Numéro pour l USSD push</label>
-                <input
-                  className="abo-phone-input"
-                  type="tel" inputMode="numeric"
-                  placeholder="Ex : 237680000000"
-                  value={phoneInput}
-                  onChange={e => setPhoneInput(e.target.value.replace(/\D/g, ''))}
-                  disabled={payLoading}
-                />
-              </div>
-
-              {/* Pay button */}
-              <button
-                className="abo-btn-pay"
-                onClick={procederPaiement}
-                disabled={payLoading}
-              >
-                {payLoading ? '⏳ Envoi de la demande USSD…' : '💳 Payer par USSD push'}
-              </button>
+              )}
             </>
           )}
 
